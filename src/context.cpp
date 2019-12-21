@@ -8,10 +8,10 @@
 #include <sstream>
 #include <stdexcept>
 
-ion::Context::Context(const std::string& title,
+ion::context::context(const std::string& title,
                       int x, int y, int width, int height,
-                      const WindowFlags& window_flags,
-                      const RenderFlags& render_flags)
+                      const ion::window_flags& wflags,
+                      const ion::render_flags& rflags)
 {
     // Put the error message in scope so it can be used in clean up
     // outside of the try block.
@@ -25,17 +25,17 @@ ion::Context::Context(const std::string& title,
             throw std::runtime_error{""};
         }
         // Try to create the window
-        auto window_flags_ = ion::WindowState::to_uint(window_flags);
+        auto wflags_ = ion::window_state::to_uint(wflags);
         window = SDL_CreateWindow(title.c_str(), x, y,
-                                  width, height, window_flags_);
+                                  width, height, wflags_);
         if (!window) {
             message << "Window could not be created! SDL Error: "
                     << SDL_GetError();
             throw std::runtime_error{""};
         }
         // Try to create the renderer
-        auto render_flags_ = ion::RenderState::to_uint(render_flags);
-        renderer = SDL_CreateRenderer(window, -1, render_flags_);
+        auto rflags_ = ion::render_state::to_uint(rflags);
+        renderer = SDL_CreateRenderer(window, -1, rflags_);
         if (!renderer) {
             message << "Renderer could not be created! SDL Error: "
                     << SDL_GetError();
@@ -58,15 +58,15 @@ ion::Context::Context(const std::string& title,
         throw std::runtime_error{message.str()};
     }
 }
-ion::Context::Context(const std::string& title,
+ion::context::context(const std::string& title,
                       int width, int height,
-                      const ion::WindowFlags& window_flags,
-                      const ion::RenderFlags& render_flags)
-    : Context(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-              width, height, window_flags, render_flags)
+                      const ion::window_flags& wflags,
+                      const ion::render_flags& rflags)
+    : context(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+              width, height, wflags, rflags)
 {}
 
-ion::Context::~Context() noexcept
+ion::context::~context() noexcept
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -74,7 +74,7 @@ ion::Context::~Context() noexcept
     SDL_Quit();
 }
 
-void ion::Context::run()
+void ion::context::run()
 {
     bool has_quit = false;
     SDL_Event event;

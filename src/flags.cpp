@@ -1,60 +1,60 @@
 #include "flags.hpp"
 #include <SDL2/SDL.h>
 
-unsigned int ion::WindowState::to_uint(const ion::WindowFlags& flags)
+unsigned int ion::window_state::to_uint(const ion::window_flags& flags)
 {
-    using namespace ion::WindowState;
+    using namespace ion::window_state;
     unsigned int _flags = 0;
-    if (flags[Fullscreen]) {
+    if (flags[fullscreen]) {
         _flags |= SDL_WINDOW_FULLSCREEN;
     }
-    if (flags[FullscreenDesktop]) {
+    if (flags[fullscreen_desktop]) {
         _flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
-    if (flags[OpenGL]) {
+    if (flags[opengl]) {
         _flags |= SDL_WINDOW_OPENGL;
     }
-    if (flags[Vulkan]) {
+    if (flags[vulkan]) {
         _flags |= SDL_WINDOW_VULKAN;
     }
-    if (flags[Hidden]) {
+    if (flags[hidden]) {
         _flags |= SDL_WINDOW_HIDDEN;
     }
-    if (flags[Borderless]) {
+    if (flags[borderless]) {
         _flags |= SDL_WINDOW_BORDERLESS;
     }
-    if (flags[Resizable]) {
+    if (flags[resizable]) {
         _flags |= SDL_WINDOW_RESIZABLE;
     }
-    if (flags[Minimized]) {
+    if (flags[minimized]) {
         _flags |= SDL_WINDOW_MINIMIZED;
     }
-    if (flags[Maximized]) {
+    if (flags[maximized]) {
         _flags |= SDL_WINDOW_MAXIMIZED;
     }
-    if (flags[InputGrabbed]) {
+    if (flags[input_grabbed]) {
         _flags |= SDL_WINDOW_INPUT_GRABBED;
     }
-    if (flags[AllowHighDPI]) {
+    if (flags[high_dpi]) {
         _flags |= SDL_WINDOW_ALLOW_HIGHDPI;
     }
     return _flags;
 }
 
-unsigned int ion::RenderState::to_uint(const RenderFlags& flags)
+unsigned int ion::render_state::to_uint(const render_flags& flags)
 {
-    using namespace ion::RenderState;
+    using namespace ion::render_state;
     unsigned int _flags = 0;
-    if (flags[Software]) {
+    if (flags[software]) {
         _flags |= SDL_RENDERER_SOFTWARE;
     }
-    if (flags[Accelerated]) {
+    if (flags[accelerated]) {
         _flags |= SDL_RENDERER_ACCELERATED;
     }
-    if (flags[PresentVSync]) {
+    if (flags[vsync]) {
         _flags |= SDL_RENDERER_PRESENTVSYNC;
     }
-    if (flags[TargetTexture]) {
+    if (flags[target_texture]) {
         _flags |= SDL_RENDERER_TARGETTEXTURE;
     }
     return _flags;

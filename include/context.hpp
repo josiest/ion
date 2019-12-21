@@ -6,7 +6,7 @@
 #include <string>
 
 namespace ion {
-    class Context {
+    class context {
         SDL_Window * window;
         SDL_Renderer * renderer;
 
@@ -17,8 +17,8 @@ namespace ion {
          * width x height, and with its upper-left corner at (x, y). Window and
          * Renderer Flags may be specified for initializing the window.
          */
-        Context(const std::string&, int, int, int, int,
-                const WindowFlags& = 0, const RenderFlags& = 0);
+        context(const std::string&, int, int, int, int,
+                const window_flags& = 0, const render_flags& = 0);
 
         /** Create a new context.
          *
@@ -27,11 +27,11 @@ namespace ion {
          * screen. Window and renderer Flags may be specified for initializing
          * the window
          */
-        Context(const std::string&, int, int,
-                const WindowFlags& = 0, const RenderFlags& = 0);
+        context(const std::string&, int, int,
+                const window_flags& = 0, const render_flags& = 0);
 
         /** Destroy this context */
-        ~Context();
+        ~context();
 
         /** The main loop of this context */
         void run();

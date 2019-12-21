@@ -4,90 +4,90 @@
 #include <bitset>
 
 namespace ion {
-    namespace WindowState {
+    namespace window_state {
         /** The possible window flags
          *
-         * Fullscreen
+         * fullscreen
          *  The window will be fullscreen.
          *
-         * FullscreenDesktop
+         * fullscreen_desktop
          *  The window will be fullscreen at the current desktop resolution.
          *
-         * OpenGL
-         *  OpenGL may be used with the window.
+         * opengl
+         *  opengl may be used with the window.
          *
-         * Vulkan
+         * vulkan
          *  Vulkan may be used with the window.
          *
-         * Hidden
+         * hidden
          *  The window won't be visible.
          *
-         * Borderless
+         * borderless
          *  No window decoration.
          *
-         * Resizable
+         * resizable
          *  The window can be resized.
          *
-         * Minimized
+         * minimized
          *  The window will be minimized
          *
-         * Maximized
+         * maximized
          *  The window will be maximized
          *
-         * InputGrabbed
+         * input_grabbed
          *  The window will grab the input focus
          *
-         * AllowHighDPI
+         * high_dpi
          *  Window will be in High-DPI mode if suported.
          */
-        enum State {
-            Fullscreen = 1 << 0,
-            FullscreenDesktop = 1 << 1,
-            OpenGL = 1 << 2,
-            Vulkan = 1 << 3,
-            Hidden = 1 << 4,
-            Borderless = 1 << 5,
-            Resizable = 1 << 6,
-            Minimized = 1 << 7,
-            Maximized = 1 << 8,
-            InputGrabbed = 1 << 9,
-            AllowHighDPI = 1 << 10
+        enum state {
+            fullscreen = 1 << 0,
+            fullscreen_desktop = 1 << 1,
+            opengl = 1 << 2,
+            vulkan = 1 << 3,
+            hidden = 1 << 4,
+            borderless = 1 << 5,
+            resizable = 1 << 6,
+            minimized = 1 << 7,
+            maximized = 1 << 8,
+            input_grabbed = 1 << 9,
+            high_dpi = 1 << 10
         };
     }
-    using WindowFlags = std::bitset<sizeof(WindowState::State)>;
+    using window_flags = std::bitset<sizeof(window_state::state)>;
 
     /** Get the value of the window flags as an unsigned int */
-    namespace WindowState {
-        unsigned int to_uint(const WindowFlags&);
+    namespace window_state {
+        unsigned int to_uint(const window_flags&);
     }
 
-    /** The possible Render Flags
+    /** The possible render flags
      *
-     * Software
+     * software
      *  Renderer is a software fallback.
      *
-     * Accelerated
+     * accelerated
      *  Renderer uses hardware acceleration.
      *
-     * PresentVSync
+     * vsync
      *  Renderer update is synchronized with the refresh rate.
      *
-     * TargetTexture
+     * target_texture
      *  Renderer supports rendering to texture.
      */
-    namespace RenderState {
-        enum State {
-            Software = 1 << 0,
-            Accelerated = 1 << 1,
-            PresentVSync = 1 << 2,
-            TargetTexture = 1 << 3
+    namespace render_state {
+        enum state {
+            software = 1 << 0,
+            accelerated = 1 << 1,
+            vsync = 1 << 2,
+            target_texture = 1 << 3
         };
     }
-    using RenderFlags = std::bitset<sizeof(RenderState::State)>;
+    using render_flags = std::bitset<sizeof(render_state::state)>;
 
     /** Get the value of the rener flags as an unsigned itn */
-    namespace RenderState {
-        unsigned int to_uint(const RenderFlags&);
+    namespace render_state {
+        unsigned int to_uint(const render_flags&);
     }
 }
 
