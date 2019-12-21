@@ -1,8 +1,11 @@
+# Dependent paths
+ENTT_PATH = /home/josie/entt/src
+
 # Define the project structure variables
 LIBDIR = lib
 BINDIR = bin
 SRCDIR = src
-INC = -Iinclude
+INC = -Iinclude -I$(ENTT_PATH)
 LOGFILE = error.log
 
 # Define the extension names

@@ -1,5 +1,4 @@
 #include "context.hpp"
-#include "flags.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -8,10 +7,8 @@
 #include <sstream>
 #include <stdexcept>
 
-ion::context::context(const std::string& title,
-                      int x, int y, int width, int height,
-                      const ion::window_flags& wflags,
-                      const ion::render_flags& rflags)
+ion::context::context(const std::string& title, const ion::rect& dim,
+                      unsigned int window_flags, unsigned int render_flags)
 {
     // Put the error message in scope so it can be used in clean up
     // outside of the try block.
@@ -25,17 +22,15 @@ ion::context::context(const std::string& title,
             throw std::runtime_error{""};
         }
         // Try to create the window
-        auto wflags_ = ion::window_state::to_uint(wflags);
-        window = SDL_CreateWindow(title.c_str(), x, y,
-                                  width, height, wflags_);
+        window = SDL_CreateWindow(title.c_str(), dim.x, dim.y,
+                                  dim.w, dim.h, window_flags);
         if (!window) {
             message << "Window could not be created! SDL Error: "
                     << SDL_GetError();
             throw std::runtime_error{""};
         }
         // Try to create the renderer
-        auto rflags_ = ion::render_state::to_uint(rflags);
-        renderer = SDL_CreateRenderer(window, -1, rflags_);
+        renderer = SDL_CreateRenderer(window, -1, render_flags);
         if (!renderer) {
             message << "Renderer could not be created! SDL Error: "
                     << SDL_GetError();
@@ -60,10 +55,12 @@ ion::context::context(const std::string& title,
 }
 ion::context::context(const std::string& title,
                       int width, int height,
-                      const ion::window_flags& wflags,
-                      const ion::render_flags& rflags)
-    : context(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-              width, height, wflags, rflags)
+                      unsigned int window_flags,
+                      unsigned int render_flags)
+
+    : context(title, ion::rect{SDL_WINDOWPOS_UNDEFINED,
+                               SDL_WINDOWPOS_UNDEFINED, width, height},
+              window_flags, render_flags)
 {}
 
 ion::context::~context() noexcept
