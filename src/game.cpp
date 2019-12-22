@@ -1,4 +1,4 @@
-#include "context.hpp"
+#include "game.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -6,9 +6,14 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include <filesystem>
 
-ion::context::context(const std::string& title, const ion::rect& dim,
-                      unsigned int window_flags, unsigned int render_flags)
+ion::game::game(const std::string& title, const ion::rect& dim,
+                const std::filesystem::path& project_directory,
+                unsigned int window_flags, unsigned int render_flags)
+
+    : project_dir{project_directory},
+      resource_dir{project_directory/"resources"}
 {
     // Put the error message in scope so it can be used in clean up
     // outside of the try block.
@@ -53,17 +58,16 @@ ion::context::context(const std::string& title, const ion::rect& dim,
         throw std::runtime_error{message.str()};
     }
 }
-ion::context::context(const std::string& title,
-                      int width, int height,
-                      unsigned int window_flags,
-                      unsigned int render_flags)
+ion::game::game(const std::string& title, int width, int height,
+                const std::filesystem::path& project_directory,
+                unsigned int window_flags, unsigned int render_flags)
 
-    : context(title, ion::rect{SDL_WINDOWPOS_UNDEFINED,
+    : game(title, ion::rect{SDL_WINDOWPOS_UNDEFINED,
                                SDL_WINDOWPOS_UNDEFINED, width, height},
-              window_flags, render_flags)
+              project_directory, window_flags, render_flags)
 {}
 
-ion::context::~context() noexcept
+ion::game::~game() noexcept
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -71,7 +75,7 @@ ion::context::~context() noexcept
     SDL_Quit();
 }
 
-void ion::context::run()
+void ion::game::run()
 {
     bool has_quit = false;
     SDL_Event event;
