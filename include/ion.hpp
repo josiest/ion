@@ -1,6 +1,7 @@
 #ifndef ION_HPP
 #define ION_HPP
 
-#include "context.hpp"
+#include "game.hpp"
+#include "texture.hpp"
 
 #endif

@@ -54,3 +54,11 @@ SDL_Texture * ion::texture_bank::load(SDL_Renderer * renderer,
                                       const texture& texture) {
     return load(renderer, texture.relative_path);
 }
+
+void ion::sort_textures(entt::entity entity, entt::registry& registry,
+                        ion::texture& texture)
+{
+    registry.sort<ion::texture>([](const auto& lhs, const auto& rhs) {
+        return lhs.sorting_index < rhs.sorting_index;
+    });
+}

@@ -1,11 +1,11 @@
 #ifndef ION_GAME_HPP
 #define ION_GAME_HPP
 
+#include "texture.hpp"
 #include <SDL2/SDL.h>
 
 #include <entt/entt.hpp>
 #include <cstdint>
-
 #include <string>
 #include <filesystem>
 
@@ -13,8 +13,11 @@ namespace ion {
     using rect = SDL_Rect;
 
     class game {
-        SDL_Window * window;
-        SDL_Renderer * renderer;
+        SDL_Window * _window;
+        SDL_Renderer * _renderer;
+
+        /** Render all sprites */
+        void render_update();
     public:
         /** Path to the poject directory */
         const std::filesystem::path project_dir;
@@ -24,6 +27,9 @@ namespace ion {
 
         /** Entity-Component registry */
         entt::registry registry;
+
+        /** Texture bank */
+        texture_bank textures;
 
         /** Create a new game.
          *
@@ -56,6 +62,9 @@ namespace ion {
 
         /** Destroy this game */
         ~game();
+
+        /** The game's renderer */
+        inline SDL_Renderer * renderer() {return _renderer;}
 
         /** The main loop of this game */
         void run();

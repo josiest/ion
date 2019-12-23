@@ -30,4 +30,4 @@ $(BINDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 .PHONY: clean
 
 clean:
-	rm -r $(BINDIR) $(LIBDIR)
+	rm -rf $(BINDIR) $(LIBDIR)

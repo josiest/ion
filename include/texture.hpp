@@ -2,6 +2,7 @@
 #define ION_TEXTURE_HPP
 
 #include <SDL2/SDL.h>
+#include <entt/entt.hpp>
 
 #include <string>
 #include <memory>
@@ -15,8 +16,12 @@ namespace ion {
     };
     struct texture {
         std::string relative_path;
-        inline texture(const std::string& path) : relative_path{path} {}
+        int sorting_index;
+
+        inline texture(const std::string& path, int i = 0)
+            : relative_path{path}, sorting_index{i} {}
     };
+    void sort_textures(entt::entity, entt::registry&, texture&);
 
     using unique_texture =
         std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)>;
