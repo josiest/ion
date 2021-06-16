@@ -6,6 +6,9 @@ It serves two primary functions
 1. it acts as RAII resource handler for SDL components
 2. it provides a higher level event-handling interface than pure SDL
 
+`ion` is still in the very early stages of development. Since this is currently
+a personal project, more features will be added as I need them.
+
 ## Installation
 
 The goal is to eventually add ion to different c++ package managers, but I'm
