@@ -22,41 +22,29 @@ the screen as white.
 #include "ion.hpp"
 #include "SDL2/SDL.h"
 
-// define a wrapper class to set a global renderer
-struct Renderer {
-    SDL_Renderer * sdl_renderer;
-};
-// initialize and retreive the global renderer wrapper
-Renderer & global_renderer()
-{
-    static Renderer r{nullptr};
-    return r;
-}
-// set the global SDL_Renderer
-void renderer(SDL_Renderer * sdl_renderer)
-{
-    auto & r = global_renderer();
-    r.sdl_renderer = sdl_renderer;
-}
-// retreive the global SDL_Renderer
-SDL_Renderer * renderer()
-{
-    return global_renderer().sdl_renderer;
-}
+// our render function will need acces to the app's renderer
+// there are more sophisticated ways of doing this, but for the sake of
+// simplicity we'll just use a global variable
+SDL_Renderer * RENDERER;
 
 // draw a white screen
 void render()
 {
-    SDL_SetRenderDrawColor(renderer(), 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderClear(renderer());
-    SDL_RenderPresent(renderer());
+    SDL_SetRenderDrawColor(RENDERER, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(RENDERER);
+    SDL_RenderPresent(RENDERER);
 }
 
 int main(int argc, char * argv[])
 {
+    // specify the app's title and dimensions
     ion::app simple{"A simple window", 800, 600};
-    renderer(simple.renderer());
-    simple.connect_update_listener(&render);
+
+    // load the renderer and render function
+    RENDERER = simple.renderer();
+    simple.connect_update_listener(&render); 
+
+    // run the app
     simple.run();
     return 0;
 }
