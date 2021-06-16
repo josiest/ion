@@ -6,10 +6,11 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <algorithm>
+
 namespace ion {
 
 app::app(const std::string& title, int width, int height)
-    : _window{nullptr}, _renderer{nullptr}
 {
     // Put the error message in scope so it can be used in clean up
     // outside of the try block.
@@ -82,6 +83,10 @@ void app::run()
                 has_quit = true;
             }
         }
+
+        // update phase
+        std::for_each(_update_listeners.begin(), _update_listeners.end(),
+                      [](auto callback) { callback(); });
     }
 }
 }
