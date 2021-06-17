@@ -2,12 +2,13 @@
 #define ION_HPP
 
 #include <SDL2/SDL.h>
+#include <functional>
 #include <vector>
 #include <string>
 
 namespace ion {
 
-typedef void (*Listener)();
+using Listener = std::function<void()>;
 
 /**
  * An SDL resource/event handler
