@@ -13,8 +13,31 @@ a personal project, more features will be added as I need them.
 
 The goal is to eventually add ion to different c++ package managers, but I'm
 just a mere student and I don't have the time to do that right now. For now
-you'll just need to download the source code and use your favorite compiling
-tool to link the library correctly.
+you'll need to download the source code and make it with cmake.
+
+I recommend adding this repository as a submodule for now:
+
+```console
+$ cd <project_directory>
+$ git submodule add https://github.com/josiest/ion.git external/ion
+```
+
+Then from there, you can use cmake to build the package
+
+```console
+$ mkdir external/ion/build && cd external/ion/build
+$ cmake ..
+$ cmake --build .
+```
+
+Finally add the following to your `CMakeLists.txt`
+
+```cmake
+set(ion_DIR <path-to-project>/external/ion/build)
+find_package(ion REQUIRED)
+...
+target_link_libraries(<project-name> PRIVATE ion)
+```
 
 ## Examples
 
