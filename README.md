@@ -79,10 +79,10 @@ int main(int argc, char * argv[])
 To run this example from the ion project directory run the following code
 
 ```console
-mkdir examples/simple/build && cd examples/simple/build
-cmake ..
-cmake --build .
-./simple
+$ mkdir examples/simple/build && cd examples/simple/build
+$ cmake ..
+$ cmake --build .
+$ ./simple
 ```
 
 ![simple example window](images/simple-example.png)
