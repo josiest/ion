@@ -33,7 +33,7 @@ $ cmake --build .
 Finally add the following to your `CMakeLists.txt`
 
 ```cmake
-set(ion_DIR <path-to-project>/external/ion/build)
+set(ion_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/ion/build)
 find_package(ion REQUIRED)
 ...
 target_link_libraries(<project-name> PRIVATE ion)
