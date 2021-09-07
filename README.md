@@ -48,31 +48,38 @@ the screen as white.
 #include "ion.hpp"
 #include "SDL2/SDL.h"
 
-// our render function will need acces to the app's renderer
-// there are more sophisticated ways of doing this, but for the sake of
-// simplicity we'll just use a global variable
-SDL_Renderer * RENDERER;
-
 // draw a white screen
-void render()
+void render(ion::Window & window)
 {
-    SDL_SetRenderDrawColor(RENDERER, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderClear(RENDERER);
-    SDL_RenderPresent(RENDERER);
+    auto renderer = window.sdl_renderer();
+    SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
 }
 
-int main(int argc, char * argv[])
+// since this framework relies on function pointers in order to handle events,
+// we can't pass capturing lambdas to the event handlers!
+// thus (at least to my knowledge), we're limited to using a global resource
+bool HAS_QUIT = false;
+bool has_quit() { return HAS_QUIT; }
+void quit(SDL_Event const &) { HAS_QUIT = true; }
+// NOTE: in general, it might be a better idea to create a resources class with
+// an API for managing its resources. But since this example only needs to know
+// when the user quit, we'll just keep things as simple as possible
+
+int main()
 {
+    // create the sdl event handler
+    ion::EventHandler handler;
+    hanler.subscribe(SDL_QUIT, &quit);
+
     // specify the app's title and dimensions
-    ion::app simple{"A simple window", 800, 600};
+    auto window = ion::unique_basic_window("A simple window", 800, 600);
 
-    // load the renderer and render function
-    RENDERER = simple.renderer();
-    simple.connect_update_listener(&render); 
-
-    // run the app
-    simple.run();
-    return 0;
+    // run the program
+    while (!has_quit()) {
+        handler.process_queue();
+    }
 }
 ```
 
