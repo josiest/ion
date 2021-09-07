@@ -42,7 +42,7 @@ target_link_libraries(<project-name> PRIVATE ion)
 ## Examples
 
 Here's a simple example of how you might use `ion`. This example renders
-the screen as white.
+a fibonacci-like gradient pattern to the screen.
 
 ```cpp
 #include "ion.hpp"
