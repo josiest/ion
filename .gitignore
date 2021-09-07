@@ -62,5 +62,6 @@ tags
 [._]*.un~
 
 # Project
-build/*
+build/
 simple
+external/
