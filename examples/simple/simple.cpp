@@ -2,27 +2,30 @@
 #include "SDL2/SDL.h"
 #include <iostream>
 
-// our render function will need acces to the app's renderer
-// there are more sophisticated ways of doing this, but for the sake of
-// simplicity we'll just use a global variable
-SDL_Window * WINDOW;
-SDL_Renderer * RENDERER;
+// since this framework relies on function pointers in order to handle events,
+// we can't pass capturing lambdas to the event handlers!
+// thus (at least to my knowledge), we're limited to using a global resource
+bool HAS_QUIT = false;
+void quit(SDL_Event const &) { HAS_QUIT = true; }
+// NOTE: in general, it might be a better idea to create a resources class with
+// an API for managing its resources. But since this example only needs to know
+// when the user quit, we'll just keep things as simple as possible
 
 // a fibonacci-like pattern
-void render()
+void render(ion::Window & window)
 {
     // the initial color
     int r0 = 48, g0 = 118, b0 = 217;
     // the final color
     int r1 = 219, g1 = 0, b1 = 66;
 
-    // clear
-    SDL_SetRenderDrawColor(RENDERER, r1, g1, b1, 0xff);
-    SDL_RenderClear(RENDERER);
+    // clear the screen
+    SDL_SetRenderDrawColor(window.sdl_renderer(), r1, g1, b1, 0xff);
+    SDL_RenderClear(window.sdl_renderer());
 
     // the dimensions of the rect to draw
     SDL_Rect rect{0, 0, 0, 0};
-    SDL_GetWindowSize(WINDOW, &rect.w, &rect.h);
+    SDL_GetWindowSize(window.sdl_window(), &rect.w, &rect.h);
     rect.w /= 2;
 
     // draw the fibonacci-like patern
@@ -36,34 +39,46 @@ void render()
         int b = (int)((1-t)*b0 + t*b1);
 
         // draw the rect
-        SDL_SetRenderDrawColor(RENDERER, r, g, b, 0xff);
-        SDL_RenderFillRect(RENDERER, &rect);
+        SDL_SetRenderDrawColor(window.sdl_renderer(), r, g, b, 0xff);
+        SDL_RenderFillRect(window.sdl_renderer(), &rect);
 
         // split in half horizontally when k is even
         if (k % 2 == 0) {
             rect.x += rect.w;
             rect.h /= 2;
         }
-        // split in half vertically when k is even
+        // split in half vertically when k is odd
         else {
             rect.y += rect.h;
             rect.w /= 2;
         }
     }
-    SDL_RenderPresent(RENDERER);
+    SDL_RenderPresent(window.sdl_renderer());
+}
+
+// creating a function to limit the scope of certain variables
+// local variables will be forced to destruct before quitting SDL
+void run_simple_program()
+{
+    // specify the app's title and dimensions
+    auto window = ion::unique_basic_window("A simple window", 800, 600);
+
+    // create the sdl event-handler
+    ion::EventHandler handler;
+    handler.subscribe(SDL_QUIT, &quit);
+
+    // run the program
+    while (!HAS_QUIT) {
+        handler.process_queue();
+        render(*window);
+    }
 }
 
 int main(int argc, char * argv[])
 {
-    // specify the app's title and dimensions
-    ion::app simple{"A simple window", 800, 600};
+    run_simple_program();
+    // finally, quit SDL
+    SDL_Quit();
 
-    // load the renderer and render function
-    WINDOW = simple.window();
-    RENDERER = simple.renderer();
-    simple.connect_update_listener(&render); 
-
-    // run the app
-    simple.run();
     return 0;
 }
