@@ -3,18 +3,31 @@
 #include <ion/input.hpp>
 
 void accelerate_player(entt::registry & registry,
-                       ion::input::InputAxis2D const & axis, float dt)
+                       ion::input::InputAxis2D const & input, float dt)
 {
     auto view = registry.view<Velocity, DynamicMover>();
-    view.each([&axis, dt](auto & vel, auto const & constants) {
+    view.each([&input, dt](auto & vel, auto const & constants) {
 
-        vel.x = axis.x();
-        vel.y = axis.y();
+        float current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
+        Velocity norm_vel = vel;
+        if (std::abs(current_speed) > constants.minspeed) {
+            norm_vel = Velocity{vel.x/current_speed, vel.y/current_speed};
+        }
 
-        float const current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
-        if (current_speed != 0) {
-            vel.x = constants.speed * vel.x/current_speed;
-            vel.y = constants.speed * vel.y/current_speed;
+        float const acc_in = constants.acceleration * dt;
+        float const acc_fr = -constants.friction * dt;
+
+        vel.x += acc_in*input.x() + acc_fr*norm_vel.x;
+        vel.y += acc_in*input.y() + acc_fr*norm_vel.y;
+
+        current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
+        if (std::abs(current_speed) <= constants.minspeed) {
+            vel.x = 0.f;
+            vel.y = 0.f;
+        }
+        else if (current_speed > constants.maxspeed) {
+            vel.x = constants.maxspeed * vel.x/current_speed;
+            vel.y = constants.maxspeed * vel.y/current_speed;
         }
     });
 }

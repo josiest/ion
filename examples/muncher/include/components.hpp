@@ -18,7 +18,10 @@ struct Color {
 };
 
 struct DynamicMover {
-    float speed;
+    float acceleration;
+    float friction;
+    float minspeed;
+    float maxspeed;
 };
 
 struct Player {};
