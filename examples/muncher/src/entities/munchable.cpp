@@ -44,15 +44,17 @@ MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
     std::uniform_real_distribution<float> speed_dist(100.f, 200.f);
     float const speed = speed_dist(_rng);
 
-    // compute the angle to the player for the mean distribution
-    float angle_to_player = 0.f;
-    auto pos_view = registry.view<Position, Player>();
-    pos_view.each([&angle_to_player, x, y](auto const & pos) {
-        float const dx = pos.x - x;
-        float const dy = pos.y - y;
-        float const dist = std::sqrt(dx*dx + dy*dy);
-        angle_to_player = std::atan2(dx/dist, dy/dist);
-    });
+    // get the player's position in order to calculate the angle to it
+    Position player_pos{_bounds.x+_bounds.w/2.f, _bounds.y+_bounds.h/2.f};
+    if (registry.valid(player)) {
+        player_pos = registry.get<Position>(player);
+    }
+
+    // calculate the angle to the player
+    float const dx = player_pos.x - x;
+    float const dy = player_pos.y - y;
+    float const dist = std::sqrt(dx*dx + dy*dy);
+    float const angle_to_player = std::atan2(dy/dist, dx/dist);
 
     // generate a random angle
     float const pi = std::atan(1.f)*4.f;

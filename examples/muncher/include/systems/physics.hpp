@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 
 void accelerate_player(entt::registry & registry, entt::entity player,
-                       ion::input::InputAxis2D const & input, float dt);
+                       ion::input::Axis2D const & input, float dt);
 
 void move_munchies(entt::registry & registry, float dt);
 

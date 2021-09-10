@@ -5,7 +5,7 @@
 #include <iostream>
 
 void accelerate_player(entt::registry & registry, entt::entity player,
-                       ion::input::InputAxis2D const & input, float dt)
+                       ion::input::Axis2D const & input, float dt)
 {
     // do nothing if the player doesn't exist
     if (!registry.valid(player)) {
