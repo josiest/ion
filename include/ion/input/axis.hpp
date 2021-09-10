@@ -4,7 +4,7 @@
 
 namespace ion::input {
 
-class InputAxis2D {
+class Axis2D {
 public:
     // get the x-value of the axis
     virtual float x() const = 0;
@@ -16,8 +16,7 @@ public:
 void set_key(SDL_Keycode key);
 void release_key(SDL_Keycode key);
 
-
-class KeyboardAxis2D : public InputAxis2D {
+class KeyboardAxis2D : public Axis2D {
 public:
     KeyboardAxis2D(EventHandler & handler, SDL_Keycode right, SDL_Keycode left,
                                            SDL_Keycode up, SDL_Keycode down);

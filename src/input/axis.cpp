@@ -6,15 +6,17 @@
 
 namespace ion::input {
 
+namespace _g {
 std::unordered_set<SDL_Keycode> KEYS_PRESSED;
+}
 
 void set_key(SDL_Event const & event)
 {
-    KEYS_PRESSED.insert(event.key.keysym.sym);
+    _g::KEYS_PRESSED.insert(event.key.keysym.sym);
 }
 void release_key(SDL_Event const & event)
 {
-    KEYS_PRESSED.erase(event.key.keysym.sym);
+    _g::KEYS_PRESSED.erase(event.key.keysym.sym);
 }
 
 KeyboardAxis2D::KeyboardAxis2D(EventHandler & handler,
@@ -29,15 +31,15 @@ KeyboardAxis2D::KeyboardAxis2D(EventHandler & handler,
 
 float KeyboardAxis2D::x() const
 {
-    bool right_pressed = KEYS_PRESSED.find(_right) != KEYS_PRESSED.end();
-    bool left_pressed = KEYS_PRESSED.find(_left) != KEYS_PRESSED.end();
+    bool right_pressed = _g::KEYS_PRESSED.find(_right) != _g::KEYS_PRESSED.end();
+    bool left_pressed = _g::KEYS_PRESSED.find(_left) != _g::KEYS_PRESSED.end();
     return static_cast<float>(right_pressed) - static_cast<float>(left_pressed);
 }
 
 float KeyboardAxis2D::y() const
 {
-    bool up_pressed = KEYS_PRESSED.find(_up) != KEYS_PRESSED.end();
-    bool down_pressed = KEYS_PRESSED.find(_down) != KEYS_PRESSED.end();
+    bool up_pressed = _g::KEYS_PRESSED.find(_up) != _g::KEYS_PRESSED.end();
+    bool down_pressed = _g::KEYS_PRESSED.find(_down) != _g::KEYS_PRESSED.end();
     return static_cast<float>(up_pressed) - static_cast<float>(down_pressed);
 }
 
