@@ -1,4 +1,4 @@
-#include "ion.hpp"
+#include "ion/ion.hpp"
 #include "SDL2/SDL.h"
 
 // draw a fibonacci-like pattern
@@ -64,8 +64,8 @@ void run_simple_program()
     handler.subscribe(SDL_QUIT, &quit);
 
     // specify the program's title and dimensions
-    auto window = ion::unique_basic_window("A simple window", 800, 600);
-    render(*window);
+    auto window = ion::basic_window("A simple window", 800, 600);
+    render(window);
 
     // run the program
     while (!HAS_QUIT) {
@@ -73,11 +73,9 @@ void run_simple_program()
     }
 }
 
-int main(int argc, char * argv[])
+int main()
 {
     run_simple_program();
     // finally, quit SDL
     SDL_Quit();
-
-    return 0;
 }
