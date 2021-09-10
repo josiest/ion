@@ -2,6 +2,7 @@
 #include "components.hpp"
 #include <ion/input.hpp>
 #include <SDL2/SDL.h>
+#include <iostream>
 
 void accelerate_player(entt::registry & registry, entt::entity player,
                        ion::input::InputAxis2D const & input, float dt)

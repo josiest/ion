@@ -79,6 +79,8 @@ entt::entity MunchableFactory::make_munchable(entt::registry & registry)
     auto color = _colors[color_dist(_rng)];
     registry.emplace<Color>(munchable, color.r, color.g, color.b, color.a);
 
+    registry.emplace<Munchable>(munchable);
+
     return munchable;
 }
 
