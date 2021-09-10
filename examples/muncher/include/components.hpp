@@ -25,3 +25,4 @@ struct DynamicMover {
 };
 
 struct Player {};
+struct Munchable {};
