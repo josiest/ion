@@ -1,10 +1,10 @@
 #include "ion/ion.hpp"
 #include "entities/player.hpp"
 #include "systems/render.hpp"
+#include "systems/physics.hpp"
 
 #include <SDL2/SDL.h>
 #include <string>
-#include <iostream>
 
 // resource interface for quitting the program
 bool HAS_QUIT = false;
@@ -37,23 +37,19 @@ public:
         make_player(_registry, static_cast<int>(_width)/2,
                                static_cast<int>(_height)/2, 15);
 
+        uint32_t prev_time = SDL_GetTicks();
+
         // run the program
         while (!has_quit()) {
+            uint32_t const current_time = SDL_GetTicks();
+            float const dt = static_cast<float>(current_time-prev_time)/1000.f;
+            prev_time = current_time;
 
             _handler.process_queue();
-            render(window, _registry);
 
-            float const x = _input.x();
-            float const y = _input.y();
-            if (x != 0.f) {
-                std::cout << "x: " << x << " ";
-            }
-            if (y != 0.f) {
-                std::cout << "y: " << y;
-            }
-            if (y != 0.f || x != 0.f) {
-                std::cout << std::endl;
-            }
+            accelerate_player(_registry, _input, dt);
+            move_munchies(_registry, dt);
+            render(window, _registry);
         }
     }
 private:

@@ -11,7 +11,7 @@ entt::entity make_player(entt::registry & registry, float x, float y, int size)
     registry.emplace<Size>(player, size);
     Uint8 r = 0, g = 0, b = 0, a = 0xff;
     registry.emplace<Color>(player, r, g, b, a);
-    registry.emplace<DynamicMover>(player, 1.f);
+    registry.emplace<DynamicMover>(player, 160.f);
     registry.emplace<Player>(player);
     return player;
 }
