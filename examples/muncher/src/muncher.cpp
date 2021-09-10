@@ -65,7 +65,7 @@ public:
 
             // apply systems
             if (munch_time(_rng)) {
-                _munchables.make_munchable(_registry);
+                _munchables.make_munchable(_registry, _player);
             }
             accelerate_player(_registry, _player, _input, dt);
             move_munchies(_registry, dt);

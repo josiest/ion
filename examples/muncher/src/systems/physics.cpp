@@ -102,7 +102,8 @@ void devour(entt::registry & registry, entt::entity player)
 
         // destroy the munchable and grow the player if the player's bigger
         if (size.value < player_box.w) {
-            player_size.value += 1;
+            float const growth = std::max(1.f, std::round(0.05f * size.value));
+            player_size.value += static_cast<int>(growth);
             registry.destroy(munchable);
         }
         // otherwise, destroy the player

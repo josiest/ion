@@ -13,7 +13,8 @@ MunchableFactory::MunchableFactory(size_t w, size_t h,
     };
 }
 
-entt::entity MunchableFactory::make_munchable(entt::registry & registry)
+entt::entity
+MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
 {
     // create the munchable entity
     auto munchable = registry.create();
@@ -63,11 +64,10 @@ entt::entity MunchableFactory::make_munchable(entt::registry & registry)
                                           speed*std::sin(phi));
 
     // get the size of the player as a mean for the size of the munchable
-    int player_size = 0;
-    auto size_view = registry.view<Size, Player>();
-    size_view.each([&player_size](auto const & size) {
-        player_size = size.value;
-    });
+    int player_size = 15;
+    if (registry.valid(player)) {
+        player_size = registry.get<Size>(player).value;
+    }
 
     // generate a random size
     std::normal_distribution<float> size_dist(player_size, 5.f);
