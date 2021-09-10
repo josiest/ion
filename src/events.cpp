@@ -1,4 +1,4 @@
-#include "events.hpp"
+#include "ion/events.hpp"
 #include <SDL2/SDL.h>
 #include <algorithm>
 
@@ -34,8 +34,7 @@ void EventHandler::process_queue()
 
         // otherwise run each subscribed callback fxn with the event
         auto listeners = search->second;
-        std::for_each(listeners.begin(), listeners.end(),
-                      [&event](auto callback) { callback(event); });
+        for (auto callback : listeners) { callback(event); }
     }
 }
 }

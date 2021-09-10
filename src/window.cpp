@@ -1,8 +1,8 @@
-#include "window.hpp"
-#include "video.hpp"
+#include "ion/window.hpp"
 
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 namespace ion {
 
@@ -24,12 +24,14 @@ Window::~Window()
     }
 }
 
-std::unique_ptr<Window>
-unique_basic_window(std::string const & title, size_t width, size_t height)
+Window basic_window(std::string const & title, size_t width, size_t height)
 {
-    // make sure video is initialized before making windows
-    init_video();
+    // initialize video if it hasn't already been done
+    if (!SDL_WasInit(SDL_INIT_VIDEO) && SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+        throw std::runtime_error{SDL_GetError()};
+    }
 
+    // create the window and a renderer for it
     SDL_Window * window = SDL_CreateWindow(
             title.c_str(),
             // use default ("undefined") window position
@@ -42,7 +44,7 @@ unique_basic_window(std::string const & title, size_t width, size_t height)
             -1, // grab the first acceptable renderer
             SDL_RENDERER_ACCELERATED);
 
-    return std::make_unique<Window>(window, renderer);
+    return Window(window, renderer);
 }
 
 }
