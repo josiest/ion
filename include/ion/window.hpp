@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <memory>
 #include <string>
 
 namespace ion {
@@ -32,9 +31,8 @@ private:
 };
 
 /**
- * Create a basic renderer-accelerated render-window
+ * Create a basic renderer-accelerated window.
  */
-std::unique_ptr<Window>
-unique_basic_window(std::string const & title, size_t width, size_t height);
+Window basic_window(std::string const & title, size_t width, size_t height);
 
 }
