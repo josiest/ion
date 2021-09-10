@@ -41,8 +41,8 @@ public:
     {
         // create the window, specifying title and dimensions
         auto window = ion::basic_window(_title, _width, _height);
-        make_player(_registry, static_cast<int>(_width)/2,
-                               static_cast<int>(_height)/2, 15);
+        auto player = make_player(_registry, static_cast<int>(_width)/2,
+                                             static_cast<int>(_height)/2, 15);
 
         // timer for physics
         uint32_t prev_time = SDL_GetTicks();
@@ -64,8 +64,9 @@ public:
             if (munch_time(_rng)) {
                 _munchables.make_munchable(_registry);
             }
-            accelerate_player(_registry, _input, dt);
+            accelerate_player(_registry, player, _input, dt);
             move_munchies(_registry, dt);
+            devour(_registry, player);
             _munchables.filter(_registry);
 
             // render
