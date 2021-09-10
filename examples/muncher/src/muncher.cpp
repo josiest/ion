@@ -1,13 +1,10 @@
-#include "ion.hpp"
+#include "ion/ion.hpp"
+#include "entities/player.hpp"
+#include "systems/render.hpp"
+
 #include <SDL2/SDL.h>
 #include <string>
-
-void render(ion::Window & window)
-{
-    auto renderer = window.sdl_renderer();
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
-}
+#include <iostream>
 
 // resource interface for quitting the program
 bool HAS_QUIT = false;
@@ -23,7 +20,8 @@ class Muncher {
 public:
     // intialize the muncher game object with the specified width and height
     Muncher(size_t width, size_t height)
-        : _title{"Muncher"}, _width(width), _height(height), _handler()
+        : _title{"Muncher"}, _width(width), _height(height), _handler(),
+          _input(_handler, SDLK_d, SDLK_a, SDLK_w, SDLK_s), _registry()
     {
         // the choice to subscribe the event listeners here is somewhat arbitrary
         _handler.subscribe(SDL_QUIT, &quit);
@@ -35,13 +33,27 @@ public:
     void run()
     {
         // create the window, specifying title and dimensions
-        auto window = ion::unique_basic_window(_title, _width, _height);
+        auto window = ion::basic_window(_title, _width, _height);
+        make_player(_registry, static_cast<int>(_width)/2,
+                               static_cast<int>(_height)/2, 15);
 
         // run the program
         while (!has_quit()) {
 
             _handler.process_queue();
-            render(*window);
+            render(window, _registry);
+
+            float const x = _input.x();
+            float const y = _input.y();
+            if (x != 0.f) {
+                std::cout << "x: " << x << " ";
+            }
+            if (y != 0.f) {
+                std::cout << "y: " << y;
+            }
+            if (y != 0.f || x != 0.f) {
+                std::cout << std::endl;
+            }
         }
     }
 private:
@@ -60,6 +72,9 @@ private:
     // This _could_ be achieved by explicitly calling `window.reset()` before
     // `SDL_Quit()`, but having this done implicitly via scoping rules is
     // arguably more elegant
+
+    ion::input::KeyboardAxis2D _input;
+    entt::registry _registry;
 };
 
 int main()
