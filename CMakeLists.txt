@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # declare sources
 set(ion_SRCEXT cpp)
-file(GLOB SOURCES src/*.${ion_SRCEXT})
+file(GLOB_RECURSE SOURCES src/*.${ion_SRCEXT})
 
 # compile library
 add_library(ion STATIC ${SOURCES})
