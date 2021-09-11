@@ -12,3 +12,4 @@ file(GLOB SOURCES src/*.cpp)
 add_executable(pipes ${SOURCES})
 
 target_link_libraries(pipes PUBLIC ion SDL2)
+target_include_directories(pipes PUBLIC include)
