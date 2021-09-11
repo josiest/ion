@@ -25,6 +25,11 @@ public:
      * Get the underlying SDL_Renderer pointer
      */
     inline SDL_Renderer * sdl_renderer() { return _renderer; }
+
+    /**
+     * Get the undelrying SDL_Surface of the window
+     */
+    inline SDL_Surface * sdl_surface() { return SDL_GetWindowSurface(_window); }
 private:
     SDL_Window * _window;
     SDL_Renderer * _renderer;
@@ -35,4 +40,8 @@ private:
  */
 Window basic_window(std::string const & title, size_t width, size_t height);
 
+/**
+ * Create a basic software-rendering window.
+ */
+Window basic_blit_window(std::string const & title, size_t width, size_t height);
 }
