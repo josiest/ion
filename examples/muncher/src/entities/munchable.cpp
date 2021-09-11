@@ -34,7 +34,7 @@ MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
     };
 
     // choose a random pair from xvals and yvals
-    std::uniform_int_distribution<size_t> pos_dist(0, xvals.size());
+    std::uniform_int_distribution<size_t> pos_dist(0, xvals.size()-1);
     size_t const i = pos_dist(_rng);
     float const x = xvals[i];
     float const y = yvals[i];

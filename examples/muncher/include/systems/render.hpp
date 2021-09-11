@@ -1,5 +1,5 @@
 #pragma once
-#include <ion/window.hpp>
+#include <ion/render/window.hpp>
 #include <entt/entity/registry.hpp>
 
 void render(ion::Window & window, entt::registry & registry);
