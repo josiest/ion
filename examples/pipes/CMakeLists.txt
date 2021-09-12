@@ -8,8 +8,10 @@ find_package(SDL2 REQUIRED)
 set(ion_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../build)
 find_package(ion REQUIRED)
 
-file(GLOB SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(pipes ${SOURCES})
 
 target_link_libraries(pipes PUBLIC ion SDL2)
-target_include_directories(pipes PUBLIC include)
+
+set(entt_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
+target_include_directories(pipes PUBLIC include ${entt_DIR})
