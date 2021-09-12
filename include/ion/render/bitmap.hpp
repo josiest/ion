@@ -26,13 +26,14 @@ public:
     /**
      * Create a bitmap from another bitmap
      */
-    Bitmap(Bitmap & bitmap);
+    Bitmap(Bitmap const & bitmap);
     ~Bitmap();
 
     /**
      * Get the underlying SDL_Surface of the bitmap
      */
     inline SDL_Surface * sdl_surface() { return _surface; }
+    inline SDL_Surface const * sdl_surface() const { return _surface; }
 private:
     SDL_Surface * _surface;
 };
