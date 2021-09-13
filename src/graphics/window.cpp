@@ -1,7 +1,7 @@
 #include "ion/graphics/window.hpp"
-
-#include <memory>
+#include <SDL2/SDL.h>
 #include <string>
+
 #include <stdexcept>
 #include <sstream>
 
@@ -26,7 +26,9 @@ window::~window()
 }
 
 // helper functions for creating windows
-SDL_Window * load_window(std::string const & title, size_t width, size_t height)
+SDL_Window *
+load_window(std::string const & title, size_t width, size_t height,
+            int x, int y, uint32_t flags)
 {
     // initialize video if it hasn't already been done
     if (!SDL_WasInit(SDL_INIT_VIDEO) && SDL_InitSubSystem(SDL_INIT_VIDEO)) {
@@ -38,11 +40,10 @@ SDL_Window * load_window(std::string const & title, size_t width, size_t height)
 
     // create the window and a renderer for it
     SDL_Window * window_ptr = SDL_CreateWindow(
-            title.c_str(),
-            // use default ("undefined") window position
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            width, height,
-            0); // no flags: basic window
+            title.c_str(), x, y,
+            static_cast<int>(width),
+            static_cast<int>(height), flags
+            );
 
     if (!window_ptr) {
         std::stringstream message;
@@ -53,14 +54,19 @@ SDL_Window * load_window(std::string const & title, size_t width, size_t height)
     return window_ptr;
 }
 
-SDL_Renderer * load_renderer(SDL_Window * window_ptr)
+SDL_Renderer * load_renderer(SDL_Window * window_ptr,
+                             int driver_index, uint32_t flags)
 {
+    // make sure the given window pointer isn't null
+    if (!window_ptr) {
+        throw std::invalid_argument{"window_ptr must not be null!"};
+    }
 
-    SDL_Renderer * renderer = SDL_CreateRenderer(
-            window_ptr,
-            -1, // grab the first acceptable renderer
-            SDL_RENDERER_ACCELERATED);
+    // create the renderer
+    SDL_Renderer * renderer =
+        SDL_CreateRenderer(window_ptr, driver_index, flags);
 
+    // error if the renderer couldn't be created (likely a shortage of memory)
     if (!renderer) {
         std::stringstream message;
         message << "Window renderer couldn't be created! SDL_Error: "
@@ -73,6 +79,7 @@ SDL_Renderer * load_renderer(SDL_Window * window_ptr)
 
 window basic_window(std::string const & title, size_t width, size_t height)
 {
+    // create the window, then create the renderer from the window
     auto window_ptr = load_window(title, width, height);
     return window(window_ptr, load_renderer(window_ptr));
 }
