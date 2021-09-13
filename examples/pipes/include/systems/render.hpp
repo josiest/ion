@@ -1,9 +1,9 @@
 #pragma once
-#include "tiles.hpp"
-#include "grid.hpp"
+#include "entities/tile.hpp"
+#include "systems/grid.hpp"
 
-#include <ion/render/window.hpp>
+#include <SDL2/SDL_surface.h>
 #include <entt.hpp>
 
-void render_grid_tiles(ion::Window & window, entt::registry & registry,
-                       Grid const & grid, tiles::TileMap & tilemap);
+void render_grid_tiles(SDL_Surface * screen, grid const & world_space,
+                       entt::registry & registry, tiles::map & tilemap);

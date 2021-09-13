@@ -1,66 +1,82 @@
-#include "grid.hpp"
-#include "tiles.hpp"
-
-#include "entities/tile.hpp"
+//#include "entities/tile.hpp"
 
 #include "systems/render.hpp"
-#include "systems/input.hpp"
+//#include "systems/input.hpp"
+//#include "systems/grid.hpp"
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
-#include <string>
-#include <unordered_map>
-#include <iostream>
+//#include <entt.hpp>
 
-class Pipes {
+#include <memory>
+
+class pipes {
 public:
-    Pipes(int width, int height)
-        : _window{ion::basic_blit_window("Pipes", width, height)},
-          _tiles{}, _grid{0, height, width, height, 50},
-          _registry{},
+    pipes(int width, int height)
 
-          _mouse_tile{make_tile(
-              _registry, tiles::TileName::Bend, tiles::Rotation::Right, -1, -1
-          )}
+          // create a basic window called "Pipes" with the specified dimensions
+        : _window{std::make_unique<ion::blit_window>(
+                ion::load_window("Pipes", width, height)
+          )}//,
+
+          // interface between grid-space and pixel-space
+          //   origin is at (0, height) because pixel-space vertical axis is weird
+          //   50 seems like a decent unit-size for now
+          //_world_space{0, height, width, height, 50},
+
+          // initialize ECS registry and create tile that's bound to mouse
+          //   for now use Bend tile as initial value,
+          //   but in the future this should be randomized
+          //
+          //   "right" is good for a default rotation
+          //
+          //   (-1, -1) is not visible on the grid:
+          //   good intial point before binding it to the mouse
+          //   in the future it may be a good idea to intialize it to mouse position
+          //   this would require making a function to do this
+          //   it may be a good idea to make such a function part of the ion framework
+          //_mouse_tile{tiles::make(
+          //    _entities, tiles::Name::Bend, tiles::Rotation::Right, -1, -1
+          //)}
     {
-        _handler.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+        _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
     }
-    ~Pipes() { SDL_Quit(); }
+    ~pipes() { /*_tiles.clear();*/ _window.reset(); SDL_Quit(); }
 
     void render()
     {
         // clear the screen
-        auto screen = _window.sdl_surface();
+        auto screen = _window->sdl_surface();
         SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format, 0, 0, 0));
 
         // draw the tiles and update the window
-        render_grid_tiles(_window, _registry, _grid, _tiles);
-        SDL_UpdateWindowSurface(_window.sdl_window());
+        //render_grid_tiles(screen, _world_space, _entities, _tiles);
+        SDL_UpdateWindowSurface(_window->sdl_window());
     }
 
     void run()
     {
         while (!ion::input::has_quit()) {
             // bind the mouse-tile entity to the mouse position
-            bind_to_mouse(_registry, _grid, _mouse_tile);
+            //bind_to_mouse(_world_space, _entities, _mouse_tile);
 
-            _handler.process_queue();
+            _events.process_queue();
             render();
         }
     }
 private:
-    ion::Window _window;
-    ion::EventHandler _handler;
+    std::unique_ptr<ion::blit_window> _window;
+    ion::event_system _events;
 
-    tiles::TileMap _tiles;
-    Grid _grid;
+    //tiles::map _tiles;
+    //grid _world_space;
 
-    entt::registry _registry;
-    entt::entity _mouse_tile;
+    //entt::registry _entities;
+    //entt::entity _mouse_tile;
 };
 
 int main()
 {
-    Pipes game(800, 600);
+    pipes game(800, 600);
     game.run();
 }

@@ -1,10 +1,10 @@
 #pragma once
+#include "entities/tile.hpp"
 #include <SDL2/SDL.h>
-#include "tiles.hpp"
 
 struct Tile {
-    tiles::TileName name;
-    tiles::Rotation rot;
+    tiles::Name name;
+    tiles::Rotation rotation;
 };
 
 struct Position {

@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL_rect.h>
 
-class Grid {
+class grid {
 public:
     /**
      * Create a grid at (x, y) in pixel space
@@ -12,7 +12,7 @@ public:
      * \param h the height of the bounds
      * \param unit_size the amount of pixels-per-unit
      */
-    Grid(int x, int y, int w, int h, int unit_size);
+    grid(int x, int y, int w, int h, int unit_size);
 
     /**
      * Convert a grid point to pixels
@@ -34,13 +34,13 @@ public:
      * \param x the x-coordinate of the grid point
      * \param y the y-coordinate of the grid point
      */
-    SDL_Rect rect(int x, int y) const;
+    SDL_Rect unit_square(int x, int y) const;
     /**
      * Get the rect of the grid square in pixel-space at p in grid-space
      *
      * \param p the grid pint
      */
-    SDL_Rect rect(SDL_Point const & p) const;
+    SDL_Rect unit_square(SDL_Point const & p) const;
 
     /**
      * Calculate the nearest grid point from pixels
