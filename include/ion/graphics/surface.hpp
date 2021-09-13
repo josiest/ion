@@ -4,33 +4,33 @@
 namespace ion {
 
 /**
- * A resource handler for a bitmap image
+ * A resource handler for a surface image
  */
-class Bitmap {
+class surface {
 public:
-    Bitmap() = delete;
+    surface() = delete;
 
     /**
-     * Create a bitmap from an SDL_Surface
+     * Create a surface from an SDL_Surface
      *
-     * \param surface the surface of the bitmap
+     * \param surface the surface of the surface
      * \param optimized_to the optional renderer to optimize the surface to
      *
-     * \note If a renderer is specified to optimize the bitmap to, the original
+     * \note If a renderer is specified to optimize the surface to, the original
      *       surface pointer is invalidated and its memory freed, even when the
      *       constructor is unsuccesful. Otherwise, it will be used as its
      *       underlying SDL_Surface.
      */
-    Bitmap(SDL_Surface * surface);
+    surface(SDL_Surface * surface);
 
     /**
-     * Create a bitmap from another bitmap
+     * Create a surface from another surface
      */
-    Bitmap(Bitmap const & bitmap);
-    ~Bitmap();
+    surface(surface const & other);
+    ~surface();
 
     /**
-     * Get the underlying SDL_Surface of the bitmap
+     * Get the underlying SDL_Surface of the surface
      */
     inline SDL_Surface * sdl_surface() const { return _surface; }
 private:
