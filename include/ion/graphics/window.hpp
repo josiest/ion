@@ -37,7 +37,7 @@ public:
     inline blit_window(SDL_Window * window_ptr) : _window{window_ptr} {}
     ~blit_window();
 
-    inline SDL_Window * sdl_window() { return _window; }
+    inline SDL_Window * sdl_window() override { return _window; }
 private:
     SDL_Window * _window;
 };
@@ -54,7 +54,7 @@ public:
         : _window{window_ptr}, _renderer{renderer} {}
     ~render_window();
 
-    inline SDL_Window * sdl_window() { return _window; }
+    inline SDL_Window * sdl_window() override { return _window; }
 
     /**
      * Get the underlying SDL_Renderer pointer

@@ -1,7 +1,7 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
 
-void render(ion::window & window);
+void render(ion::render_window & window);
 
 // creating a function to limit the scope of certain variables
 // local variables will be forced to destruct before quitting SDL
@@ -22,7 +22,7 @@ void run_simple_program()
 }
 
 // draw a fibonacci-like pattern
-void render(ion::window & window)
+void render(ion::render_window & window)
 {
     // the initial color
     int r0 = 48, g0 = 118, b0 = 217;
@@ -30,8 +30,9 @@ void render(ion::window & window)
     int r1 = 219, g1 = 0, b1 = 66;
 
     // clear the screen
-    SDL_SetRenderDrawColor(window.sdl_renderer(), r1, g1, b1, 0xff);
-    SDL_RenderClear(window.sdl_renderer());
+    auto renderer = window.sdl_renderer();
+    SDL_SetRenderDrawColor(renderer, r1, g1, b1, 0xff);
+    SDL_RenderClear(renderer);
 
     // the dimensions of the rect to draw
     SDL_Rect rect{0, 0, 0, 0};
@@ -49,8 +50,8 @@ void render(ion::window & window)
         int b = (int)((1-t)*b0 + t*b1);
 
         // draw the rect
-        SDL_SetRenderDrawColor(window.sdl_renderer(), r, g, b, 0xff);
-        SDL_RenderFillRect(window.sdl_renderer(), &rect);
+        SDL_SetRenderDrawColor(renderer, r, g, b, 0xff);
+        SDL_RenderFillRect(renderer, &rect);
 
         // split in half horizontally when k is even
         if (k % 2 == 0) {
@@ -63,7 +64,7 @@ void render(ion::window & window)
             rect.w /= 2;
         }
     }
-    SDL_RenderPresent(window.sdl_renderer());
+    SDL_RenderPresent(renderer);
 }
 
 int main()
