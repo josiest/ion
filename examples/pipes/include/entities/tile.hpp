@@ -52,7 +52,7 @@ inline std::unordered_set<Rotation> rotations = {
 };
 
 template<typename engine_t>
-Name random_name(engine_t rng)
+Name random_name(engine_t & rng)
 {
     std::uniform_int_distribution<> index(0, names.size()-1);
     auto choice = names.begin();
@@ -61,7 +61,7 @@ Name random_name(engine_t rng)
 }
 
 template<typename engine_t>
-Rotation random_rotation(engine_t rng)
+Rotation random_rotation(engine_t & rng)
 {
     std::uniform_int_distribution<> index(0, rotations.size()-1);
     auto choice = rotations.begin();

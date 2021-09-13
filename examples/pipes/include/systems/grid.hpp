@@ -45,9 +45,19 @@ public:
     /**
      * Calculate the nearest grid point from pixels
      *
+     * \param x the x-coordinate of the pixel-point to convert
+     * \param y the y-coordinate of the pixel-point to convert
+     */
+    SDL_Point nearest_point(int x, int y) const;
+    /**
+     * Calculate the nearest grid point from pixels
+     *
      * \param p the pixel-point to convert
      */
-    SDL_Point nearest_point(SDL_Point const & p) const;
+    inline SDL_Point nearest_point(SDL_Point const & p) const
+    {
+        return nearest_point(p.x, p.y);
+    }
 
     /**
      * \return he unit size of this grid

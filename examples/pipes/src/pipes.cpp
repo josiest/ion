@@ -40,6 +40,8 @@ public:
         _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
         _events.subscribe_functor(SDL_MOUSEWHEEL,
                 [this](SDL_Event const & event) { rotate_tile(event); });
+        _events.subscribe_functor(SDL_MOUSEBUTTONUP,
+                [this](SDL_Event const & event) { place_tile(event); });
     }
     ~pipes() { /*_tiles.clear();*/ _window.reset(); SDL_Quit(); }
 
@@ -77,14 +79,36 @@ private:
     entt::entity _mouse_tile;
 
     void rotate_tile(SDL_Event const & event);
+    void place_tile(SDL_Event const & event);
 };
 
 pipes GAME(800, 600);
 void pipes::rotate_tile(SDL_Event const & event)
 {
+    // do nothing if not the right event type
+    if (event.type != SDL_MOUSEWHEEL) {
+        return;
+    }
+
+    // otherwise, rotate the tile
     auto & tile = _entities.get<Tile>(_mouse_tile);
     if (event.wheel.y > 0) { increment_rotation(tile.rotation); }
     else if (event.wheel.y < 0) { decrement_rotation(tile.rotation); }
+}
+void pipes::place_tile(SDL_Event const & event)
+{
+    // do nothing if not the right event type
+    if (event.type != SDL_MOUSEBUTTONUP ||
+            event.button.button != SDL_BUTTON_LEFT) {
+        return;
+    }
+
+    auto & tile = _entities.get<Tile>(_mouse_tile);
+    auto p = _world_space.nearest_point(event.button.x, event.button.y);
+    tiles::make(_entities, tile.name, tile.rotation, p.x, p.y);
+
+    tile.name = tiles::random_name(_rng);
+    tile.rotation = tiles::random_rotation(_rng);
 }
 
 int main()

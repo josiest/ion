@@ -25,11 +25,11 @@ SDL_Rect grid::unit_square(SDL_Point const & p) const
     return unit_square(p.x, p.y);
 }
 
-SDL_Point grid::nearest_point(SDL_Point const & p) const
+SDL_Point grid::nearest_point(int x, int y) const
 {
     float const unit_size = static_cast<float>(_unit_size);
     return SDL_Point {
-        static_cast<int>(std::floor((p.x-_bounds.x)/unit_size)),
-        static_cast<int>(std::floor((_bounds.y-p.y)/unit_size))
+        static_cast<int>(std::floor((x-_bounds.x)/unit_size)),
+        static_cast<int>(std::floor((_bounds.y-y)/unit_size))
     };
 }
