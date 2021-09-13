@@ -1,4 +1,4 @@
-#include "ion/render/bitmap.hpp"
+#include "ion/graphics/bitmap.hpp"
 #include <SDL2/SDL.h>
 #include <stdexcept>
 #include <sstream>
@@ -26,8 +26,7 @@ Bitmap::Bitmap(Bitmap const & bitmap)
     bool const copy_successful =
         // any changes to src through BlitSurface are _not_ documented, so to
         // the end user, we can assume that it's behaviorally constant
-        SDL_BlitSurface(const_cast<SDL_Surface *>(bitmap.sdl_surface()), nullptr,
-                        _surface, nullptr) == 0;
+        SDL_BlitSurface(bitmap.sdl_surface(), nullptr, _surface, nullptr) == 0;
 
     // if failure clean up and throw error
     if (!copy_successful) {

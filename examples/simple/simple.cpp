@@ -1,5 +1,25 @@
-#include "ion/ion.hpp"
-#include "SDL2/SDL.h"
+#include <ion/ion.hpp>
+#include <SDL2/SDL.h>
+
+void render(ion::Window & window);
+
+// creating a function to limit the scope of certain variables
+// local variables will be forced to destruct before quitting SDL
+void run_simple_program()
+{
+    // create the sdl event-handler
+    ion::EventHandler handler;
+    handler.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+
+    // specify the program's title and dimensions
+    auto window = ion::basic_window("A simple window", 800, 600);
+    render(window);
+
+    // run the program
+    while (!ion::input::has_quit()) {
+        handler.process_queue();
+    }
+}
 
 // draw a fibonacci-like pattern
 void render(ion::Window & window)
@@ -44,33 +64,6 @@ void render(ion::Window & window)
         }
     }
     SDL_RenderPresent(window.sdl_renderer());
-}
-
-// since this framework relies on function pointers in order to handle events,
-// we can't pass capturing lambdas to the event handlers!
-// thus (at least to my knowledge), we're limited to using a global resource
-bool HAS_QUIT = false;
-void quit(SDL_Event const &) { HAS_QUIT = true; }
-// NOTE: in general, it might be a better idea to create a resources class with
-// an API for managing its resources. But since this example only needs to know
-// when the user quit, we'll just keep things as simple as possible
-
-// creating a function to limit the scope of certain variables
-// local variables will be forced to destruct before quitting SDL
-void run_simple_program()
-{
-    // create the sdl event-handler
-    ion::EventHandler handler;
-    handler.subscribe(SDL_QUIT, &quit);
-
-    // specify the program's title and dimensions
-    auto window = ion::basic_window("A simple window", 800, 600);
-    render(window);
-
-    // run the program
-    while (!HAS_QUIT) {
-        handler.process_queue();
-    }
 }
 
 int main()

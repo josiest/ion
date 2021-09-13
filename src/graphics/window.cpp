@@ -1,4 +1,4 @@
-#include "ion/render/window.hpp"
+#include "ion/graphics/window.hpp"
 
 #include <memory>
 #include <string>

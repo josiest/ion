@@ -1,4 +1,4 @@
-#include "ion/render/image.hpp"
+#include "ion/graphics/image.hpp"
 #include <SDL2/SDL.h>
 #include <string>
 #include <stdexcept>
