@@ -18,10 +18,8 @@ public:
     /**
      * \return the undelrying SDL_Surface of the window
      */
-    inline virtual SDL_Surface * sdl_surface() final
-    {
-        return SDL_GetWindowSurface(sdl_window());
-    }
+    virtual SDL_Surface * sdl_surface() = 0;
+
 };
 
 /**
@@ -38,6 +36,10 @@ public:
     ~blit_window();
 
     inline SDL_Window * sdl_window() override { return _window; }
+    inline SDL_Surface * sdl_surface() override
+    {
+        return SDL_GetWindowSurface(sdl_window());
+    }
 private:
     SDL_Window * _window;
 };
@@ -55,6 +57,10 @@ public:
     ~render_window();
 
     inline SDL_Window * sdl_window() override { return _window; }
+    inline SDL_Surface * sdl_surface() override
+    {
+        return SDL_GetWindowSurface(sdl_window());
+    }
 
     /**
      * Get the underlying SDL_Renderer pointer
