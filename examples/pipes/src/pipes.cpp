@@ -30,10 +30,10 @@ public:
           _rng{std::random_device{}()},
 
           // initialize ECS registry and create tile that's bound to mouse
-          //   "right" is good for a default rotation
-          _mouse_tile{tiles::make(
-              _entities, tiles::random_name(_rng), tiles::Rotation::Right,
-              ion::input::mouse_position()
+          _mouse_tile{tiles::make(_entities,
+                  tiles::random_name(_rng),
+                  tiles::random_rotation(_rng),
+                  ion::input::mouse_position()
           )}
     {
         _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);

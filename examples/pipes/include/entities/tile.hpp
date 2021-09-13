@@ -38,6 +38,15 @@ Name random_name(engine_t rng)
     return *choice;
 }
 
+template<typename engine_t>
+Rotation random_rotation(engine_t rng)
+{
+    std::uniform_int_distribution<> index(0, rotations.size()-1);
+    auto choice = rotations.begin();
+    std::advance(choice, index(rng));
+    return *choice;
+}
+
 class map {
 public:
     map();
