@@ -3,8 +3,9 @@
 #include <random>
 #include <cmath>
 
-MunchableFactory::MunchableFactory(size_t w, size_t h,
-                                   MunchableFactory::engine_t rng)
+munchable_factory::munchable_factory(size_t w, size_t h,
+                                     munchable_factory::engine_t rng)
+
     : _bounds{0, 0, static_cast<int>(w), static_cast<int>(h)}, _rng{rng}
 {
     _colors = std::vector<Color> {
@@ -14,10 +15,10 @@ MunchableFactory::MunchableFactory(size_t w, size_t h,
 }
 
 entt::entity
-MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
+munchable_factory::make_munchable(entt::registry & entities, entt::entity player)
 {
     // create the munchable entity
-    auto munchable = registry.create();
+    auto munchable = entities.create();
 
     // the distribution for the x and y position
     std::uniform_real_distribution<float> xdist(_bounds.x, _bounds.x+_bounds.w);
@@ -38,7 +39,7 @@ MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
     size_t const i = pos_dist(_rng);
     float const x = xvals[i];
     float const y = yvals[i];
-    registry.emplace<Position>(munchable, x, y);
+    entities.emplace<Position>(munchable, x, y);
 
     // the distributions for velocity speed and angle
     std::uniform_real_distribution<float> speed_dist(100.f, 200.f);
@@ -46,8 +47,8 @@ MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
 
     // get the player's position in order to calculate the angle to it
     Position player_pos{_bounds.x+_bounds.w/2.f, _bounds.y+_bounds.h/2.f};
-    if (registry.valid(player)) {
-        player_pos = registry.get<Position>(player);
+    if (entities.valid(player)) {
+        player_pos = entities.get<Position>(player);
     }
 
     // calculate the angle to the player
@@ -62,39 +63,39 @@ MunchableFactory::make_munchable(entt::registry & registry, entt::entity player)
     float const phi = angle_dist(_rng);
 
     // calculate the velocity from the random speed and angle
-    registry.emplace<Velocity>(munchable, speed*std::cos(phi),
+    entities.emplace<Velocity>(munchable, speed*std::cos(phi),
                                           speed*std::sin(phi));
 
     // get the size of the player as a mean for the size of the munchable
     int player_size = 15;
-    if (registry.valid(player)) {
-        player_size = registry.get<Size>(player).value;
+    if (entities.valid(player)) {
+        player_size = entities.get<Size>(player).value;
     }
 
     // generate a random size
     std::normal_distribution<float> size_dist(player_size, 5.f);
     int const size = std::abs(static_cast<int>(std::round(size_dist(_rng))));
-    registry.emplace<Size>(munchable, size);
+    entities.emplace<Size>(munchable, size);
 
     // choose a color
     std::uniform_int_distribution<size_t> color_dist(0, _colors.size()-1);
     auto color = _colors[color_dist(_rng)];
-    registry.emplace<Color>(munchable, color.r, color.g, color.b, color.a);
+    entities.emplace<Color>(munchable, color.r, color.g, color.b, color.a);
 
-    registry.emplace<Munchable>(munchable);
+    entities.emplace<Munchable>(munchable);
 
     return munchable;
 }
 
-void MunchableFactory::filter(entt::registry & registry)
+void munchable_factory::filter(entt::registry & entities)
 {
-    auto view = registry.view<Position, Munchable>();
-    view.each([this, &registry](auto const entity, auto & pos) {
+    auto view = entities.view<Position, Munchable>();
+    view.each([this, &entities](auto const munchable, auto & pos) {
 
         if (pos.x < _bounds.x || pos.x > _bounds.x+_bounds.w
                 || pos.y < _bounds.y || pos.y > _bounds.y+_bounds.h) {
 
-            registry.destroy(entity);
+            entities.destroy(munchable);
         }
     });
 }

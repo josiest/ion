@@ -14,24 +14,30 @@
 void reset_game(SDL_Event const & event);
 
 // a class that manages sdl resources
-class Muncher {
+class muncher {
 public:
     using engine_t = std::mt19937;
-    // intialize the muncher game object with the specified width and height
-    Muncher(size_t width, size_t height)
+
+    muncher(size_t width, size_t height)
+
+          // intialize the muncher game object with the specified width and height
         : _title{"Muncher"}, _width(width), _height(height),
-          _handler(), _input(_handler, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
+
+          // create a wasd keyboard input axis
+          _input(_events, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
+
+          // initialize the random engine to a random seed
           _rng{std::random_device{}()}, 
-          _registry(),
+
+          // create the player entity and the munchable factory
           _player(_make_player()), _munchables{_width, _height, _rng}
     {
-        // the choice to subscribe the event listeners here is somewhat arbitrary
-        _handler.subscribe(SDL_QUIT, &ion::input::quit_on_event);
-        _handler.subscribe(SDL_KEYUP, &reset_game);
+        _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+        _events.subscribe(SDL_KEYUP, &reset_game);
     }
 
     // make sure that sdl quits once the game goes out of scope
-    ~Muncher() { SDL_Quit(); }
+    ~muncher() { SDL_Quit(); }
 
     void run()
     {
@@ -42,41 +48,40 @@ public:
         uint32_t prev_time = SDL_GetTicks();
 
         // decider for making a munchable
-        std::binomial_distribution<bool> munch_time(1, .01);
+        std::binomial_distribution<bool> is_munch_time(1, .01);
 
         // run the program
         while (!ion::input::has_quit()) {
+            // handle events
+            _events.process_queue();
+
+            // apply systems
+
+            // decide if this is the frame to make a new munchable
+            if (is_munch_time(_rng)) {
+                _munchables.make_munchable(_entities, _player);
+            }
             // update physics timer
             uint32_t const current_time = SDL_GetTicks();
             float const dt = static_cast<float>(current_time-prev_time)/1000.f;
             prev_time = current_time;
 
-            // handle events
-            _handler.process_queue();
+            // physics systems
+            accelerate_player(_entities, _player, _input, dt);
+            move_munchies(_entities, dt);
 
-            // apply systems
-            if (munch_time(_rng)) {
-                _munchables.make_munchable(_registry, _player);
-            }
-            accelerate_player(_registry, _player, _input, dt);
-            move_munchies(_registry, dt);
-            devour(_registry, _player);
-            _munchables.filter(_registry);
+            // mechanic systems
+            devour(_entities, _player);
+            _munchables.filter(_entities);
 
             // render
-            render(window, _registry);
+            render(window, _entities);
         }
-    }
-
-    entt::entity _make_player()
-    {
-        return make_player(_registry, static_cast<int>(_width)/2,
-                                      static_cast<int>(_height)/2, 15);
     }
     void reset()
     {
-        if (_registry.valid(_player)) {
-            _registry.destroy(_player);
+        if (_entities.valid(_player)) {
+            _entities.destroy(_player);
         }
         _player = _make_player();
     }
@@ -85,27 +90,23 @@ private:
     size_t _width;
     size_t _height;
 
-    // as hinted at before, this could have been declared as a local variable
-    // in run, but it was somewhat arbitrarily chosen to be a member variable
-    ion::EventHandler _handler;
-    // that being said, it's a bad idea to declare SDL-wrapper objects as member
-    // variables of a game/app-manager class like this (notice: window is a
-    // local variable of run). this is because we want them to be destroyed
-    // _before_ `SDL_Quit` is called.
-    //
-    // This _could_ be achieved by explicitly calling `window.reset()` before
-    // `SDL_Quit()`, but having this done implicitly via scoping rules is
-    // arguably more elegant
-    ion::input::KeyboardAxis2D _input;
+    ion::event_system _events;
+    ion::input::keyboard_axis _input;
 
     engine_t _rng;
-    entt::registry _registry;
+    entt::registry _entities;
 
     entt::entity _player;
-    MunchableFactory _munchables;
+    munchable_factory _munchables;
+
+    entt::entity _make_player()
+    {
+        return make_player(_entities, static_cast<int>(_width)/2,
+                                      static_cast<int>(_height)/2, 15);
+    }
 };
 
-Muncher GAME{800, 600};
+muncher GAME{800, 600};
 void reset_game(SDL_Event const & event)
 {
     // do nothing if not the right event or not the right key
