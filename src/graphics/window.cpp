@@ -7,10 +7,15 @@
 
 namespace ion {
 
-window::window(SDL_Window * window_ptr, SDL_Renderer * renderer)
-    : _window(window_ptr), _renderer(renderer) {}
+blit_window::~blit_window()
+{
+    if (_window) {
+        SDL_DestroyWindow(_window);
+        _window = nullptr;
+    }
+}
 
-window::~window()
+render_window::~render_window()
 {
     // destroy and clear the renderer pointer first
     if (_renderer) {
@@ -77,16 +82,18 @@ SDL_Renderer * load_renderer(SDL_Window * window_ptr,
     return renderer;
 }
 
-window basic_window(std::string const & title, size_t width, size_t height)
+render_window basic_window(std::string const & title,
+                           size_t width, size_t height)
 {
     // create the window, then create the renderer from the window
     auto window_ptr = load_window(title, width, height);
-    return window(window_ptr, load_renderer(window_ptr));
+    return render_window(window_ptr, load_renderer(window_ptr));
 }
 
-window basic_blit_window(std::string const & title, size_t width, size_t height)
+blit_window basic_blit_window(std::string const & title,
+                              size_t width, size_t height)
 {
-    return window(load_window(title, width, height), nullptr);
+    return blit_window(load_window(title, width, height));
 }
 
 }
