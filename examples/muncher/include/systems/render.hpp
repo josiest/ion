@@ -1,6 +1,6 @@
 #pragma once
-#include <ion/render/window.hpp>
+#include <ion/graphics/window.hpp>
 #include <entt/entity/registry.hpp>
 
-void render(ion::Window & window, entt::registry & registry);
-void render_munchies(ion::Window & window, entt::registry & registry);
+void render(ion::window & window, entt::registry & registry);
+void render_munchies(ion::window & window, entt::registry & registry);

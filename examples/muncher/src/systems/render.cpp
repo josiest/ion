@@ -1,7 +1,11 @@
 #include "systems/render.hpp"
 #include "components.hpp"
 
-void render(ion::Window & window, entt::registry & registry)
+#include <ion/graphics/window.hpp>
+#include <entt/entity/registry.hpp>
+#include <SDL2/SDL.h>
+
+void render(ion::window & window, entt::registry & registry)
 {
     auto renderer = window.sdl_renderer();
     SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
@@ -11,7 +15,7 @@ void render(ion::Window & window, entt::registry & registry)
     SDL_RenderPresent(renderer);
 }
 
-void render_munchies(ion::Window & window, entt::registry & registry)
+void render_munchies(ion::window & window, entt::registry & registry)
 {
     auto renderer = window.sdl_renderer();
     auto view = registry.view<Position, Size, Color>();

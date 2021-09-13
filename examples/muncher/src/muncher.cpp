@@ -1,24 +1,15 @@
-#include "ion/ion.hpp"
-
 #include "entities/player.hpp"
 #include "entities/munchable.hpp"
 
 #include "systems/render.hpp"
 #include "systems/physics.hpp"
 
+#include <ion/ion.hpp>
+#include <entt/entity/registry.hpp>
 #include <SDL2/SDL.h>
 
 #include <string>
 #include <random>
-
-// resource interface for quitting the program
-bool HAS_QUIT = false;
-
-// determine if the user has quit the game
-bool has_quit() { return HAS_QUIT; }
-
-// an event-callback to set the quit-flag to true
-void quit(SDL_Event const &) { HAS_QUIT = true; }
 
 void reset_game(SDL_Event const & event);
 
@@ -35,7 +26,7 @@ public:
           _player(_make_player()), _munchables{_width, _height, _rng}
     {
         // the choice to subscribe the event listeners here is somewhat arbitrary
-        _handler.subscribe(SDL_QUIT, &quit);
+        _handler.subscribe(SDL_QUIT, &ion::input::quit_on_event);
         _handler.subscribe(SDL_KEYUP, &reset_game);
     }
 
@@ -54,7 +45,7 @@ public:
         std::binomial_distribution<bool> munch_time(1, .01);
 
         // run the program
-        while (!has_quit()) {
+        while (!ion::input::has_quit()) {
             // update physics timer
             uint32_t const current_time = SDL_GetTicks();
             float const dt = static_cast<float>(current_time-prev_time)/1000.f;
