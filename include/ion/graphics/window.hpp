@@ -8,13 +8,15 @@ namespace ion {
 /**
  * A wrapper class for an SDL_Window
  */
-class Window {
+class window {
 public:
+    window() = delete;
+
     /**
      * Create a window handler object using the given window and renderer
      */
-    Window(SDL_Window * window, SDL_Renderer * renderer);
-    ~Window();
+    window(SDL_Window * window_ptr, SDL_Renderer * renderer);
+    ~window();
 
     /**
      * Get the underlying SDL_Window pointer
@@ -38,10 +40,10 @@ private:
 /**
  * Create a basic renderer-accelerated window.
  */
-Window basic_window(std::string const & title, size_t width, size_t height);
+window basic_window(std::string const & title, size_t width, size_t height);
 
 /**
  * Create a basic software-rendering window.
  */
-Window basic_blit_window(std::string const & title, size_t width, size_t height);
+window basic_blit_window(std::string const & title, size_t width, size_t height);
 }

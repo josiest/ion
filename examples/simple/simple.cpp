@@ -1,7 +1,7 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
 
-void render(ion::Window & window);
+void render(ion::window & window);
 
 // creating a function to limit the scope of certain variables
 // local variables will be forced to destruct before quitting SDL
@@ -22,7 +22,7 @@ void run_simple_program()
 }
 
 // draw a fibonacci-like pattern
-void render(ion::Window & window)
+void render(ion::window & window)
 {
     // the initial color
     int r0 = 48, g0 = 118, b0 = 217;

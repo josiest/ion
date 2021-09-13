@@ -6,10 +6,10 @@
 
 namespace ion {
 
-Window::Window(SDL_Window * window, SDL_Renderer * renderer)
-    : _window(window), _renderer(renderer) {}
+window::window(SDL_Window * window_ptr, SDL_Renderer * renderer)
+    : _window(window_ptr), _renderer(renderer) {}
 
-Window::~Window()
+window::~window()
 {
     // destroy and clear the renderer pointer first
     if (_renderer) {
@@ -24,7 +24,7 @@ Window::~Window()
     }
 }
 
-Window basic_window(std::string const & title, size_t width, size_t height)
+window basic_window(std::string const & title, size_t width, size_t height)
 {
     // initialize video if it hasn't already been done
     if (!SDL_WasInit(SDL_INIT_VIDEO) && SDL_InitSubSystem(SDL_INIT_VIDEO)) {
@@ -32,30 +32,30 @@ Window basic_window(std::string const & title, size_t width, size_t height)
     }
 
     // create the window and a renderer for it
-    SDL_Window * window = SDL_CreateWindow(
+    SDL_Window * window_ptr = SDL_CreateWindow(
             title.c_str(),
             // use default ("undefined") window position
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             width, height,
             0); // no flags: basic window
 
-    if (!window) {
+    if (!window_ptr) {
         throw std::runtime_error{SDL_GetError()};
     }
 
     SDL_Renderer * renderer = SDL_CreateRenderer(
-            window,
+            window_ptr,
             -1, // grab the first acceptable renderer
             SDL_RENDERER_ACCELERATED);
 
     if (!renderer) {
-        SDL_DestroyWindow(window);
+        SDL_DestroyWindow(window_ptr);
         throw std::runtime_error{SDL_GetError()};
     }
-    return Window(window, renderer);
+    return window(window_ptr, renderer);
 }
 
-Window basic_blit_window(std::string const & title, size_t width, size_t height)
+window basic_blit_window(std::string const & title, size_t width, size_t height)
 {
     // initialize video if it hasn't already been done
     if (!SDL_WasInit(SDL_INIT_VIDEO) && SDL_InitSubSystem(SDL_INIT_VIDEO)) {
@@ -63,18 +63,18 @@ Window basic_blit_window(std::string const & title, size_t width, size_t height)
     }
 
     // create the window and a renderer for it
-    SDL_Window * window = SDL_CreateWindow(
+    SDL_Window * window_ptr = SDL_CreateWindow(
             title.c_str(),
             // use default ("undefined") window position
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             width, height,
             SDL_WINDOW_SHOWN); // make sure the window renders
 
-    if (!window) {
+    if (!window_ptr) {
         throw std::runtime_error{SDL_GetError()};
     }
 
-    return Window(window, nullptr);
+    return window(window_ptr, nullptr);
 }
 
 }
