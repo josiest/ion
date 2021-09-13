@@ -9,9 +9,11 @@
 #include <entt.hpp>
 
 #include <memory>
+#include <random>
 
 class pipes {
 public:
+    using engine_t = std::mt19937;
     pipes(int width, int height)
 
           // create a basic window called "Pipes" with the specified dimensions
@@ -24,19 +26,13 @@ public:
           //   50 seems like a decent unit-size for now
           _world_space{0, height, width, height, 50},
 
+          // intialize the random engine with a random seed
+          _rng{std::random_device{}()},
+
           // initialize ECS registry and create tile that's bound to mouse
-          //   for now use Bend tile as initial value,
-          //   but in the future this should be randomized
-          //
           //   "right" is good for a default rotation
-          //
-          //   (-1, -1) is not visible on the grid:
-          //   good intial point before binding it to the mouse
-          //   in the future it may be a good idea to intialize it to mouse position
-          //   this would require making a function to do this
-          //   it may be a good idea to make such a function part of the ion framework
           _mouse_tile{tiles::make(
-              _entities, tiles::Name::Bend, tiles::Rotation::Right,
+              _entities, tiles::random_name(_rng), tiles::Rotation::Right,
               ion::input::mouse_position()
           )}
     {
@@ -71,6 +67,8 @@ private:
 
     tiles::map _tiles;
     grid _world_space;
+
+    engine_t _rng;
 
     entt::registry _entities;
     entt::entity _mouse_tile;

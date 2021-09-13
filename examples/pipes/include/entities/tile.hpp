@@ -10,6 +10,9 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <random>
+#include <iterator>
+
 namespace tiles {
 
 enum class Name { End, Bar, Bend, Fork };
@@ -25,6 +28,15 @@ inline std::unordered_set<Name> names = {
 inline std::unordered_set<Rotation> rotations = {
     Rotation::Right, Rotation::Up, Rotation::Left, Rotation::Down
 };
+
+template<typename engine_t>
+Name random_name(engine_t rng)
+{
+    std::uniform_int_distribution<> index(0, names.size()-1);
+    auto choice = names.begin();
+    std::advance(choice, index(rng));
+    return *choice;
+}
 
 class map {
 public:
