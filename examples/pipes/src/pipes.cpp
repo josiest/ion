@@ -36,7 +36,8 @@ public:
           //   this would require making a function to do this
           //   it may be a good idea to make such a function part of the ion framework
           _mouse_tile{tiles::make(
-              _entities, tiles::Name::Bend, tiles::Rotation::Right, -1, -1
+              _entities, tiles::Name::Bend, tiles::Rotation::Right,
+              ion::input::mouse_position()
           )}
     {
         _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);

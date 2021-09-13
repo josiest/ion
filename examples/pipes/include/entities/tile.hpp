@@ -38,8 +38,14 @@ private:
 
 // registry functions
 
-entt::entity make(entt::registry & registry,
+entt::entity make(entt::registry & entities,
                   Name tilename, Rotation rotation, int x, int y);
+
+inline entt::entity make(entt::registry & entities,
+                         Name tilename, Rotation rotation, SDL_Point const & p)
+{
+    return make(entities, tilename, rotation, p.x, p.y);
+}
 
 void move(entt::registry & registry, entt::entity tile, int x, int y);
 void rotate(entt::registry & registry, entt::entity tile, Rotation rotation);

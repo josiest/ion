@@ -25,4 +25,11 @@ public:
 private:
     SDL_Keycode _right, _left, _up, _down;
 };
+
+inline SDL_Point mouse_position()
+{
+    SDL_Point mouse{-1, -1};
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+    return mouse;
+}
 }
