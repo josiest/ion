@@ -42,16 +42,18 @@ void event_system::process_queue()
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
 
-        auto search = _listeners_by_type.find(event.type);
-
-        // if no listeners are subscribed, skip this event
-        if (search == _listeners_by_type.end()) {
-            continue;
+        // run each subscribed callback fp with the event if any exist
+        auto fp_search = _listeners_by_type.find(event.type);
+        if (fp_search != _listeners_by_type.end()) {
+            auto listeners = fp_search->second;
+            for (auto callback : listeners) { callback(event); }
         }
-
-        // otherwise run each subscribed callback fxn with the event
-        auto listeners = search->second;
-        for (auto callback : listeners) { callback(event); }
+        // run each subscribed callback fxn with the event if any exist
+        auto fxn_search = _listener_functors.find(event.type);
+        if (fxn_search != _listener_functors.end()) {
+            auto listeners = fxn_search->second;
+            for (auto callback : listeners) { callback(event); }
+        }
     }
 }
 }

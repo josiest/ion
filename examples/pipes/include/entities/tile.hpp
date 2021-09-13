@@ -18,6 +18,28 @@ namespace tiles {
 enum class Name { End, Bar, Bend, Fork };
 enum class Rotation { Right, Up, Left, Down };
 
+inline void increment_rotation(Rotation & rotation)
+{
+    switch (rotation) {
+    case Rotation::Right: rotation = Rotation::Up; break;
+    case Rotation::Up: rotation = Rotation::Left; break;
+    case Rotation::Left: rotation = Rotation::Down; break;
+    case Rotation::Down: rotation = Rotation::Right; break;
+    default: break;
+    }
+}
+
+inline void decrement_rotation(Rotation & rotation)
+{
+    switch (rotation) {
+    case Rotation::Right: rotation = Rotation::Down; break;
+    case Rotation::Up: rotation = Rotation::Right; break;
+    case Rotation::Left: rotation = Rotation::Up; break;
+    case Rotation::Down: rotation = Rotation::Left; break;
+    default: break;
+    }
+}
+
 std::ostream & operator<<(std::ostream & os, Name tilename);
 std::ostream & operator<<(std::ostream & os, Rotation rot);
 std::string image_path(Name tilename, Rotation rotation);

@@ -1,3 +1,4 @@
+#include "components.hpp"
 #include "entities/tile.hpp"
 
 #include "systems/render.hpp"
@@ -37,6 +38,8 @@ public:
           )}
     {
         _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+        _events.subscribe_functor(SDL_MOUSEWHEEL,
+                [this](SDL_Event const & event) { rotate_tile(event); });
     }
     ~pipes() { /*_tiles.clear();*/ _window.reset(); SDL_Quit(); }
 
@@ -72,10 +75,19 @@ private:
 
     entt::registry _entities;
     entt::entity _mouse_tile;
+
+    void rotate_tile(SDL_Event const & event);
 };
+
+pipes GAME(800, 600);
+void pipes::rotate_tile(SDL_Event const & event)
+{
+    auto & tile = _entities.get<Tile>(_mouse_tile);
+    if (event.wheel.y > 0) { increment_rotation(tile.rotation); }
+    else if (event.wheel.y < 0) { decrement_rotation(tile.rotation); }
+}
 
 int main()
 {
-    pipes game(800, 600);
-    game.run();
+    GAME.run();
 }
