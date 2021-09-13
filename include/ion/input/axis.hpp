@@ -18,8 +18,8 @@ void release_key(SDL_Keycode key);
 
 class KeyboardAxis2D : public Axis2D {
 public:
-    KeyboardAxis2D(EventHandler & handler, SDL_Keycode right, SDL_Keycode left,
-                                           SDL_Keycode up, SDL_Keycode down);
+    KeyboardAxis2D(event_system & events, SDL_Keycode right, SDL_Keycode left,
+                                          SDL_Keycode up, SDL_Keycode down);
     float x() const;
     float y() const;
 private:

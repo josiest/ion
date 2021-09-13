@@ -19,14 +19,14 @@ void release_key(SDL_Event const & event)
     _g::KEYS_PRESSED.erase(event.key.keysym.sym);
 }
 
-KeyboardAxis2D::KeyboardAxis2D(EventHandler & handler,
+KeyboardAxis2D::KeyboardAxis2D(event_system & events,
                                SDL_Keycode right, SDL_Keycode left,
                                SDL_Keycode up, SDL_Keycode down)
 
     : _right(right), _left(left), _up(up), _down(down)
 {
-    handler.subscribe(SDL_KEYDOWN, &set_key);
-    handler.subscribe(SDL_KEYUP, &release_key);
+    events.subscribe(SDL_KEYDOWN, &set_key);
+    events.subscribe(SDL_KEYUP, &release_key);
 }
 
 float KeyboardAxis2D::x() const

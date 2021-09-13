@@ -8,8 +8,8 @@ void render(ion::window & window);
 void run_simple_program()
 {
     // create the sdl event-handler
-    ion::EventHandler handler;
-    handler.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+    ion::event_system events;
+    events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
     // specify the program's title and dimensions
     auto window = ion::basic_window("A simple window", 800, 600);
@@ -17,7 +17,7 @@ void run_simple_program()
 
     // run the program
     while (!ion::input::has_quit()) {
-        handler.process_queue();
+        events.process_queue();
     }
 }
 

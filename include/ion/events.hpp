@@ -7,41 +7,39 @@
 
 namespace ion {
 
-typedef void (*ListenerFP)(SDL_Event const &);
-using ListenerFXN = std::function<void(SDL_Event const &)>;
+typedef void (*listener_fp)(SDL_Event const &);
+using listener_fxn = std::function<void(SDL_Event const &)>;
 
-class EventHandler {
+class event_system {
 public:
-    inline EventHandler() {}
-
     /**
      * Subscribe a function pointer listener
      *
      * \param event_type the SDL event type to listen for
-     * \param listener the function to call back to when event_type is triggered
+     * \param callback the function to call back to when event_type is triggered
      *
      * \note This should be the preferred method for subscribing functions
      *       because it has the least overhead
      */
-    void subscribe(Uint32 event_type, ListenerFP listener);
+    void subscribe(Uint32 event_type, listener_fp callback);
 
     /**
      * Subscribe an arbitrary function listener
      *
      * \param event_type the SDL event type to listen for
-     * \param listener the function to call back to when event_type is triggered
+     * \param callback the function to call back to when event_type is triggered
      *
      * \note Be cautious when using this method because std::function has a lot
      *       of overhead and it may unnecesarily slow down your game
      */
-    void subscribe_functor(Uint32 event_type, ListenerFXN listener);
+    void subscribe_functor(Uint32 event_type, listener_fxn callback);
 
     /**
      * Poll all SDL events in the queue, calling any listeners along the way.
      */
     void process_queue();
 private:
-    std::unordered_map<Uint32, std::vector<ListenerFP>> _listeners_by_type;
-    std::unordered_map<Uint32, std::vector<ListenerFXN>> _listener_functors;
+    std::unordered_map<Uint32, std::vector<listener_fp>> _listeners_by_type;
+    std::unordered_map<Uint32, std::vector<listener_fxn>> _listener_functors;
 };
 }
