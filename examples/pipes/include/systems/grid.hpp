@@ -12,7 +12,7 @@ public:
      * \param h the height of the bounds
      * \param unit_size the amount of pixels-per-unit
      */
-    grid(int x, int y, int w, int h, int unit_size);
+    grid(int x, int y, size_t w, size_t h, int unit_size);
 
     /**
      * Convert a grid point to pixels

@@ -25,7 +25,7 @@ public:
 /**
  * A render-less window meant to present by blitting surfaces.
  */
-class blit_window final : window {
+class blit_window final : public window {
 public:
     /**
      * Create a render-less window from an SDL_Window
@@ -47,7 +47,7 @@ private:
 /**
  * A window with a renderer
  */
-class render_window final : window {
+class render_window final : public window {
 public:
     /**
      * Create a window handler object using the given window and renderer

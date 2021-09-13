@@ -2,9 +2,9 @@
 #include <SDL2/SDL_rect.h>
 #include <cmath>
 
-grid::grid(int x, int y, int w, int h, int unit_size)
-    : _bounds{x, y, w, h}, _unit_size{unit_size}
-{}
+grid::grid(int x, int y, size_t w, size_t h, int unit_size)
+    : _bounds{x, y, static_cast<int>(w), static_cast<int>(h)},
+      _unit_size{unit_size} {}
 
 SDL_Point grid::pixels(int x, int y) const
 {
