@@ -5,19 +5,20 @@
 #include <entt.hpp>
 #include <SDL2/SDL.h>
 
-void pipes::bind_to_mouse(entt::registry & entities, entt::entity tile)
+void bind_to_mouse(entt::registry & entities, entt::entity tile,
+                   grid const & world_space)
 {
     // get the mouse coordinates and translate them to grid-space
     SDL_Point mouse{0, 0};
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    auto q = _world_space.nearest_point(mouse);
+    auto q = world_space.nearest_point(mouse);
 
     // update the desired entity to correspond to the mouse position
     tiles::move(entities, tile, q.x, q.y);
 }
 
-void pipes::rotate_tile(entt::registry & entities, entt::entity mouse_tile,
-                        SDL_Event const & event)
+void rotate_tile(entt::registry & entities, entt::entity mouse_tile,
+                 SDL_Event const & event)
 {
     // do nothing if not the right event type
     if (event.type != SDL_MOUSEWHEEL) {
@@ -26,12 +27,12 @@ void pipes::rotate_tile(entt::registry & entities, entt::entity mouse_tile,
 
     // otherwise, rotate the tile
     auto & tile = entities.get<Tile>(mouse_tile);
-    if (event.wheel.y > 0) { increment_rotation(tile.rotation); }
-    else if (event.wheel.y < 0) { decrement_rotation(tile.rotation); }
+    if (event.wheel.y > 0) { tiles::increment_rotation(tile.rotation); }
+    else if (event.wheel.y < 0) { tiles::decrement_rotation(tile.rotation); }
 }
 
-void pipes::place_tile(entt::registry & entities, entt::entity mouse_tile,
-                       SDL_Event const & event)
+void place_tile(entt::registry & entities, entt::entity mouse_tile,
+                pipes & game, SDL_Event const & event)
 {
     // do nothing if not the right event type
     if (event.type != SDL_MOUSEBUTTONUP ||
@@ -40,21 +41,21 @@ void pipes::place_tile(entt::registry & entities, entt::entity mouse_tile,
     }
 
     // the grid point closest to the position of the mouse when it was clicked
-    auto p = _world_space.nearest_point(event.button.x, event.button.y);
+    auto p = game.world_space().nearest_point(event.button.x, event.button.y);
 
     // do nothing if the tile is already placed
-    if (_placed_tiles.find(p) != _placed_tiles.end()) {
+    auto & tileset = game.placed_tiles();
+    if (tileset.contains(p)) {
         return;
     }
+    // keep track of the positions that have been placed
+    tileset.insert(p);
 
     auto & tile = entities.get<Tile>(mouse_tile);
     tiles::make(entities, tile.name, tile.rotation, p.x, p.y);
 
-    // keep track of the positions that have been placed
-    _placed_tiles.insert(p);
-
     // generate a new random tile
-    tile.name = tiles::random_name(_rng);
-    tile.rotation = tiles::random_rotation(_rng);
+    tile.name = tiles::random_name(game.rng());
+    tile.rotation = tiles::random_rotation(game.rng());
 }
 

@@ -3,6 +3,8 @@
 #include "components.hpp"
 #include "entities/tile.hpp"
 
+#include "systems/render.hpp"
+#include "systems/input.hpp"
 #include "systems/grid.hpp"
 #include "systems/tile.hpp"
 
@@ -40,14 +42,14 @@ void pipes::run()
 
     // rotate the tile associated with the mouse when scrolled
     _events.subscribe_functor(SDL_MOUSEWHEEL,
-            [this, &entities, mouse_tile](SDL_Event const & event) {
+            [&entities, mouse_tile](SDL_Event const & event) {
             rotate_tile(entities, mouse_tile, event);
             });
 
     // place the tile associated with the mouse when clicked
     _events.subscribe_functor(SDL_MOUSEBUTTONUP,
             [this, &entities, mouse_tile](SDL_Event const & event) {
-            place_tile(entities, mouse_tile, event);
+            place_tile(entities, mouse_tile, *this, event);
             });
 
     // create the window and run the game
@@ -55,11 +57,11 @@ void pipes::run()
     while (!ion::input::has_quit()) {
 
         // bind the mouse-tile entity to the mouse position
-        bind_to_mouse(entities, mouse_tile);
+        bind_to_mouse(entities, mouse_tile, _world_space);
 
         // process any events then render the window
         _events.process_queue();
-        render(window, entities);
+        render(window, entities, *this);
     }
 }
 

@@ -18,39 +18,34 @@ template<> struct hash<SDL_Point> {
     }
 };
 }
-
 inline bool operator==(SDL_Point const & p, SDL_Point const & q)
 {
     return p.x == q.x && p.y == q.y;
 }
+using pointset = std::unordered_set<SDL_Point>;
 
 class pipes {
 public:
     using engine_t = std::mt19937;
+
     pipes(size_t width, size_t height);
     inline ~pipes() { _tiles.clear(); SDL_Quit(); }
     void run();
+
+    inline tiles::map & tilemap() { return _tiles; }
+    inline grid const & world_space() const { return _world_space; }
+
+    inline engine_t & rng() { return _rng; }
+    inline pointset & placed_tiles() { return _placed_tiles; }
 private:
     size_t _width, _height;
     ion::event_system _events;
 
+    // shared immutable resources
     tiles::map _tiles;
     grid _world_space;
 
+    // shared mutable resources
     engine_t _rng;
-
-    std::unordered_set<SDL_Point> _placed_tiles;
-
-    // render systems
-    void render(ion::window & window, entt::registry & entities);
-    void render_grid_tiles(ion::window & window, entt::registry & entities);
-
-    // input systems
-    void bind_to_mouse(entt::registry & entities, entt::entity tile);
-
-    void rotate_tile(entt::registry & entities, entt::entity tile,
-                     SDL_Event const & event);
-
-    void place_tile(entt::registry & entities, entt::entity tile,
-                    SDL_Event const & event);
+    pointset _placed_tiles;
 };
