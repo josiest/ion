@@ -28,7 +28,7 @@ public:
     {
         return SDL_Color{0x42, 0x87, 0xf5, 0xff};
     }
-    inline SDL_Color good_bg_color() const
+    inline SDL_Color placeable_bg_color() const
     {
         return SDL_Color{0x9d, 0xbe, 0xf5, 0xff};
     }

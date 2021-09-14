@@ -57,7 +57,7 @@ void render_mouse_tile(ion::window & window, entt::registry & entities,
     // finally render
     auto screen = window.sdl_surface();
 
-    auto color = game.good_bg_color();
+    auto color = game.placeable_bg_color();
     if (!tiles::is_adjacent(game.placed_tiles(), p.x, p.y)) {
         color = game.distant_bg_color();
     }
