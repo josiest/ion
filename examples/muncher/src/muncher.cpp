@@ -45,7 +45,7 @@ public:
         auto window = ion::basic_window(_title, _width, _height);
 
         // timer for physics
-        uint32_t prev_time = SDL_GetTicks();
+        ion::clock clock;
 
         // decider for making a munchable
         std::binomial_distribution<bool> is_munch_time(1, .01);
@@ -61,12 +61,8 @@ public:
             if (is_munch_time(_rng)) {
                 _munchables.make_munchable(_entities, _player);
             }
-            // update physics timer
-            uint32_t const current_time = SDL_GetTicks();
-            float const dt = static_cast<float>(current_time-prev_time)/1000.f;
-            prev_time = current_time;
-
             // physics systems
+            float const dt = clock.tick();
             accelerate_player(_entities, _player, _input, dt);
             move_munchies(_entities, dt);
 
