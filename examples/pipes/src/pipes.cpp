@@ -61,7 +61,7 @@ void pipes::run()
 
         // process any events then render the window
         _events.process_queue();
-        render(window, entities, *this);
+        render(window, entities, mouse_tile, *this);
     }
 }
 

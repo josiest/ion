@@ -38,4 +38,16 @@ private:
     std::unordered_map<Name, std::unordered_map<Rotation, ion::surface>> _images;
 };
 
+entt::entity make(entt::registry & entities,
+                  Name name, Rotation rotation, int x, int y);
+
+inline entt::entity make(entt::registry & entities,
+                         Name name, Rotation rotation, SDL_Point const & p)
+{
+    return make(entities, name, rotation, p.x, p.y);
+}
+
+entt::entity make_static(entt::registry & entities,
+                         Name tilename, Rotation rotation, int x, int y);
+
 }

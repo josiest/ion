@@ -1,5 +1,6 @@
 #include "pipes.hpp"
 #include "components.hpp"
+#include "entities/tile.hpp"
 #include "systems/tile.hpp"
 
 #include <entt.hpp>
@@ -52,7 +53,7 @@ void place_tile(entt::registry & entities, entt::entity mouse_tile,
     tileset.insert(p);
 
     auto & tile = entities.get<Tile>(mouse_tile);
-    tiles::make(entities, tile.name, tile.rotation, p.x, p.y);
+    tiles::make_static(entities, tile.name, tile.rotation, p.x, p.y);
 
     // generate a new random tile
     tile.name = tiles::random_name(game.rng());

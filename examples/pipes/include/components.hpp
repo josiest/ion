@@ -10,3 +10,5 @@ struct Tile {
 struct Position {
     int x, y;
 };
+
+struct Static {};

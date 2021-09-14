@@ -59,4 +59,22 @@ SDL_Surface * map::sdl_surface(Name tilename, Rotation rotation)
 {
     return _images.at(tilename).at(rotation).sdl_surface();
 }
+
+entt::entity make(entt::registry & entities,
+                  Name name, Rotation rotation, int x, int y)
+{
+    auto const tile = entities.create();
+    entities.emplace<Tile>(tile, name, rotation);
+    entities.emplace<Position>(tile, x, y);
+    return tile;
+}
+
+entt::entity make_static(entt::registry & entities,
+                         Name tilename, Rotation rotation, int x, int y)
+{
+    auto const tile = make(entities, tilename, rotation, x, y);
+    entities.emplace<Static>(tile);
+    return tile;
+}
+
 }
