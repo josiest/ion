@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ion/graphics/surface.hpp>
-#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL.h>
 #include <entt.hpp>
 
 #include <ostream>
@@ -12,6 +12,21 @@
 
 #include <random>
 #include <iterator>
+
+namespace std {
+template<> struct hash<SDL_Point> {
+    size_t operator()(SDL_Point const & p) const
+    {
+        return hash<int>{}(p.x) ^ hash<int>{}(p.y);
+    }
+};
+}
+inline bool operator==(SDL_Point const & p, SDL_Point const & q)
+{
+    return p.x == q.x && p.y == q.y;
+}
+
+using pointset = std::unordered_set<SDL_Point>;
 
 namespace tiles {
 

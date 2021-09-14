@@ -44,5 +44,6 @@ Rotation random_rotation(engine_t & rng)
 
 void move(entt::registry & registry, entt::entity tile, int x, int y);
 void rotate(entt::registry & registry, entt::entity tile, Rotation rotation);
+bool is_adjacent(pointset const & tileset, int x, int y);
 
 }

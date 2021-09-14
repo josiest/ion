@@ -10,20 +10,6 @@
 #include <unordered_set>
 #include <random>
 
-namespace std {
-template<> struct hash<SDL_Point> {
-    size_t operator()(SDL_Point const & p) const
-    {
-        return hash<int>{}(p.x) ^ hash<int>{}(p.y);
-    }
-};
-}
-inline bool operator==(SDL_Point const & p, SDL_Point const & q)
-{
-    return p.x == q.x && p.y == q.y;
-}
-using pointset = std::unordered_set<SDL_Point>;
-
 class pipes {
 public:
     using engine_t = std::mt19937;
@@ -37,6 +23,19 @@ public:
 
     inline engine_t & rng() { return _rng; }
     inline pointset & placed_tiles() { return _placed_tiles; }
+
+    inline SDL_Color static_bg_color() const
+    {
+        return SDL_Color{0x42, 0x87, 0xf5, 0xff};
+    }
+    inline SDL_Color good_bg_color() const
+    {
+        return SDL_Color{0x9d, 0xbe, 0xf5, 0xff};
+    }
+    inline SDL_Color distant_bg_color() const
+    {
+        return SDL_Color{0xd3, 0xd3, 0xd3, 0xff};
+    }
 private:
     size_t _width, _height;
     ion::event_system _events;

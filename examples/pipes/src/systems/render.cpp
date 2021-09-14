@@ -1,5 +1,6 @@
 #include "systems/render.hpp"
 #include "systems/grid.hpp"
+#include "systems/tile.hpp"
 
 #include "pipes.hpp"
 #include "components.hpp"
@@ -29,13 +30,13 @@ void render_static_tiles(ion::window & window, entt::registry & entities,
     view.each([&game, screen](auto const & tile, auto const & pos) {
 
         // get the sdl surface to render from and the grid sqaure to render to
-        auto tile_surface = game.tilemap()
-                                .sdl_surface(tile.name, tile.rotation);
-
-        SDL_Rect grid_square = game.world_space()
-                                   .unit_square(pos.x, pos.y);
+        auto tile_surface = game.tilemap().sdl_surface(tile.name, tile.rotation);
+        SDL_Rect grid_square = game.world_space().unit_square(pos.x, pos.y);
 
         // render the tile
+        auto const color = game.static_bg_color();
+        SDL_FillRect(screen, &grid_square,
+                     SDL_MapRGB(screen->format, color.r, color.g, color.b));
         SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
     });
 }
@@ -54,6 +55,15 @@ void render_mouse_tile(ion::window & window, entt::registry & entities,
     auto tile_surface = game.tilemap().sdl_surface(tile.name, tile.rotation);
 
     // finally render
-    SDL_BlitScaled(tile_surface, nullptr, window.sdl_surface(), &grid_square);
+    auto screen = window.sdl_surface();
+
+    auto color = game.good_bg_color();
+    if (!tiles::is_adjacent(game.placed_tiles(), p.x, p.y)) {
+        color = game.distant_bg_color();
+    }
+    SDL_FillRect(screen, &grid_square,
+                 SDL_MapRGB(screen->format, color.r, color.g, color.b));
+
+    SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
 
 }

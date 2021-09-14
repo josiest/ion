@@ -22,7 +22,7 @@ pipes::pipes(size_t width, size_t height)
       // interface between grid-space and pixel-space
       //   origin is at (0, height) because pixel-space vertical axis is weird
       //   50 seems like a decent unit-size for now
-      _world_space{0, static_cast<int>(height), width, height, 50},
+      _world_space{0, static_cast<int>(height), width, height, 100},
 
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
@@ -31,6 +31,16 @@ pipes::pipes(size_t width, size_t height)
 void pipes::run()
 {
     entt::registry entities;
+
+    // create a random initial tile in the middle of the screen
+    auto init_point = _world_space.nearest_point(
+            SDL_Point{static_cast<int>(_width)/2, static_cast<int>(_height)/2});
+
+    auto init_tile = tiles::make_static(entities,
+            tiles::random_name(_rng), tiles::random_rotation(_rng),
+            init_point.x, init_point.y);
+
+    _placed_tiles.insert(init_point);
 
     // create a random tile associated with the mouse and save a reference
     auto mouse_tile = tiles::make(entities, tiles::random_name(_rng),

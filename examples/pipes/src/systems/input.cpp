@@ -44,9 +44,9 @@ void place_tile(entt::registry & entities, entt::entity mouse_tile,
     // the grid point closest to the position of the mouse when it was clicked
     auto p = game.world_space().nearest_point(event.button.x, event.button.y);
 
-    // do nothing if the tile is already placed
+    // do nothing if the tile is already placed or if no adjacent tiles
     auto & tileset = game.placed_tiles();
-    if (tileset.contains(p)) {
+    if (tileset.contains(p) || !tiles::is_adjacent(tileset, p.x, p.y)) {
         return;
     }
     // keep track of the positions that have been placed
