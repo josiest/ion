@@ -4,7 +4,7 @@ project(ion)
 
 # versioning
 set(ion_MAJOR_VERSION 0)
-set(ion_MINOR_VERSION 2)
+set(ion_MINOR_VERSION 3)
 set(ion_PATCH_VERSION 1)
 set(ion_VERSION
     ${ion_MAJOR_VERSION}.${ion_MINOR_VERSION}.${ion_PATCH_VERSION})
@@ -13,7 +13,7 @@ set(ion_VERSION
 include(GNUInstallDirs)
 
 # compiler flags
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # --- compile library ---
@@ -44,7 +44,7 @@ install(TARGETS ion
 
 # declare headers
 set(ion_HEXT hpp)
-file(GLOB HEADERS include/*.${ion_HEXT})
+file(GLOB_RECURSE HEADERS include/*.${ion_HEXT})
 
 # install header files into installation include dir
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

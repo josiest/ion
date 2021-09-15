@@ -1,3 +1,5 @@
+#pragma once
+
 #include "entities/tile.hpp"
 
 namespace tiles {

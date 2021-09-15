@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_surface.h>
 
 namespace ion {
 
@@ -13,13 +13,7 @@ public:
     /**
      * Create a surface from an SDL_Surface
      *
-     * \param surface the surface of the surface
-     * \param optimized_to the optional renderer to optimize the surface to
-     *
-     * \note If a renderer is specified to optimize the surface to, the original
-     *       surface pointer is invalidated and its memory freed, even when the
-     *       constructor is unsuccesful. Otherwise, it will be used as its
-     *       underlying SDL_Surface.
+     * \param surface the underlying SDL_Surface
      */
     surface(SDL_Surface * surface);
 

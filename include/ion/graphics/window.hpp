@@ -1,45 +1,50 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_render.h>
+
 #include <string>
 #include <stdexcept>
 
 namespace ion {
 
 /**
- * An SDL_Window resource handler
+ * Convertible to an SDL_Window pointer
  */
-class window {
-public:
-    /**
-     * \return the underlying SDL_Window pointer
-     */
-    virtual SDL_Window * sdl_window() = 0;
-    /**
-     * \return the undelrying SDL_Surface of the window
-     */
-    virtual SDL_Surface * sdl_surface() = 0;
+template<class window_t>
+concept window_resource = std::convertible_to<window_t, SDL_Window *>;
 
-};
+/**
+ * Convertible to an SDL_Renderer pointer
+ */
+template<class renderer_t>
+concept renderer_resource = std::convertible_to<renderer_t, SDL_Renderer *>;
+
+/**
+ * Convertible to an SDL_Window pointer and an SDL_Renderer pointer
+ */
+template<class window_t>
+concept renderable_window = window_resource<window_t> && renderer_resource<window_t>;
 
 /**
  * A render-less window meant to present by blitting surfaces.
  */
-class blit_window final : public window {
+class blit_window {
 public:
+    // delete unwanted implicit constructors
+    blit_window() = delete;
+    blit_window(blit_window const &) = delete;
+
     /**
      * Create a render-less window from an SDL_Window
      *
      * \param window_ptr the underlying SDL_Window
      */
-    inline blit_window(SDL_Window * window_ptr) : _window{window_ptr} {}
+    inline explicit blit_window(SDL_Window * window_ptr) : _window{window_ptr} {}
     ~blit_window();
 
-    inline SDL_Window * sdl_window() override { return _window; }
-    inline SDL_Surface * sdl_surface() override
-    {
-        return SDL_GetWindowSurface(sdl_window());
-    }
+    inline operator SDL_Window *() { return _window; }
+    
 private:
     SDL_Window * _window;
 };
@@ -47,25 +52,22 @@ private:
 /**
  * A window with a renderer
  */
-class render_window final : public window {
+class render_window {
 public:
+    // delete unwanted implicit constructors
+    render_window() = delete;
+    render_window(render_window const &) = delete;
+
     /**
      * Create a window handler object using the given window and renderer
      */
     inline render_window(SDL_Window * window_ptr, SDL_Renderer * renderer)
         : _window{window_ptr}, _renderer{renderer} {}
+
     ~render_window();
 
-    inline SDL_Window * sdl_window() override { return _window; }
-    inline SDL_Surface * sdl_surface() override
-    {
-        return SDL_GetWindowSurface(sdl_window());
-    }
-
-    /**
-     * Get the underlying SDL_Renderer pointer
-     */
-    inline SDL_Renderer * sdl_renderer() { return _renderer; }
+    inline operator SDL_Window *() { return _window; }
+    inline operator SDL_Renderer *() { return _renderer; }
 private:
     SDL_Window * _window;
     SDL_Renderer * _renderer;
