@@ -1,10 +1,14 @@
 #pragma once
 
+#include "ion/graphics/image.hpp"
+
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_render.h>
 
 #include <string>
 #include <stdexcept>
+
+#include <unordered_map>
 
 namespace ion {
 
@@ -24,7 +28,8 @@ concept renderer_resource = std::convertible_to<renderer_t, SDL_Renderer *>;
  * Convertible to an SDL_Window pointer and an SDL_Renderer pointer
  */
 template<class window_t>
-concept renderable_window = window_resource<window_t> && renderer_resource<window_t>;
+concept renderable_window =
+    window_resource<window_t> && renderer_resource<window_t>;
 
 /**
  * A render-less window meant to present by blitting surfaces.
@@ -48,7 +53,7 @@ public:
     blit_window(SDL_Window * window, int img_init_flags = 0);
 
     ~blit_window();
-    operator SDL_Window *() { return _window; }
+    operator SDL_Window *() noexcept { return _window; }
 private:
     SDL_Window * _window;
 };
@@ -56,11 +61,15 @@ private:
 /**
  * A window with a renderer
  */
+template<typename id_type=size_t, class texture_ptr=unique_texture>
 class render_window {
 public:
     // delete unwanted implicit constructors
     render_window() = delete;
     render_window(render_window const &) = delete;
+
+    /** A map of texture ids to to pointers of SDL_Textures */
+    std::unordered_map<id_type, texture_ptr> textures;
 
     /**
      * Create a window with a renderer
@@ -72,8 +81,31 @@ public:
      * \throws std::runtime_error if SDL couldn't initialize video or image
      */
     render_window(SDL_Window * window, SDL_Renderer * renderer,
-                  int init_img_flags = 0);
-    ~render_window();
+                  int img_init_flags = 0)
+
+        : _window{window}, _renderer{renderer}
+    {
+        init_video();
+        init_image(img_init_flags);
+    }
+
+    ~render_window()
+    {
+        // destroy all textures loaded with the renderer first
+        textures.clear();
+
+        // then destroy and clear the renderer
+        if (_renderer) {
+            SDL_DestroyRenderer(_renderer);
+            _renderer = nullptr;
+        }
+
+        // finally destroy and clear the window pointer
+        if (_window) {
+            SDL_DestroyWindow(_window);
+            _window = nullptr;
+        }
+    }
 
     /** Convert the window object to its underlying SDL_Window */
     operator SDL_Window *() { return _window; }
@@ -100,8 +132,8 @@ private:
  * \throw std::runtime_error if the window couldn't be created
  */
 SDL_Window * load_window(std::string const & title, size_t width, size_t height,
-                         int x=SDL_WINDOWPOS_UNDEFINED,
-                         int y=SDL_WINDOWPOS_UNDEFINED,
+                         int x = SDL_WINDOWPOS_UNDEFINED,
+                         int y = SDL_WINDOWPOS_UNDEFINED,
                          uint32_t flags=0);
 
 /**
@@ -135,8 +167,15 @@ SDL_Renderer * load_renderer(SDL_Window * window,
  *
  * \return the window object
  */
-render_window basic_window(std::string const & title,
-                           size_t width, size_t height);
+template<typename id_type=size_t, class texture_ptr=unique_texture>
+render_window<id_type, texture_ptr>
+basic_window(std::string const & title, size_t width, size_t height)
+{
+    // create the window, then create the renderer from the window
+    auto window_ptr = load_window(title, width, height);
+    using window_t = render_window<id_type, texture_ptr>;
+    return window_t(window_ptr, load_renderer(window_ptr));
+}
 
 /**
  * Create a basic software-rendering window.

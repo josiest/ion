@@ -30,29 +30,6 @@ blit_window::~blit_window()
     }
 }
 
-render_window::render_window(SDL_Window * window, SDL_Renderer * renderer,
-                             int img_init_flags)
-    : _window{window}, _renderer{renderer}
-{
-    init_video();
-    init_image(img_init_flags);
-}
-
-render_window::~render_window()
-{
-    // destroy and clear the renderer pointer first
-    if (_renderer) {
-        SDL_DestroyRenderer(_renderer);
-        _renderer = nullptr;
-    }
-
-    // destroy and clear the window pointer last
-    if (_window) {
-        SDL_DestroyWindow(_window);
-        _window = nullptr;
-    }
-}
-
 SDL_Window *
 load_window(std::string const & title, size_t width, size_t height,
             int x, int y, uint32_t flags)
@@ -94,14 +71,6 @@ SDL_Renderer * load_renderer(SDL_Window * window_ptr,
         throw std::runtime_error{message.str()};
     }
     return renderer;
-}
-
-render_window basic_window(std::string const & title,
-                           size_t width, size_t height)
-{
-    // create the window, then create the renderer from the window
-    auto window_ptr = load_window(title, width, height);
-    return render_window(window_ptr, load_renderer(window_ptr));
 }
 
 blit_window basic_blit_window(std::string const & title,

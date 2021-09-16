@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_render.h>
 
 #include <memory>
 #include <string>
@@ -29,10 +30,21 @@ void init_video();
  */
 void init_image(int flags);
 
+/** A pointer type */
+template<typename ptr_t, typename underlying_t>
+concept pointer = requires(ptr_t ptr) {
+    { *ptr } -> std::same_as<underlying_t>;
+};
+
 /** A type alias for a unique pointer to an SDL_Surface */
 using unique_surface = std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)>;
 /** A type alias for a shared pointer to an SDL_Surface */
 using shared_surface = std::shared_ptr<SDL_Surface>;
+
+/** A type alias for a unique pointer to an SDL_Texture */
+using unique_texture = std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)>;
+/** A type alias for a shared pointer to an SDL_Texture */
+using shared_texture = std::shared_ptr<SDL_Texture>;
 
 /**
  * Load an image as an SDL_Surface 
