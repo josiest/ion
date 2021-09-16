@@ -1,6 +1,6 @@
 #include "systems/tile.hpp"
 #include "entities/tile.hpp"
-#include "components.hpp"
+#include "types/components.hpp"
 
 #include <entt.hpp>
 
@@ -11,7 +11,7 @@ namespace tiles {
 
 void move(entt::registry & registry, entt::entity tile, int x, int y)
 {
-    auto & p = registry.get<Position>(tile);
+    auto & p = registry.get<component::position>(tile);
     p.x = x;
     p.y = y;
 }
@@ -19,7 +19,7 @@ void move(entt::registry & registry, entt::entity tile, int x, int y)
 void rotate(entt::registry & registry,
             entt::entity tile, tiles::Rotation rotation)
 {
-    registry.get<Tile>(tile).rotation = rotation;
+    registry.get<component::tile>(tile).rotation = rotation;
 }
 
 bool is_adjacent(pointset const & tileset, int x, int y)

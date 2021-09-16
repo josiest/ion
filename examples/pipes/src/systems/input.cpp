@@ -1,5 +1,5 @@
 #include "pipes.hpp"
-#include "components.hpp"
+#include "types/components.hpp"
 #include "entities/tile.hpp"
 #include "systems/tile.hpp"
 
@@ -10,9 +10,9 @@ void bind_to_mouse(entt::registry & entities, entt::entity tile,
                    grid const & world_space)
 {
     // get the mouse coordinates and translate them to grid-space
-    SDL_Point mouse{0, 0};
+    SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    auto q = world_space.nearest_point(mouse);
+    auto const q = world_space.nearest_point(mouse);
 
     // update the desired entity to correspond to the mouse position
     tiles::move(entities, tile, q.x, q.y);
@@ -27,7 +27,7 @@ void rotate_tile(entt::registry & entities, entt::entity mouse_tile,
     }
 
     // otherwise, rotate the tile
-    auto & tile = entities.get<Tile>(mouse_tile);
+    auto & tile = entities.get<component::tile>(mouse_tile);
     if (event.wheel.y > 0) { tiles::increment_rotation(tile.rotation); }
     else if (event.wheel.y < 0) { tiles::decrement_rotation(tile.rotation); }
 }
@@ -52,7 +52,7 @@ void place_tile(entt::registry & entities, entt::entity mouse_tile,
     // keep track of the positions that have been placed
     tileset.insert(p);
 
-    auto & tile = entities.get<Tile>(mouse_tile);
+    auto & tile = entities.get<component::tile>(mouse_tile);
     tiles::make_static(entities, tile.name, tile.rotation, p.x, p.y);
 
     // generate a new random tile

@@ -1,12 +1,11 @@
 #include "pipes.hpp"
 
-#include "components.hpp"
-#include "entities/tile.hpp"
-
-#include "systems/render.hpp"
-#include "systems/input.hpp"
-#include "systems/grid.hpp"
 #include "systems/tile.hpp"
+#include "systems/input.hpp"
+#include "systems/render.hpp"
+#include "systems/resource.hpp"
+
+#include "entities/tile.hpp"
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
@@ -19,6 +18,9 @@ pipes::pipes(size_t width, size_t height)
 
     : _width{width}, _height{height},
 
+      // load the tile bitmap images
+      _tiles{tiles::load_map()},
+
       // interface between grid-space and pixel-space
       //   origin is at (0, height) because pixel-space vertical axis is weird
       //   50 seems like a decent unit-size for now
@@ -27,6 +29,7 @@ pipes::pipes(size_t width, size_t height)
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
 {}
+pipes::~pipes() { _tiles.clear(); SDL_Quit(); }
 
 void pipes::run()
 {

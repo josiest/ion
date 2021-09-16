@@ -31,6 +31,10 @@ concept renderable_window = window_resource<window_t> && renderer_resource<windo
  */
 class blit_window {
 public:
+    /**
+     * An owning reference to SDL_Surfaces
+     */
+
     // delete unwanted implicit constructors
     blit_window() = delete;
     blit_window(blit_window const &) = delete;
@@ -38,13 +42,13 @@ public:
     /**
      * Create a render-less window from an SDL_Window
      *
-     * \param window_ptr the underlying SDL_Window
+     * \param window the underlying SDL_Window
+     * \param img_init_flags the flags to initialize SDL_image with
      */
-    inline explicit blit_window(SDL_Window * window_ptr) : _window{window_ptr} {}
-    ~blit_window();
+    blit_window(SDL_Window * window, int img_init_flags = 0);
 
-    inline operator SDL_Window *() { return _window; }
-    
+    ~blit_window();
+    operator SDL_Window *() { return _window; }
 private:
     SDL_Window * _window;
 };
@@ -59,15 +63,23 @@ public:
     render_window(render_window const &) = delete;
 
     /**
-     * Create a window handler object using the given window and renderer
+     * Create a window with a renderer
+     *
+     * \param window the underlying SDL_Window to use
+     * \param renderer the underlying SDL_Renderer to use
+     * \param init_img_flags the flags to initialize SDL_image with
+     *
+     * \throws std::runtime_error if SDL couldn't initialize video or image
      */
-    inline render_window(SDL_Window * window_ptr, SDL_Renderer * renderer)
-        : _window{window_ptr}, _renderer{renderer} {}
-
+    render_window(SDL_Window * window, SDL_Renderer * renderer,
+                  int init_img_flags = 0);
     ~render_window();
 
-    inline operator SDL_Window *() { return _window; }
-    inline operator SDL_Renderer *() { return _renderer; }
+    /** Convert the window object to its underlying SDL_Window */
+    operator SDL_Window *() { return _window; }
+
+    /** Convert the window object to its underlying SDL_Renderer */
+    operator SDL_Renderer *() { return _renderer; }
 private:
     SDL_Window * _window;
     SDL_Renderer * _renderer;
@@ -85,9 +97,7 @@ private:
  * \param flags the window flags
  *
  * \return the window created from the given parameters
- *
- * \throw std::runtime_error if video couldn't initialize or if the window
- *        couldn't be created
+ * \throw std::runtime_error if the window couldn't be created
  */
 SDL_Window * load_window(std::string const & title, size_t width, size_t height,
                          int x=SDL_WINDOWPOS_UNDEFINED,
@@ -97,9 +107,9 @@ SDL_Window * load_window(std::string const & title, size_t width, size_t height,
 /**
  * Create a renderer from an SDL_Window
  *
- * \param window_ptr the SDL_Window to create a renderer for. If the renderer
- *                   fails to intialize properly, this pointer will be
- *                   invalidated and its memory freed.
+ * \param window the SDL_Window to create a renderer for. If the renderer
+ *               fails to intialize properly, this pointer will be
+ *               invalidated and its memory freed.
  *
  * \param driver_index the index of the driver to use. Defaults to using the
  *                     first acceptable driver
@@ -109,10 +119,10 @@ SDL_Window * load_window(std::string const & title, size_t width, size_t height,
  *
  * \return the SDL_Renderer pointer that was created
  *
- * \throw std::invalid_argument if window_ptr is null
+ * \throw std::invalid_argument if window is null
  * \throw std::runtime_error if the renderer couldn't be created
  */
-SDL_Renderer * load_renderer(SDL_Window * window_ptr,
+SDL_Renderer * load_renderer(SDL_Window * window,
                              int driver_index=-1,
                              uint32_t flags=SDL_RENDERER_ACCELERATED);
 

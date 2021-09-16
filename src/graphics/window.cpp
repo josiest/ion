@@ -1,11 +1,26 @@
+// header declarations
 #include "ion/graphics/window.hpp"
-#include <SDL2/SDL.h>
+
+// types used
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_render.h>
 #include <string>
 
+// functions used
+#include "ion/graphics/image.hpp"
+
+// exceptions and messages
 #include <stdexcept>
 #include <sstream>
 
 namespace ion {
+
+blit_window::blit_window(SDL_Window * window, int img_init_flags)
+    : _window{window}
+{
+    init_video();
+    init_image(img_init_flags);
+}
 
 blit_window::~blit_window()
 {
@@ -13,6 +28,14 @@ blit_window::~blit_window()
         SDL_DestroyWindow(_window);
         _window = nullptr;
     }
+}
+
+render_window::render_window(SDL_Window * window, SDL_Renderer * renderer,
+                             int img_init_flags)
+    : _window{window}, _renderer{renderer}
+{
+    init_video();
+    init_image(img_init_flags);
 }
 
 render_window::~render_window()
@@ -30,26 +53,17 @@ render_window::~render_window()
     }
 }
 
-// helper functions for creating windows
 SDL_Window *
 load_window(std::string const & title, size_t width, size_t height,
             int x, int y, uint32_t flags)
 {
-    // initialize video if it hasn't already been done
-    if (!SDL_WasInit(SDL_INIT_VIDEO) && SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        std::stringstream message;
-        message << "SDL couldn't initialize video! SDL_Error: "
-                << SDL_GetError();
-        throw std::runtime_error{message.str()};
-    }
-
-    // create the window and a renderer for it
+    // create the underlying window
     SDL_Window * window_ptr = SDL_CreateWindow(
             title.c_str(), x, y,
-            static_cast<int>(width),
-            static_cast<int>(height), flags
-            );
+            static_cast<int>(width), static_cast<int>(height),
+            flags);
 
+    // failure if the window couldn't be created
     if (!window_ptr) {
         std::stringstream message;
         message << "Window couldn't be created! SDL_Error: "
@@ -71,7 +85,7 @@ SDL_Renderer * load_renderer(SDL_Window * window_ptr,
     SDL_Renderer * renderer =
         SDL_CreateRenderer(window_ptr, driver_index, flags);
 
-    // error if the renderer couldn't be created (likely a shortage of memory)
+    // error if the renderer couldn't be created
     if (!renderer) {
         std::stringstream message;
         message << "Window renderer couldn't be created! SDL_Error: "

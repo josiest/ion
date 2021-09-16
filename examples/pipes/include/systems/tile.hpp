@@ -1,6 +1,12 @@
 #pragma once
 
-#include "entities/tile.hpp"
+#include "types/tile.hpp"
+#include "types/point.hpp"
+
+#include <entt.hpp>
+
+#include <random>
+#include <iterator>
 
 namespace tiles {
 

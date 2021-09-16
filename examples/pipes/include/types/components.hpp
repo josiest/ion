@@ -2,13 +2,15 @@
 #include "entities/tile.hpp"
 #include <SDL2/SDL.h>
 
-struct Tile {
+namespace component {
+struct tile {
     tiles::Name name;
     tiles::Rotation rotation;
 };
 
-struct Position {
+struct position {
     int x, y;
 };
 
-struct Static {};
+struct static_tile {};
+}
