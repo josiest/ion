@@ -1,5 +1,6 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
+#include <cmath>
 
 void render(ion::renderable_window auto & window);
 
@@ -40,13 +41,16 @@ void render(ion::renderable_window auto & window)
 
     // draw the fibonacci-like patern
     int n = 8;
+    auto intlerp = [](int a, int b, float t) {
+        return static_cast<int>(std::lerp(a, b, t));
+    };
     for (int k = 0; k < n; k++) {
 
         // calculate the intermediate color
-        float t = (float)k/n;
-        int r = (int)((1-t)*r0 + t*r1);
-        int g = (int)((1-t)*g0 + t*g1);
-        int b = (int)((1-t)*b0 + t*b1);
+        float const t = static_cast<float>(k)/n;
+        int const r = intlerp(r0, r1, t);
+        int const g = intlerp(g0, g1, t);
+        int const b = intlerp(b0, b1, t);
 
         // draw the rect
         SDL_SetRenderDrawColor(window, r, g, b, 0xff);
