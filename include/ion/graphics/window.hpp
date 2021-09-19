@@ -5,6 +5,7 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_render.h>
 
+#include <cstdint>
 #include <string>
 #include <stdexcept>
 
@@ -123,18 +124,31 @@ private:
  * \param title the title of the window
  * \param width the width of the window
  * \param height the height of the window
- *
- * \param x the x-coordinate of the window position
- * \param y the y-coordinate of the window position
  * \param flags the window flags
  *
  * \return the window created from the given parameters
  * \throw std::runtime_error if the window couldn't be created
  */
-SDL_Window * load_window(std::string const & title, size_t width, size_t height,
-                         int x = SDL_WINDOWPOS_UNDEFINED,
-                         int y = SDL_WINDOWPOS_UNDEFINED,
-                         uint32_t flags=0);
+SDL_Window * load_window(std::string const & title,
+                         std::size_t width, std::size_t height,
+                         std::uint32_t flags=0);
+
+/**
+ * Create an SDL_Window pointer
+ *
+ * \param title the title of the window
+ * \param x the x-coordinate of the window position
+ * \param y the y-coordinate of the window position
+ * \param width the width of the window
+ * \param height the height of the window
+ * \param flags the window flags
+ *
+ * \return the window created from the given parameters
+ * \throw std::runtime_error if the window couldn't be created
+ */
+SDL_Window * load_window(std::string const & title, int x, int y,
+                         std::size_t width, std::size_t height,
+                         std::uint32_t flags = 0);
 
 /**
  * Create a renderer from an SDL_Window
@@ -172,9 +186,9 @@ render_window<id_type, texture_ptr>
 basic_window(std::string const & title, size_t width, size_t height)
 {
     // create the window, then create the renderer from the window
-    auto window_ptr = load_window(title, width, height);
+    auto window = load_window(title, width, height);
     using window_t = render_window<id_type, texture_ptr>;
-    return window_t(window_ptr, load_renderer(window_ptr));
+    return window_t(window, load_renderer(window));
 }
 
 /**
