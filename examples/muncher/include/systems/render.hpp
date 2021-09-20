@@ -32,7 +32,8 @@ void render_munchies(ion::renderable_window auto & window,
         // get the upper-left corner of the munchy square
         auto x = static_cast<int>(std::round(p.x - size.value/2.f));
         auto y = static_cast<int>(std::round(p.y - size.value/2.f));
-        SDL_Rect const munchy{x, y, size.value, size.value};
+        auto s = static_cast<int>(std::round(size.value));
+        SDL_Rect const munchy{x, y, s, s};
 
         // draw the munchy with the appropriate color
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);

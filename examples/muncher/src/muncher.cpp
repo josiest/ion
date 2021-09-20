@@ -46,8 +46,11 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       // initialize the random engine with a pseudo-random seed
       _rng{std::random_device{}()}, 
 
-      // create the player entity and the munchable factory
-      _player{_make_player()},
+      // initialize the player prefab and create the player entity
+      _player_settings{width, height},
+      _player{_player_settings.create(_entities)},
+
+      // initialize the munchable prefab
       _munchables{width, height, _rng}, _munchtime_likelihood{.01}
 {
     // quit when the user exits the window
@@ -92,10 +95,12 @@ void muncher::run() noexcept
 
 void muncher::reset() noexcept
 {
+    // destroy the player if they exist
     if (_entities.valid(_player)) {
         _entities.destroy(_player);
     }
-    _player = _make_player();
+    // then reinstantiate them with default settings
+    _player = _player_settings.create(_entities);
 }
 
 void reset_game(SDL_Event const & event)
@@ -105,11 +110,4 @@ void reset_game(SDL_Event const & event)
         return;
     }
     get_game().reset();
-}
-
-entt::entity muncher::_make_player() noexcept
-{
-    int width, height;
-    SDL_GetWindowSize(_window.sdl_window(), &width, &height);
-    return make_player(_entities, width/2, height/2, 15);
 }

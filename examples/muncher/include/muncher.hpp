@@ -82,6 +82,7 @@ private:
     entt::registry _entities;
 
     // entity references and managers
+    prefab::player _player_settings;
     entt::entity _player;
 
     munchable_factory _munchables;
@@ -89,8 +90,6 @@ private:
 
     // error handling
     std::string _error;
-
-    entt::entity _make_player() noexcept;
 };
 
 muncher & get_game() noexcept;

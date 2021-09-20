@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <cstdint>
 
 struct Position {
     float x, y;
@@ -10,11 +10,11 @@ struct Velocity {
 };
 
 struct Size {
-    int value;
+    float value;
 };
 
 struct Color {
-    Uint8 r, g, b, a;
+    uint8_t r, g, b, a;
 };
 
 struct DynamicMover {

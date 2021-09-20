@@ -1,8 +1,10 @@
 #include "systems/physics.hpp"
 #include "components.hpp"
+
 #include <ion/input.hpp>
 #include <SDL2/SDL.h>
-#include <iostream>
+
+#include <cmath>
 
 void accelerate_player(entt::registry & registry, entt::entity player,
                        ion::input::axis2d const & input, float dt)
@@ -77,23 +79,28 @@ void devour(entt::registry & registry, entt::entity player)
     }
 
     // get the necessary components
-    auto const & player_pos = registry.get<Position>(player);
-    auto & player_size = registry.get<Size>(player);
+    auto [player_pos, player_size_component] =
+        registry.get<const Position, Size>(player);
+
+    int const player_size =
+        static_cast<int>(std::round(player_size_component.value));
+
     SDL_Rect const player_box{
         static_cast<int>(std::round(player_pos.x)),
         static_cast<int>(std::round(player_pos.y)),
-        player_size.value, player_size.value
+        player_size, player_size
     };
 
     // check for collisions against all the munchables
     auto view = registry.view<Position, Size, Munchable>();
-    view.each([player, &player_box, &player_size, &registry](
-            auto const munchable, auto const & pos, auto const & size) {
+    view.each([player, &player_box, &player_size_component, &registry]
+              (auto const munchable, auto const & pos, auto const & size) {
 
         // get the bounding box for the munchable
         int const x = static_cast<int>(std::round(pos.x));
         int const y = static_cast<int>(std::round(pos.y));
-        SDL_Rect const munchable_box{x, y, size.value, size.value};
+        int const s = static_cast<int>(std::round(size.value));
+        SDL_Rect const munchable_box{x, y, s, s};
 
         // do nothing if no collision detected
         if (!collides_with(player_box, munchable_box)) {
@@ -102,8 +109,7 @@ void devour(entt::registry & registry, entt::entity player)
 
         // destroy the munchable and grow the player if the player's bigger
         if (size.value < player_box.w) {
-            float const growth = std::max(1.f, std::round(0.05f * size.value));
-            player_size.value += static_cast<int>(growth);
+            player_size_component.value += .05f * size.value;
             registry.destroy(munchable);
         }
         // otherwise, destroy the player
