@@ -4,11 +4,9 @@
 
 void render(ion::renderable_window auto & window);
 
-// creating a function to limit the scope of certain variables
-// local variables will be forced to destruct before quitting SDL
 int main()
 {
-    // initialize sdl
+    // initialize sdl - initialize this before other sdl resources
     ion::sdl_context sdl;
 
     // create the sdl event-handler: quit when sdl's quit event is triggered
