@@ -14,7 +14,7 @@ void accelerate_player(entt::registry & entities, entt::entity player,
     // do nothing if the player doesn't exist
     //      or doesn't have the right components
     if (not entities.valid(player) ||
-            not entities.all_of<component::position,
+            not entities.all_of<component::bbox,
                                 component::dynamic_mover>(player)) {
         return;
     }
@@ -62,12 +62,12 @@ void accelerate_player(entt::registry & entities, entt::entity player,
 
 void move_munchies(entt::registry & entities, float dt)
 {
-    auto munchies = entities.view<component::position,
-                                  component::velocity>();
+    auto munchies = entities.view<component::bbox,
+                                  component::velocity const>();
 
-    munchies.each([dt](auto & pos, auto const & vel) {
-        pos.x += vel.x * dt;
-        pos.y -= vel.y * dt;
+    munchies.each([dt](auto & p, auto const & v) {
+        p.x += v.x * dt;
+        p.y -= v.y * dt;
     });
 }
 

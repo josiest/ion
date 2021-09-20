@@ -1,4 +1,5 @@
 #include "entities/munchable.hpp"
+#include "entities/player.hpp"
 #include "components.hpp"
 
 #include <entt/entity/registry.hpp>
@@ -17,8 +18,9 @@ munchable_factory::munchable_factory(size_t w, size_t h, engine_t rng)
     };
 }
 
-entt::entity
-munchable_factory::make_munchable(entt::registry & entities, entt::entity player)
+entt::entity munchable_factory::make_munchable(
+        entt::registry & entities, entt::entity player,
+        prefab::player const & player_settings)
 {
     // create the munchable entity
     auto munchable = entities.create();
@@ -42,26 +44,24 @@ munchable_factory::make_munchable(entt::registry & entities, entt::entity player
     size_t const i = pos_dist(_rng);
     float const x = xvals[i];
     float const y = yvals[i];
-    entities.emplace<component::position>(munchable, x, y);
+
+    // get the size of the player as a mean for the size of the munchable
+    auto const player_box = player_settings.try_get_bbox(entities, player);
+
+    // generate a random size
+    std::normal_distribution<float> size_dist(player_box.size, 5.f);
+    float const size = std::abs(static_cast<int>(std::round(size_dist(_rng))));
+
+    // add the new bbox component to the munchable entitiy
+    entities.emplace<component::bbox>(munchable, x, y, size);
 
     // the distributions for velocity speed and angle
     std::uniform_real_distribution<float> speed_dist(100.f, 200.f);
     float const speed = speed_dist(_rng);
 
-    // get the player's position in order to calculate the angle to it
-    component::position player_pos{
-        _bounds.x+_bounds.w/2.f, _bounds.y+_bounds.h/2.f
-    };
-
-    if (entities.valid(player) and
-            entities.all_of<component::position>(player)) {
-
-        player_pos = entities.get<component::position>(player);
-    }
-
     // calculate the angle to the player
-    float const dx = player_pos.x - x;
-    float const dy = player_pos.y - y;
+    float const dx = player_box.x - x;
+    float const dy = player_box.y - y;
     float const dist = std::sqrt(dx*dx + dy*dy);
     float const angle_to_player = std::atan2(dy/dist, dx/dist);
 
@@ -73,17 +73,6 @@ munchable_factory::make_munchable(entt::registry & entities, entt::entity player
     // calculate the velocity from the random speed and angle
     entities.emplace<component::velocity>(munchable, speed*std::cos(phi),
                                                      speed*std::sin(phi));
-
-    // get the size of the player as a mean for the size of the munchable
-    float player_size = 15.f;
-    if (entities.valid(player)) {
-        player_size = entities.get<component::size>(player).value;
-    }
-
-    // generate a random size
-    std::normal_distribution<float> size_dist(player_size, 5.f);
-    float const size = std::abs(static_cast<int>(std::round(size_dist(_rng))));
-    entities.emplace<component::size>(munchable, size);
 
     // choose a color
     std::uniform_int_distribution<size_t> color_dist(0, _colors.size()-1);

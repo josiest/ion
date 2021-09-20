@@ -27,39 +27,25 @@ player::player(std::uint32_t width, std::uint32_t height) noexcept
 entt::entity player::create(entt::registry & registry) const noexcept
 {
     auto player = registry.create();
-    registry.emplace<component::position>(player, _x, _y);
+    registry.emplace<component::bbox>(player, _x, _y, _size);
     registry.emplace<component::velocity>(player, 0.f, 0.f);
-    registry.emplace<component::size>(player, _size);
     registry.emplace<component::color>(player, _r, _g, _b);
     registry.emplace<component::dynamic_mover>(player, _acceleration, _friction,
                                                        _minspeed, _maxspeed);
     return player;
 }
 
-component::position
-player::try_get_position(entt::registry const & entities,
-                         entt::entity playerid) const noexcept
+component::bbox
+player::try_get_bbox(entt::registry const & entities,
+                     entt::entity playerid) const noexcept
 {
     // return the player's position if they exist
     if (entities.valid(playerid) and
-            entities.all_of<component::position>(playerid)) {
+            entities.all_of<component::bbox>(playerid)) {
 
-        return entities.get<component::position>(playerid);
+        return entities.get<component::bbox>(playerid);
     }
     // otherwise return their default starting size
-    return {_x, _y};
-}
-
-float player::try_get_size(entt::registry const & entities,
-                           entt::entity playerid) const noexcept
-{
-    // return the player's size if they exist
-    if (entities.valid(playerid) and
-            entities.all_of<component::size>(playerid)) {
-
-        return entities.get<component::size>(playerid).value;
-    }
-    // otherwise return their default starting size
-    return _size;
+    return {_x, _y, _size};
 }
 }

@@ -27,22 +27,15 @@ void render_munchies(ion::renderable_window auto & window,
                      entt::registry & registry)
 {
     auto renderer = window.sdl_renderer();
+    auto munchies = registry.view<component::bbox, component::color>();
 
-    auto munchies = registry.view<component::position, component::size,
-                                  component::color>();
-
-    munchies.each([renderer]
-                  (auto const & p, auto const & size, auto const & color) {
-
-        // get the upper-left corner of the munchy square
-        auto x = static_cast<int>(std::round(p.x - size.value/2.f));
-        auto y = static_cast<int>(std::round(p.y - size.value/2.f));
-        auto s = static_cast<int>(std::round(size.value));
-        SDL_Rect const munchy{x, y, s, s};
-
+    munchies.each([renderer](auto const & box, auto const & color) {
         // draw the munchy with the appropriate color
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xff);
-        SDL_RenderFillRect(renderer, &munchy);
+
+        // cast the bbox to an SDL_Rect and draw the munchy
+        auto const rect = static_cast<SDL_Rect>(box);
+        SDL_RenderFillRect(renderer, &rect);
     });
 }
 }

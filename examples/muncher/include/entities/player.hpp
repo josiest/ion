@@ -29,28 +29,16 @@ public:
     entt::entity create(entt::registry & entities) const noexcept;
 
     /**
-     * Get the player's position component or default to their start
+     * Get the player's bbox component or default to their starting bbox
      *
      * \param entities the registry where the player may exist
      * \param playerid the id of the player entity
      *
-     * \return the player's position if they exist in entities. Otherwise return
-     *         their default starting position.
+     * \return the player's bbox if they exist in entities. Otherwise return
+     *         their default starting bbox.
      */
-    component::position try_get_position(entt::registry const & entities,
-                                         entt::entity playerid) const noexcept;
-
-    /**
-     * Get the player's size component or default to their start size
-     *
-     * \param entities the registry where the player may exist
-     * \param playerid the id of the player entity
-     *
-     * \return the player's current size if they exist in entities. Otherwise
-     *         return their default starting size.
-     */
-    float try_get_size(entt::registry const & entities,
-                       entt::entity playerid) const noexcept;
+    component::bbox try_get_bbox(entt::registry const & entities,
+                                 entt::entity playerid) const noexcept;
 private:
     float _x, _y;
     float _size;

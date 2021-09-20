@@ -1,22 +1,24 @@
 #pragma once
 #include <cstdint>
+#include <cmath>
+#include <SDL2/SDL_rect.h>
 
 namespace component {
 
-struct position {
-    float x, y;
+struct bbox {
+    float x, y, size;
+
+    // convert the bbox to an SDL_Rect
+    explicit operator SDL_Rect() const noexcept
+    {
+        int const s = static_cast<int>(std::round(size));
+        return SDL_Rect{static_cast<int>(std::round(x)),
+                        static_cast<int>(std::round(y)), s, s};
+    }
 };
 
 struct velocity {
     float x, y;
-};
-
-struct size {
-    float value;
-};
-
-struct bbox {
-    float x, y, size;
 };
 
 struct color {

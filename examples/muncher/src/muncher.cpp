@@ -78,7 +78,7 @@ void muncher::run() noexcept
 
         // decide if this is the frame to make a new munchable
         if (is_munch_time(_rng)) {
-            _munchables.make_munchable(_entities, _player);
+            _munchables.make_munchable(_entities, _player, _player_settings);
         }
         // physics systems
         float const dt = clock.tick();
