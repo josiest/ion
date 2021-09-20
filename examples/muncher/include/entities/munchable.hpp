@@ -1,7 +1,8 @@
 #pragma once
-#include "components.hpp"
 #include <entt/entity/registry.hpp>
 #include <SDL2/SDL.h>
+#include "components.hpp"
+
 #include <random>
 #include <vector>
 
@@ -14,5 +15,5 @@ public:
 private:
     SDL_Rect _bounds;
     engine_t _rng;
-    std::vector<Color> _colors;
+    std::vector<component::color> _colors;
 };

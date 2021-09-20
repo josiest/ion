@@ -1,28 +1,30 @@
 #pragma once
 #include <cstdint>
 
-struct Position {
+namespace component {
+
+struct position {
     float x, y;
 };
 
-struct Velocity {
+struct velocity {
     float x, y;
 };
 
-struct Size {
+struct size {
     float value;
 };
 
-struct Color {
-    uint8_t r, g, b, a;
+struct color {
+    uint8_t r, g, b;
 };
 
-struct DynamicMover {
+struct dynamic_mover {
     float acceleration;
     float friction;
     float minspeed;
     float maxspeed;
 };
 
-struct Player {};
-struct Munchable {};
+struct munchable {};
+}

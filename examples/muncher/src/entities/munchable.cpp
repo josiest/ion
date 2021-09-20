@@ -1,16 +1,19 @@
 #include "entities/munchable.hpp"
+#include "components.hpp"
+
 #include <entt/entity/registry.hpp>
+
 #include <random>
 #include <cmath>
+#include <cstdint>
 
-munchable_factory::munchable_factory(size_t w, size_t h,
-                                     munchable_factory::engine_t rng)
+munchable_factory::munchable_factory(size_t w, size_t h, engine_t rng)
 
     : _bounds{0, 0, static_cast<int>(w), static_cast<int>(h)}, _rng{rng}
 {
-    _colors = std::vector<Color> {
-        {0xf3, 0x91, 0x89, 0xff}, {0xbb, 0x80, 0x82, 0xff},
-        {0x6e, 0x75, 0x82, 0xff}, {0x04, 0x65, 0x82, 0xff}
+    _colors = std::vector<component::color> {
+        {0xf3, 0x91, 0x89}, {0xbb, 0x80, 0x82},
+        {0x6e, 0x75, 0x82}, {0x04, 0x65, 0x82}
     };
 }
 
@@ -39,16 +42,21 @@ munchable_factory::make_munchable(entt::registry & entities, entt::entity player
     size_t const i = pos_dist(_rng);
     float const x = xvals[i];
     float const y = yvals[i];
-    entities.emplace<Position>(munchable, x, y);
+    entities.emplace<component::position>(munchable, x, y);
 
     // the distributions for velocity speed and angle
     std::uniform_real_distribution<float> speed_dist(100.f, 200.f);
     float const speed = speed_dist(_rng);
 
     // get the player's position in order to calculate the angle to it
-    Position player_pos{_bounds.x+_bounds.w/2.f, _bounds.y+_bounds.h/2.f};
-    if (entities.valid(player)) {
-        player_pos = entities.get<Position>(player);
+    component::position player_pos{
+        _bounds.x+_bounds.w/2.f, _bounds.y+_bounds.h/2.f
+    };
+
+    if (entities.valid(player) and
+            entities.all_of<component::position>(player)) {
+
+        player_pos = entities.get<component::position>(player);
     }
 
     // calculate the angle to the player
@@ -63,34 +71,38 @@ munchable_factory::make_munchable(entt::registry & entities, entt::entity player
     float const phi = angle_dist(_rng);
 
     // calculate the velocity from the random speed and angle
-    entities.emplace<Velocity>(munchable, speed*std::cos(phi),
-                                          speed*std::sin(phi));
+    entities.emplace<component::velocity>(munchable, speed*std::cos(phi),
+                                                     speed*std::sin(phi));
 
     // get the size of the player as a mean for the size of the munchable
-    int player_size = 15;
+    float player_size = 15.f;
     if (entities.valid(player)) {
-        player_size = entities.get<Size>(player).value;
+        player_size = entities.get<component::size>(player).value;
     }
 
     // generate a random size
     std::normal_distribution<float> size_dist(player_size, 5.f);
-    int const size = std::abs(static_cast<int>(std::round(size_dist(_rng))));
-    entities.emplace<Size>(munchable, size);
+    float const size = std::abs(static_cast<int>(std::round(size_dist(_rng))));
+    entities.emplace<component::size>(munchable, size);
 
     // choose a color
     std::uniform_int_distribution<size_t> color_dist(0, _colors.size()-1);
     auto color = _colors[color_dist(_rng)];
-    entities.emplace<Color>(munchable, color.r, color.g, color.b, color.a);
 
-    entities.emplace<Munchable>(munchable);
+    entities.emplace<component::color>(munchable,
+                                       color.r, color.g, color.b);
+
+    entities.emplace<component::munchable>(munchable);
 
     return munchable;
 }
 
 void munchable_factory::filter(entt::registry & entities)
 {
-    auto view = entities.view<Position, Munchable>();
-    view.each([this, &entities](auto const munchable, auto & pos) {
+    auto munchables =
+        entities.view<component::position, component::munchable>();
+
+    munchables.each([this, &entities](auto const munchable, auto & pos) {
 
         if (pos.x < _bounds.x || pos.x > _bounds.x+_bounds.w
                 || pos.y < _bounds.y || pos.y > _bounds.y+_bounds.h) {

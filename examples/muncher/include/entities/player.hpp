@@ -37,8 +37,8 @@ public:
      * \return the player's position if they exist in entities. Otherwise return
      *         their default starting position.
      */
-    Position try_get_position(entt::registry const & entities,
-                              entt::entity playerid) const noexcept;
+    component::position try_get_position(entt::registry const & entities,
+                                         entt::entity playerid) const noexcept;
 
     /**
      * Get the player's size component or default to their start size

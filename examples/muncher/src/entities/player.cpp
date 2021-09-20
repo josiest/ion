@@ -27,22 +27,24 @@ player::player(std::uint32_t width, std::uint32_t height) noexcept
 entt::entity player::create(entt::registry & registry) const noexcept
 {
     auto player = registry.create();
-    registry.emplace<Position>(player, _x, _y);
-    registry.emplace<Velocity>(player, 0.f, 0.f);
-    registry.emplace<Size>(player, _size);
-    registry.emplace<Color>(player, _r, _g, _b, static_cast<uint8_t>(0xff));
-    registry.emplace<DynamicMover>(player, _acceleration, _friction,
-                                           _minspeed, _maxspeed);
-    registry.emplace<Player>(player);
+    registry.emplace<component::position>(player, _x, _y);
+    registry.emplace<component::velocity>(player, 0.f, 0.f);
+    registry.emplace<component::size>(player, _size);
+    registry.emplace<component::color>(player, _r, _g, _b);
+    registry.emplace<component::dynamic_mover>(player, _acceleration, _friction,
+                                                       _minspeed, _maxspeed);
     return player;
 }
 
-Position player::try_get_position(entt::registry const & entities,
-                                  entt::entity playerid) const noexcept
+component::position
+player::try_get_position(entt::registry const & entities,
+                         entt::entity playerid) const noexcept
 {
     // return the player's position if they exist
-    if (entities.valid(playerid) and entities.all_of<Position>(playerid)) {
-        return entities.get<Position>(playerid);
+    if (entities.valid(playerid) and
+            entities.all_of<component::position>(playerid)) {
+
+        return entities.get<component::position>(playerid);
     }
     // otherwise return their default starting size
     return {_x, _y};
@@ -52,8 +54,10 @@ float player::try_get_size(entt::registry const & entities,
                            entt::entity playerid) const noexcept
 {
     // return the player's size if they exist
-    if (entities.valid(playerid) and entities.all_of<Size>(playerid)) {
-        return entities.get<Size>(playerid).value;
+    if (entities.valid(playerid) and
+            entities.all_of<component::size>(playerid)) {
+
+        return entities.get<component::size>(playerid).value;
     }
     // otherwise return their default starting size
     return _size;

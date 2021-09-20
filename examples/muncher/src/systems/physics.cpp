@@ -10,19 +10,22 @@ void accelerate_player(entt::registry & registry, entt::entity player,
                        ion::input::axis2d const & input, float dt)
 {
     // do nothing if the player doesn't exist
-    if (!registry.valid(player)) {
+    //      or doesn't have the right components
+    if (not registry.valid(player) ||
+            not registry.all_of<component::position,
+                                component::dynamic_mover>(player)) {
         return;
     }
 
     // get the components they need for accelration
-    auto & vel = registry.get<Velocity>(player);
-    auto const & constants = registry.get<DynamicMover>(player);
+    auto [vel, constants] = registry.get<component::velocity,
+                                         component::dynamic_mover const>(player);
 
     // get the current speed for velocity normalization
     float current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
-    Velocity norm_vel = vel;
+    component::velocity norm_vel = vel;
     if (std::abs(current_speed) > constants.minspeed) {
-        norm_vel = Velocity{vel.x/current_speed, vel.y/current_speed};
+        norm_vel = {vel.x/current_speed, vel.y/current_speed};
     }
 
     // calculate the acceleration from input and from friction
@@ -57,8 +60,10 @@ void accelerate_player(entt::registry & registry, entt::entity player,
 
 void move_munchies(entt::registry & registry, float dt)
 {
-    auto view = registry.view<Position, Velocity>();
-    view.each([dt](auto & pos, auto const & vel) {
+    auto munchies = registry.view<component::position,
+                                  component::velocity>();
+
+    munchies.each([dt](auto & pos, auto const & vel) {
         pos.x += vel.x * dt;
         pos.y -= vel.y * dt;
     });
@@ -66,9 +71,9 @@ void move_munchies(entt::registry & registry, float dt)
 
 bool collides_with(SDL_Rect const & a, SDL_Rect const & b)
 {
-    bool const within_width = a.x <= b.x+b.w && a.x+a.w >= b.x;
-    bool const within_height = a.y <= b.y+b.h && a.y+a.h >= b.y;
-    return within_width && within_height;
+    bool const within_width = a.x <= b.x+b.w and a.x+a.w >= b.x;
+    bool const within_height = a.y <= b.y+b.h and a.y+a.h >= b.y;
+    return within_width and within_height;
 }
 
 void devour(entt::registry & registry, entt::entity player)
@@ -80,7 +85,7 @@ void devour(entt::registry & registry, entt::entity player)
 
     // get the necessary components
     auto [player_pos, player_size_component] =
-        registry.get<const Position, Size>(player);
+        registry.get<component::position const , component::size>(player);
 
     int const player_size =
         static_cast<int>(std::round(player_size_component.value));
@@ -92,9 +97,13 @@ void devour(entt::registry & registry, entt::entity player)
     };
 
     // check for collisions against all the munchables
-    auto view = registry.view<Position, Size, Munchable>();
-    view.each([player, &player_box, &player_size_component, &registry]
-              (auto const munchable, auto const & pos, auto const & size) {
+    auto munchables =
+        registry.view<component::position, component::size,
+                      component::munchable>();
+
+    munchables.each(
+            [player, &player_box, &player_size_component, &registry]
+            (auto const munchable, auto const & pos, auto const & size) {
 
         // get the bounding box for the munchable
         int const x = static_cast<int>(std::round(pos.x));
