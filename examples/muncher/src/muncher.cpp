@@ -41,8 +41,11 @@ public:
 
     void run()
     {
+        // declare the sdl context before any other sdl resources
+        ion::sdl_context sdl;
+
         // create the window, specifying title and dimensions
-        auto window = ion::basic_window(_title, _width, _height);
+        auto window = ion::render_window(_title, _width, _height);
 
         // timer for physics
         ion::clock clock;
