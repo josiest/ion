@@ -5,6 +5,7 @@
 
 #include "systems/render.hpp"
 #include "systems/physics.hpp"
+#include "systems/mechanics.hpp"
 
 #include <ion/ion.hpp>
 #include <entt/entity/registry.hpp>
@@ -85,8 +86,12 @@ void muncher::run() noexcept
         systems::move_munchies(_entities, dt);
 
         // mechanics systems
-        systems::devour(_entities, _player);
-        _munchables.filter(_entities);
+        systems::munch(_entities, _player);
+
+        // get the size of the screen to filter out munchables
+        int width, height;
+        SDL_GetWindowSize(_window.sdl_window(), &width, &height);
+        systems::filter_munchables(_entities, width, height);
 
         // render
         systems::render(_window, _entities);

@@ -15,6 +15,10 @@ struct size {
     float value;
 };
 
+struct bbox {
+    float x, y, size;
+};
+
 struct color {
     uint8_t r, g, b;
 };

@@ -8,19 +8,19 @@
 
 namespace systems {
 
-void accelerate_player(entt::registry & registry, entt::entity player,
+void accelerate_player(entt::registry & entities, entt::entity player,
                        ion::input::axis2d const & input, float dt)
 {
     // do nothing if the player doesn't exist
     //      or doesn't have the right components
-    if (not registry.valid(player) ||
-            not registry.all_of<component::position,
+    if (not entities.valid(player) ||
+            not entities.all_of<component::position,
                                 component::dynamic_mover>(player)) {
         return;
     }
 
     // get the components they need for accelration
-    auto [vel, constants] = registry.get<component::velocity,
+    auto [vel, constants] = entities.get<component::velocity,
                                          component::dynamic_mover const>(player);
 
     // get the current speed for velocity normalization
@@ -60,9 +60,9 @@ void accelerate_player(entt::registry & registry, entt::entity player,
     }
 }
 
-void move_munchies(entt::registry & registry, float dt)
+void move_munchies(entt::registry & entities, float dt)
 {
-    auto munchies = registry.view<component::position,
+    auto munchies = entities.view<component::position,
                                   component::velocity>();
 
     munchies.each([dt](auto & pos, auto const & vel) {
@@ -71,62 +71,10 @@ void move_munchies(entt::registry & registry, float dt)
     });
 }
 
-bool collides_with(SDL_Rect const & a, SDL_Rect const & b)
+bool collides_with(component::bbox const & a, component::bbox const & b)
 {
-    bool const within_width = a.x <= b.x+b.w and a.x+a.w >= b.x;
-    bool const within_height = a.y <= b.y+b.h and a.y+a.h >= b.y;
+    bool const within_width = a.x <= b.x+b.size and a.x+a.size >= b.x;
+    bool const within_height = a.y <= b.y+b.size and a.y+a.size >= b.y;
     return within_width and within_height;
-}
-
-void devour(entt::registry & registry, entt::entity player)
-{
-    // do nothing if the player doesn't exist
-    if (!registry.valid(player)) {
-        return;
-    }
-
-    // get the necessary components
-    auto [player_pos, player_size_component] =
-        registry.get<component::position const , component::size>(player);
-
-    int const player_size =
-        static_cast<int>(std::round(player_size_component.value));
-
-    SDL_Rect const player_box{
-        static_cast<int>(std::round(player_pos.x)),
-        static_cast<int>(std::round(player_pos.y)),
-        player_size, player_size
-    };
-
-    // check for collisions against all the munchables
-    auto munchables =
-        registry.view<component::position, component::size,
-                      component::munchable>();
-
-    munchables.each(
-            [player, &player_box, &player_size_component, &registry]
-            (auto const munchable, auto const & pos, auto const & size) {
-
-        // get the bounding box for the munchable
-        int const x = static_cast<int>(std::round(pos.x));
-        int const y = static_cast<int>(std::round(pos.y));
-        int const s = static_cast<int>(std::round(size.value));
-        SDL_Rect const munchable_box{x, y, s, s};
-
-        // do nothing if no collision detected
-        if (!collides_with(player_box, munchable_box)) {
-            return;
-        }
-
-        // destroy the munchable and grow the player if the player's bigger
-        if (size.value < player_box.w) {
-            player_size_component.value += .05f * size.value;
-            registry.destroy(munchable);
-        }
-        // otherwise, destroy the player
-        else {
-            registry.destroy(player);
-        }
-    });
 }
 }

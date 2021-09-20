@@ -96,18 +96,3 @@ munchable_factory::make_munchable(entt::registry & entities, entt::entity player
 
     return munchable;
 }
-
-void munchable_factory::filter(entt::registry & entities)
-{
-    auto munchables =
-        entities.view<component::position, component::munchable>();
-
-    munchables.each([this, &entities](auto const munchable, auto & pos) {
-
-        if (pos.x < _bounds.x || pos.x > _bounds.x+_bounds.w
-                || pos.y < _bounds.y || pos.y > _bounds.y+_bounds.h) {
-
-            entities.destroy(munchable);
-        }
-    });
-}
