@@ -81,15 +81,15 @@ void muncher::run() noexcept
         }
         // physics systems
         float const dt = clock.tick();
-        accelerate_player(_entities, _player, _input, dt);
-        move_munchies(_entities, dt);
+        systems::accelerate_player(_entities, _player, _input, dt);
+        systems::move_munchies(_entities, dt);
 
-        // mechanic systems
-        devour(_entities, _player);
+        // mechanics systems
+        systems::devour(_entities, _player);
         _munchables.filter(_entities);
 
         // render
-        render(_window, _entities);
+        systems::render(_window, _entities);
     }
 }
 

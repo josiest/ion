@@ -6,6 +6,8 @@
 #include <entt/entity/registry.hpp>
 #include "components.hpp"
 
+namespace systems {
+
 void render_munchies(ion::renderable_window auto & window,
                      entt::registry & registry);
 
@@ -42,4 +44,5 @@ void render_munchies(ion::renderable_window auto & window,
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xff);
         SDL_RenderFillRect(renderer, &munchy);
     });
+}
 }

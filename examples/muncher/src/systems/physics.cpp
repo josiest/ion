@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+namespace systems {
+
 void accelerate_player(entt::registry & registry, entt::entity player,
                        ion::input::axis2d const & input, float dt)
 {
@@ -126,4 +128,5 @@ void devour(entt::registry & registry, entt::entity player)
             registry.destroy(player);
         }
     });
+}
 }
