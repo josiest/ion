@@ -8,7 +8,10 @@
 #include <algorithm>
 #include <vector>
 
+// namespace aliases
 namespace ranges = std::ranges;
+namespace cmpt = component;
+
 namespace systems {
 
 // determine if a munchable collides with the player
@@ -38,20 +41,28 @@ decltype(auto) grow_player_by(auto & player_box, auto growth, auto & munchables)
     };
 }
 
+// determine if a munchable is out of bounds
+decltype(auto) out_of_bounds(auto & munchables, auto width, auto height)
+{
+    return [&munchables, width, height] (auto const munchable) {
+        auto const & [p] = munchables.get(munchable);
+        return p.x+p.size < 0 || p.x > width || p.y+p.size < 0 || p.y > height;
+    };
+}
+
 void munch(entt::registry & entities, entt::entity player)
 {
     // do nothing if the player doesn't exist
     if (not entities.valid(player) ||
-            not entities.all_of<component::bbox,
-                                component::growth_rate>(player)) {
+            not entities.all_of<cmpt::bbox, cmpt::growth_rate>(player)) {
         return;
     }
     // get the required components of the player
     auto [player_box, growth_rate] =
-        entities.get<component::bbox, component::growth_rate const>(player);
+        entities.get<cmpt::bbox, cmpt::growth_rate const>(player);
 
     // view all bounding box components of the munchables
-    auto munchables = entities.view<component::bbox, component::munchable>();
+    auto munchables = entities.view<cmpt::bbox, cmpt::munchable>();
 
     // define the mechanic systems
     auto are_colliding = collides_with_player(player_box, munchables);
@@ -79,17 +90,13 @@ void filter_munchables(entt::registry & entities,
                        std::uint32_t width, std::uint32_t height)
 {
     // view the position component of all munchable entities
-    auto munchables = entities.view<component::bbox const, component::munchable>();
-
-    // determine if a munchable entity is out of bounds
-    auto out_of_bounds = [&munchables, width, height] (auto const munchable) {
-        auto const & [p] = munchables.get(munchable);
-        return p.x+p.size < 0 || p.x > width || p.y+p.size < 0 || p.y > height;
-    };
+    auto munchables = entities.view<cmpt::bbox const, cmpt::munchable>();
+    auto munchable_is_lost = out_of_bounds(munchables, width, height);
 
     // filter out any munchables that are within bounds
     std::vector<entt::entity> lost_munchables;
-    ranges::copy_if(munchables, std::back_inserter(lost_munchables), out_of_bounds);
+    auto copy_to = std::back_inserter(lost_munchables);
+    ranges::copy_if(munchables, copy_to, munchable_is_lost);
 
     // erase the munchables that are out of bounds
     entities.destroy(lost_munchables.begin(), lost_munchables.end());
