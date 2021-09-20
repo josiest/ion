@@ -81,12 +81,12 @@ private:
     engine_t _rng;
     entt::registry _entities;
 
-    // entity references and managers
+    // entity prefabs
     prefab::player _player_settings;
-    entt::entity _player;
+    prefab::munchable _munchable_settings;
 
-    munchable_factory _munchables;
-    double _munchtime_likelihood;
+    // entity references
+    entt::entity _player;
 
     // error handling
     std::string _error;

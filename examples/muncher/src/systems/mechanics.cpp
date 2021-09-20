@@ -11,19 +11,20 @@
 namespace ranges = std::ranges;
 namespace systems {
 
-void munch(entt::registry & registry, entt::entity player)
+void munch(entt::registry & entities, entt::entity player)
 {
     // do nothing if the player doesn't exist
-    if (!registry.valid(player)) {
+    if (not entities.valid(player) ||
+            not entities.all_of<component::bbox>(player)) {
         return;
     }
 
     // get the necessary components
-    auto player_box = registry.get<component::bbox>(player);
+    auto & player_box = entities.get<component::bbox>(player);
 
     // check for collisions against all the munchables
-    auto munchables = registry.view<component::bbox, component::munchable>();
-    munchables.each([player, &player_box, &registry]
+    auto munchables = entities.view<component::bbox, component::munchable>();
+    munchables.each([player, &player_box, &entities]
                     (auto const munchable, auto const & munchable_box) {
 
         // do nothing if no collision detected
@@ -34,11 +35,11 @@ void munch(entt::registry & registry, entt::entity player)
         // destroy the munchable and grow the player if the player's bigger
         if (munchable_box.size < player_box.size) {
             player_box.size += .05f * munchable_box.size;
-            registry.destroy(munchable);
+            entities.destroy(munchable);
         }
-        // otherwise, destroy the player
-        else {
-            registry.destroy(player);
+        // otherwise, destroy the player if they still exist
+        else if (entities.valid(player)) {
+            entities.destroy(player);
         }
     });
 }

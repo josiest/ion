@@ -22,7 +22,7 @@ struct velocity {
 };
 
 struct color {
-    uint8_t r, g, b;
+    std::uint8_t r, g, b;
 };
 
 struct dynamic_mover {

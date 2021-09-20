@@ -47,12 +47,11 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       // initialize the random engine with a pseudo-random seed
       _rng{std::random_device{}()}, 
 
-      // initialize the player prefab and create the player entity
-      _player_settings{width, height},
-      _player{_player_settings.create(_entities)},
+      // initialize the player and munchable prefabs
+      _player_settings{width, height}, _munchable_settings{width, height},
 
-      // initialize the munchable prefab
-      _munchables{width, height, _rng}, _munchtime_likelihood{.01}
+      // create the player
+      _player{_player_settings.create(_entities)}
 {
     // quit when the user exits the window
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
@@ -66,22 +65,21 @@ void muncher::run() noexcept
     // timer for physics
     ion::clock clock;
 
-    // decider for making a munchable
-    std::binomial_distribution<bool> is_munch_time(1, _munchtime_likelihood);
-
     // run the program
     while (!ion::input::has_quit()) {
         // handle events
         _events.process_queue();
 
         // apply systems
+        float const dt = clock.tick();
 
-        // decide if this is the frame to make a new munchable
-        if (is_munch_time(_rng)) {
-            _munchables.make_munchable(_entities, _player, _player_settings);
+        // create a new munchable entity if it's time to
+        if (_munchable_settings.should_munch(dt, _rng)) {
+
+            _munchable_settings.create(_entities, _player,
+                                       _player_settings, _rng);
         }
         // physics systems
-        float const dt = clock.tick();
         systems::accelerate_player(_entities, _player, _input, dt);
         systems::move_munchies(_entities, dt);
 
