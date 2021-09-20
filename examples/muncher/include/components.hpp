@@ -32,5 +32,9 @@ struct dynamic_mover {
     float maxspeed;
 };
 
+struct growth_rate {
+    float value;
+};
+
 struct munchable {};
 }

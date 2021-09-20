@@ -45,5 +45,6 @@ private:
     std::uint8_t _r, _g, _b;
     float _acceleration, _friction;
     float _minspeed, _maxspeed;
+    float _growth_rate;
 };
 }

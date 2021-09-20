@@ -21,7 +21,7 @@ player::player(std::uint32_t width, std::uint32_t height) noexcept
 
       // some arbitrary constants that seem to work decently for now
       _acceleration{200.f}, _friction{100.f},
-      _minspeed{0.1f}, _maxspeed{160.f}
+      _minspeed{.1f}, _maxspeed{160.f}, _growth_rate{.1f}
 {}
 
 entt::entity player::create(entt::registry & registry) const noexcept
@@ -32,6 +32,7 @@ entt::entity player::create(entt::registry & registry) const noexcept
     registry.emplace<component::color>(player, _r, _g, _b);
     registry.emplace<component::dynamic_mover>(player, _acceleration, _friction,
                                                        _minspeed, _maxspeed);
+    registry.emplace<component::growth_rate>(player, _growth_rate);
     return player;
 }
 

@@ -42,11 +42,13 @@ void munch(entt::registry & entities, entt::entity player)
 {
     // do nothing if the player doesn't exist
     if (not entities.valid(player) ||
-            not entities.all_of<component::bbox>(player)) {
+            not entities.all_of<component::bbox,
+                                component::growth_rate>(player)) {
         return;
     }
     // get the required components of the player
-    auto & player_box = entities.get<component::bbox>(player);
+    auto [player_box, growth_rate] =
+        entities.get<component::bbox, component::growth_rate const>(player);
 
     // view all bounding box components of the munchables
     auto munchables = entities.view<component::bbox, component::munchable>();
@@ -54,12 +56,12 @@ void munch(entt::registry & entities, entt::entity player)
     // define the mechanic systems
     auto are_colliding = collides_with_player(player_box, munchables);
     auto are_bigger = bigger_than_player(player_box, munchables);
-    auto grow_player = grow_player_by(player_box, .05f, munchables);
+    auto grow_player = grow_player_by(player_box, growth_rate.value, munchables);
 
     // filter out all munchables not colliding with the player
     std::vector<entt::entity> colliding_munchables;
-    auto it = std::back_inserter(colliding_munchables);
-    ranges::copy_if(munchables, it, are_colliding);
+    auto copy_to = std::back_inserter(colliding_munchables);
+    ranges::copy_if(munchables, copy_to, are_colliding);
 
     // if any munchables are bigger than the player, munch the player
     if (ranges::any_of(colliding_munchables, are_bigger)) {
