@@ -11,6 +11,33 @@
 namespace ranges = std::ranges;
 namespace systems {
 
+// determine if a munchable collides with the player
+decltype(auto) collides_with_player(auto & player_box, auto & munchables)
+{
+    return [&player_box, &munchables](auto const munchable) {
+        auto const & [munchable_box] = munchables.get(munchable);
+        return collides_with(player_box, munchable_box);
+    };
+}
+
+// determine if a munchable is bigger than the player
+decltype(auto) bigger_than_player(auto & player_box, auto & munchables)
+{
+    return [&player_box, &munchables](auto const munchable) {
+        auto const & [munchable_box] = munchables.get(munchable);
+        return munchable_box.size >= player_box.size;
+    };
+}
+
+// grow the player's bounding box
+decltype(auto) grow_player_by(auto & player_box, auto growth, auto & munchables)
+{
+    return [&player_box, growth, &munchables](auto const munchable) {
+        auto const & [munchable_box] = munchables.get(munchable);
+        player_box.size += growth*munchable_box.size;
+    };
+}
+
 void munch(entt::registry & entities, entt::entity player)
 {
     // do nothing if the player doesn't exist
@@ -18,30 +45,32 @@ void munch(entt::registry & entities, entt::entity player)
             not entities.all_of<component::bbox>(player)) {
         return;
     }
-
-    // get the necessary components
+    // get the required components of the player
     auto & player_box = entities.get<component::bbox>(player);
 
-    // check for collisions against all the munchables
+    // view all bounding box components of the munchables
     auto munchables = entities.view<component::bbox, component::munchable>();
-    munchables.each([player, &player_box, &entities]
-                    (auto const munchable, auto const & munchable_box) {
 
-        // do nothing if no collision detected
-        if (not collides_with(player_box, munchable_box)) {
-            return;
-        }
+    // define the mechanic systems
+    auto are_colliding = collides_with_player(player_box, munchables);
+    auto are_bigger = bigger_than_player(player_box, munchables);
+    auto grow_player = grow_player_by(player_box, .05f, munchables);
 
-        // destroy the munchable and grow the player if the player's bigger
-        if (munchable_box.size < player_box.size) {
-            player_box.size += .05f * munchable_box.size;
-            entities.destroy(munchable);
-        }
-        // otherwise, destroy the player if they still exist
-        else if (entities.valid(player)) {
-            entities.destroy(player);
-        }
-    });
+    // filter out all munchables not colliding with the player
+    std::vector<entt::entity> colliding_munchables;
+    auto it = std::back_inserter(colliding_munchables);
+    ranges::copy_if(munchables, it, are_colliding);
+
+    // if any munchables are bigger than the player, munch the player
+    if (ranges::any_of(colliding_munchables, are_bigger)) {
+        entities.destroy(player);
+    }
+    // otherwise munch all colliding munchables
+    else {
+        ranges::for_each(colliding_munchables, grow_player);
+        entities.destroy(colliding_munchables.begin(),
+                         colliding_munchables.end());
+    }
 }
 
 void filter_munchables(entt::registry & entities,
