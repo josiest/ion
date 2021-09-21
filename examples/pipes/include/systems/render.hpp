@@ -9,27 +9,29 @@
 
 #include "entities/tile.hpp"
 
-#include <ion/graphics/window.hpp>
+#include <ion/sdl/window.hpp>
 #include <SDL2/SDL_surface.h>
 #include <entt.hpp>
 
-void render(ion::window_resource auto & window, entt::registry & entities,
+void render(ion::sdl_window_resource auto & window, entt::registry & entities,
             entt::entity mouse_tile, pipes & game)
 {
     // clear the screen
-    auto screen = SDL_GetWindowSurface(window);
+    auto sdl_window = window.sdl_window();
+    auto screen = SDL_GetWindowSurface(sdl_window);
     SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format, 0, 0, 0));
 
     // draw the tiles and update the window
     render_static_tiles(window, entities, game);
     render_mouse_tile(window, entities, mouse_tile, game);
-    SDL_UpdateWindowSurface(window);
+    SDL_UpdateWindowSurface(sdl_window);
 }
 
-void render_static_tiles(ion::window_resource auto & window,
+void render_static_tiles(ion::sdl_window_resource auto & window,
                          entt::registry & entities, pipes & game)
 {
-    auto screen = SDL_GetWindowSurface(window);
+    auto sdl_window = window.sdl_window();
+    auto screen = SDL_GetWindowSurface(sdl_window);
     auto static_tiles = entities.view<component::tile, component::position,
                                       component::static_tile>();
 
@@ -49,7 +51,7 @@ void render_static_tiles(ion::window_resource auto & window,
     });
 }
 
-void render_mouse_tile(ion::window_resource auto & window,
+void render_mouse_tile(ion::sdl_window_resource auto & window,
                        entt::registry & entities, entt::entity mouse_tile,
                        pipes & game)
 {
@@ -65,7 +67,8 @@ void render_mouse_tile(ion::window_resource auto & window,
         tiles::get_surface(game.tiles(), tile.name, tile.rotation);
 
     // finally render
-    auto screen = SDL_GetWindowSurface(window);
+    auto sdl_window = window.sdl_window();
+    auto screen = SDL_GetWindowSurface(sdl_window);
 
     SDL_Color const * color = &tiles::placeable_bg_color;
     if (!tiles::is_adjacent(game.placed_tiles(), p.x, p.y)) {

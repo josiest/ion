@@ -13,10 +13,26 @@
 
 #include <memory>
 #include <random>
+#include <iostream>
 
-pipes::pipes(size_t width, size_t height)
+int main()
+{
+    pipes game{800, 600};
 
-    : _width{width}, _height{height},
+    // crash if the game failed to initialize
+    if (not game.is_ok()) {
+        std::cout << game.error() << std::endl;
+    }
+    // otherwise run the game
+    else {
+        game.run();
+    }
+}
+
+pipes::pipes(std::uint32_t width, std::uint32_t height)
+
+    : _window{"Pipes", width, height},
+      _width{width}, _height{height},
 
       // load the tile bitmap images
       _tiles{tiles::load_map()},
@@ -29,7 +45,6 @@ pipes::pipes(size_t width, size_t height)
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
 {}
-pipes::~pipes() { _tiles.clear(); SDL_Quit(); }
 
 void pipes::run()
 {
@@ -66,7 +81,6 @@ void pipes::run()
             });
 
     // create the window and run the game
-    auto window = ion::basic_blit_window("Pipes", _width, _height);
     while (!ion::input::has_quit()) {
 
         // bind the mouse-tile entity to the mouse position
@@ -74,12 +88,6 @@ void pipes::run()
 
         // process any events then render the window
         _events.process_queue();
-        render(window, entities, mouse_tile, *this);
+        render(_window, entities, mouse_tile, *this);
     }
-}
-
-int main()
-{
-    pipes game(800, 600);
-    game.run();
 }

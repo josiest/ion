@@ -30,7 +30,7 @@ public:
     /**
      * Determine if sdl was initialized
      */
-    bool good() const noexcept;
+    bool is_ok() const noexcept;
 
     /**
      * Get the error message for why SDL couldn't initialize

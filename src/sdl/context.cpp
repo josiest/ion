@@ -17,7 +17,7 @@ sdl_context::sdl_context(std::uint32_t flags) noexcept
 sdl_context::~sdl_context()
 {
     // quit sdl if it was initialized
-    if (good()) {
+    if (is_ok()) {
         SDL_Quit();
     }
 }
@@ -26,7 +26,7 @@ std::string sdl_context::error() const noexcept
 {
     return _error;
 }
-bool sdl_context::good() const noexcept
+bool sdl_context::is_ok() const noexcept
 {
     return _error.empty();
 }

@@ -77,7 +77,7 @@ render_window::~render_window()
     }
 }
 
-bool render_window::good() const noexcept
+bool render_window::is_ok() const noexcept
 {
     return _window != nullptr and _renderer != nullptr;
 }

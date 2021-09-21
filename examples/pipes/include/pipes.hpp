@@ -8,16 +8,18 @@
 #include <SDL2/SDL.h>
 #include <entt.hpp>
 
-#include <unordered_set>
 #include <random>
+#include <cstdint>
 
 class pipes {
 public:
     using engine_t = std::mt19937;
 
-    pipes(size_t width, size_t height);
-    ~pipes();
+    pipes(std::uint32_t width, std::uint32_t height);
     void run();
+
+    inline bool is_ok() const noexcept { return _error.empty(); }
+    inline std::string error() const noexcept { return _error; }
 
     // shared immutable resources
     inline tilemap const & tiles() const noexcept { return _tiles; }
@@ -27,7 +29,11 @@ public:
     inline engine_t & rng() noexcept { return _rng; }
     inline pointset & placed_tiles() noexcept { return _placed_tiles; }
 private:
-    size_t _width, _height;
+    // initialize sdl before other sdl resources
+    ion::sdl_context _sdl;
+    ion::blit_window _window;
+
+    std::uint32_t _width, _height;
     ion::event_system _events;
 
     // shared immutable resources
@@ -37,4 +43,7 @@ private:
     // shared mutable resources
     engine_t _rng;
     pointset _placed_tiles;
+
+    // error handling
+    std::string _error;
 };

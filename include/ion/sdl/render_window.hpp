@@ -45,10 +45,13 @@ public:
      * Create a render window
      *
      * \param title the title of the window
+     *
      * \param x the x-coordinate of the window position
      * \param y the y-coordinate of the window position
+     *
      * \param width the width of the window
      * \param height the height of the window
+     *
      * \param window_flags the flags used to initialize the window
      * \param driver_index the index of the graphics driver to use
      * \param renderer_flags the flags used to initialize the renderer
@@ -73,7 +76,7 @@ public:
     /**
      * Determine if this window has been initialized
      */
-    bool good() const noexcept;
+    bool is_ok() const noexcept;
 
     /**
      * Get the error message for why the window or renderer couldn't initialize
