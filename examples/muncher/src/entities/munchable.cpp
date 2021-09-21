@@ -5,9 +5,9 @@
 #include "systems/physics.hpp"
 
 #include <entt/entity/registry.hpp>
+#include <SDL2/SDL_video.h>
 
 #include <random>
-#include <cstdint>
 #include <utility>
 
 #include <cmath>
@@ -16,10 +16,10 @@
 namespace prefab {
 
 using namespace std::numbers;
-munchable::munchable(std::uint32_t width, std::uint32_t height) noexcept
+munchable::munchable(SDL_Window * window) noexcept
 
-      // define the bounds where the munchable can be created
-    : _width{width}, _height{height},
+      // a reference to the window that defines the bounds
+    : _window{window},
 
       // some arbitrary colors to choose from that look nice
       _colors{{0xf3, 0x91, 0x89}, {0xbb, 0x80, 0x82},
@@ -77,16 +77,20 @@ munchable::random_bbox(entt::registry & entities, entt::entity munchableid,
                        component::bbox const & player_box,
                        engine_t & rng) const noexcept
 {
+    // query the window for it's size
+    int width, height;
+    SDL_GetWindowSize(_window, &width, &height);
+
     // the distribution for the x and y position
-    std::uniform_real_distribution<float> xdist(0.f, _width);
+    std::uniform_real_distribution<float> xdist(0.f, width);
     float const x = xdist(rng);
 
-    std::uniform_real_distribution<float> ydist(0.f, _height);
+    std::uniform_real_distribution<float> ydist(0.f, height);
     float const y = ydist(rng);
 
     // the choices for the positions (must be on a boundary)
     using point = std::pair<float, float>;
-    std::vector<point> positions{{0, y}, {_width, y}, {x, 0}, {x, _height}};
+    std::vector<point> positions{{0, y}, {width, y}, {x, 0}, {x, height}};
 
     // choose a random position
     std::uniform_int_distribution<std::size_t> idist(0, positions.size()-1);

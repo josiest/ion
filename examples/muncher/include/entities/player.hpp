@@ -1,8 +1,7 @@
 #pragma once
 #include "components.hpp"
 #include <entt/entity/registry.hpp>
-
-#include <cstdint>
+#include <SDL2/SDL_video.h>
 
 namespace prefab {
 
@@ -14,11 +13,9 @@ public:
 
     /**
      * Create a player prefab within the given bounds
-     *
-     * \param width the width of the bounds
-     * \param height the height of the bounds
+     * \param window the sdl window the player is bound to
      */
-    player(std::uint32_t width, std::uint32_t height) noexcept;
+    player(SDL_Window * window) noexcept;
 
     /**
      * Create a player entity in a registry
@@ -40,7 +37,7 @@ public:
     component::bbox try_get_bbox(entt::registry const & entities,
                                  entt::entity playerid) const noexcept;
 private:
-    float _x, _y;
+    SDL_Window * _window;
     float _size;
     std::uint8_t _r, _g, _b;
     float _acceleration, _friction;

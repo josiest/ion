@@ -1,17 +1,17 @@
 #include "entities/player.hpp"
 #include "components.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
 #include <entt/entity/registry.hpp>
 
 #include <cstdint>
 
 namespace prefab {
 
-player::player(std::uint32_t width, std::uint32_t height) noexcept
+player::player(SDL_Window * window) noexcept
 
       // player starts in the middle of the screen
-    : _x{width/2.f}, _y{height/2.f},
+    : _window{window},
 
       // 15 seems like a decent starting size
       _size{15.f},
@@ -21,13 +21,17 @@ player::player(std::uint32_t width, std::uint32_t height) noexcept
 
       // some arbitrary constants that seem to work decently for now
       _acceleration{200.f}, _friction{100.f},
-      _minspeed{.1f}, _maxspeed{160.f}, _growth_rate{.1f}
+      _minspeed{.1f}, _maxspeed{160.f}, _growth_rate{.06f}
 {}
 
 entt::entity player::create(entt::registry & registry) const noexcept
 {
     auto player = registry.create();
-    registry.emplace<component::bbox>(player, _x, _y, _size);
+
+    int width, height;
+    SDL_GetWindowSize(_window, &width, &height);
+
+    registry.emplace<component::bbox>(player, width/2.f, height/2.f, _size);
     registry.emplace<component::velocity>(player, 0.f, 0.f);
     registry.emplace<component::color>(player, _r, _g, _b);
     registry.emplace<component::dynamic_mover>(player, _acceleration, _friction,
@@ -47,6 +51,8 @@ player::try_get_bbox(entt::registry const & entities,
         return entities.get<component::bbox>(playerid);
     }
     // otherwise return their default starting size
-    return {_x, _y, _size};
+    int width, height;
+    SDL_GetWindowSize(_window, &width, &height);
+    return {width/2.f, height/2.f, _size};
 }
 }

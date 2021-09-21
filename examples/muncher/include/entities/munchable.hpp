@@ -3,9 +3,8 @@
 #include "components.hpp"
 
 #include <entt/entity/registry.hpp>
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
 
-#include <cstdint>
 #include <random>
 #include <vector>
 
@@ -23,12 +22,10 @@ public:
     munchable() = delete;
     munchable(munchable const &) = delete;
     /**
-     * Create a munchable prefab with the specified bounds
-     *
-     * \param width the width of the bounds to create munchables in
-     * \param height the height of the bounds to create munchables in
+     * Create a munchable prefab with bounds connected to a window's size
+     * \param window the window that defines the bounds
      */
-    munchable(std::uint32_t width, std::uint32_t height) noexcept;
+    explicit munchable(SDL_Window * window) noexcept;
 
     /**
      * Create a munchable entity in a registry
@@ -52,7 +49,7 @@ public:
      */
     bool should_munch(float dt, engine_t & rng) const noexcept;
 private:
-    std::uint32_t _width, _height;
+    SDL_Window * _window;
     std::vector<component::color> _colors;
 
     float _minspeed, _maxspeed, _angle_variation;

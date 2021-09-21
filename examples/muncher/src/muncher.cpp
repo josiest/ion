@@ -39,7 +39,7 @@ int main()
 muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
 
       // intialize the window with specified dimensions
-    : _window{"Muncher", width, height},
+    : _window{"Muncher", width, height, SDL_WINDOW_RESIZABLE},
 
       // create a wasd keyboard input axis
       _input(_events, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
@@ -48,11 +48,20 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       _rng{std::random_device{}()}, 
 
       // initialize the player and munchable prefabs
-      _player_settings{width, height}, _munchable_settings{width, height},
+      _player_settings{_window.sdl_window()},
+      _munchable_settings{_window.sdl_window()},
 
       // create the player
       _player{_player_settings.create(_entities)}
 {
+    // check if sdl resources initialized properly
+    if (not _sdl.is_ok()) {
+        _error = _sdl.error(); return;
+    }
+    if (not _window.is_ok()) {
+        _error = _window.error(); return;
+    }
+
     // quit when the user exits the window
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
