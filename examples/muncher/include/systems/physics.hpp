@@ -52,6 +52,12 @@ component::velocity normalized(component::velocity const & v, float eps);
  */
 float magnitude(component::velocity const & v);
 
+/**
+ * Compute the distance between two bounding boxes as a velocity
+ */
+component::velocity distance(component::bbox const & lhs,
+                             component::bbox const & rhs);
+
 component::velocity operator+(component::velocity const & lhs,
                               component::velocity const & rhs);
 

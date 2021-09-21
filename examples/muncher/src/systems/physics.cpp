@@ -66,6 +66,16 @@ cmpt::velocity normalized(cmpt::velocity const & v, float eps)
     return {v.x/speed, v.y/speed};
 }
 
+float magnitude(cmpt::velocity const & v)
+{
+    return std::sqrt(v.x*v.x + v.y*v.y);
+}
+
+cmpt::velocity distance(cmpt::bbox const & lhs, cmpt::bbox const & rhs)
+{
+    return {rhs.x-lhs.x, rhs.y-lhs.y};
+}
+
 cmpt::velocity operator+(cmpt::velocity const & lhs,
                          cmpt::velocity const & rhs)
 {
@@ -83,10 +93,5 @@ cmpt::velocity & operator+=(cmpt::velocity & lhs,
 cmpt::velocity operator*(float lhs, cmpt::velocity const & rhs)
 {
     return {lhs*rhs.x, lhs*rhs.y};
-}
-
-float magnitude(cmpt::velocity const & v)
-{
-    return std::sqrt(v.x*v.x + v.y*v.y);
 }
 }

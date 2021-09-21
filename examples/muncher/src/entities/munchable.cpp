@@ -1,6 +1,8 @@
 #include "entities/munchable.hpp"
 #include "entities/player.hpp"
+
 #include "components.hpp"
+#include "systems/physics.hpp"
 
 #include <entt/entity/registry.hpp>
 
@@ -111,13 +113,11 @@ munchable::random_velocity(entt::registry & entities, entt::entity munchableid,
     float const speed = speed_dist(rng);
 
     // calculate the angle to the player
-    float const dx = player_box.x - munchable_box.x;
-    float const dy = player_box.y - munchable_box.y;
-    float const dist = std::sqrt(dx*dx + dy*dy);
-    float const angle_to_player = std::atan2(dy/dist, dx/dist);
+    auto const d = systems::distance(munchable_box, player_box);
+    auto const dn = systems::normalized(d, .1f);
+    float const angle_to_player = std::atan2(dn.y, dn.x);
 
     // generate a random angle
-    float const pi = std::atan(1.f)*4.f;
     std::normal_distribution angle_dist(angle_to_player, _angle_variation);
     float const phi = angle_dist(rng);
 
