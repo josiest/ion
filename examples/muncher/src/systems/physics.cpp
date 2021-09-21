@@ -8,73 +8,83 @@
 
 namespace systems {
 
+namespace cmpt = component;
 void accelerate_player(entt::registry & entities, entt::entity player,
                        ion::input::axis2d const & input, float dt)
 {
     // do nothing if the player doesn't exist
     //      or doesn't have the right components
     if (not entities.valid(player) ||
-            not entities.all_of<component::bbox,
-                                component::dynamic_mover>(player)) {
+            not entities.all_of<cmpt::bbox, cmpt::dynamic_mover>(player)) {
         return;
     }
 
     // get the components they need for accelration
-    auto [vel, constants] = entities.get<component::velocity,
-                                         component::dynamic_mover const>(player);
-
-    // get the current speed for velocity normalization
-    float current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
-    component::velocity norm_vel = vel;
-    if (std::abs(current_speed) > constants.minspeed) {
-        norm_vel = {vel.x/current_speed, vel.y/current_speed};
-    }
+    auto [v, constants] =
+        entities.get<cmpt::velocity, cmpt::dynamic_mover const>(player);
 
     // calculate the acceleration from input and from friction
     float const acc_in = constants.acceleration * dt;
     float const acc_fr = -constants.friction * dt;
 
-    // normalize the input
-    float inx = input.x();
-    float iny = input.y();
-    float const in_norm = std::sqrt(inx*inx + iny*iny);
-    if (std::abs(in_norm) > 0.f) {
-        inx = inx/in_norm;
-        iny = iny/in_norm;
-    }
-
     // calculate the velocity from the various accelerations
-    vel.x += acc_in*inx + acc_fr*norm_vel.x;
-    vel.y += acc_in*iny + acc_fr*norm_vel.y;
+    float const eps = constants.minspeed;
+    v += acc_in*normalized({input.x(), input.y()}, eps) + acc_fr*normalized(v, eps);
 
-    // cut the velocity if below threshold
-    current_speed = std::sqrt(vel.x*vel.x + vel.y*vel.y);
-    if (std::abs(current_speed) <= constants.minspeed) {
-        vel.x = 0.f;
-        vel.y = 0.f;
-    }
-    // clamp the velocity if above max speed
-    else if (current_speed > constants.maxspeed) {
-        vel.x = constants.maxspeed * vel.x/current_speed;
-        vel.y = constants.maxspeed * vel.y/current_speed;
-    }
+    // clamp the velocity to be within the defined thresholds
+    float const speed = std::min(magnitude(v), constants.maxspeed);
+    v = speed * normalized(v, eps);
 }
 
 void move_munchies(entt::registry & entities, float dt)
 {
-    auto munchies = entities.view<component::bbox,
-                                  component::velocity const>();
-
+    auto munchies = entities.view<cmpt::bbox, cmpt::velocity const>();
     munchies.each([dt](auto & p, auto const & v) {
         p.x += v.x * dt;
         p.y -= v.y * dt;
     });
 }
 
-bool collides_with(component::bbox const & a, component::bbox const & b)
+bool collides_with(cmpt::bbox const & a, cmpt::bbox const & b)
 {
     bool const within_width = a.x <= b.x+b.size and a.x+a.size >= b.x;
     bool const within_height = a.y <= b.y+b.size and a.y+a.size >= b.y;
     return within_width and within_height;
+}
+
+cmpt::velocity normalized(cmpt::velocity const & v, float eps)
+{
+
+    float const speed = magnitude(v);
+
+    // return the zero vector if speed is below threshold
+    if (speed < eps) { return {0.f, 0.f}; }
+
+    // otherwise return the normalized velocity
+    return {v.x/speed, v.y/speed};
+}
+
+cmpt::velocity operator+(cmpt::velocity const & lhs,
+                         cmpt::velocity const & rhs)
+{
+    return {lhs.x + rhs.x, lhs.y + rhs.y};
+}
+
+cmpt::velocity & operator+=(cmpt::velocity & lhs,
+                            cmpt::velocity const & rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    return lhs;
+}
+
+cmpt::velocity operator*(float lhs, cmpt::velocity const & rhs)
+{
+    return {lhs*rhs.x, lhs*rhs.y};
+}
+
+float magnitude(cmpt::velocity const & v)
+{
+    return std::sqrt(v.x*v.x + v.y*v.y);
 }
 }
