@@ -13,7 +13,12 @@ find_package(ion REQUIRED)
 file(GLOB_RECURSE sources src/*.cpp)
 add_executable(basic ${sources})
 
-target_include_directories(basic PUBLIC
-    ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
+include_directories(basic PUBLIC
+    src ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'")
+endforeach()
 
 target_link_libraries(basic PUBLIC ion SDL2 OpenGL::OpenGL GLEW::GLEW)
