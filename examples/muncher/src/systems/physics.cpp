@@ -29,7 +29,9 @@ void accelerate_player(entt::registry & entities, entt::entity player,
 
     // calculate the velocity from the various accelerations
     float const eps = constants.minspeed;
-    v += acc_in*normalized({input.x(), input.y()}, eps) + acc_fr*normalized(v, eps);
+    auto const in = normalized({input.x(), input.y()}, eps);
+    auto const vn = normalized(v, eps);
+    v += acc_in*in + acc_fr*vn;
 
     // clamp the velocity to be within the defined thresholds
     float const speed = std::min(magnitude(v), constants.maxspeed);
