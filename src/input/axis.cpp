@@ -1,6 +1,6 @@
 #include "ion/input/axis.hpp"
 #include "ion/events.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <unordered_set>
 
@@ -29,14 +29,14 @@ keyboard_axis::keyboard_axis(event_system & events,
     events.subscribe(SDL_KEYUP, &release_key);
 }
 
-float keyboard_axis::x() const
+float keyboard_axis::x() const noexcept
 {
     bool right_pressed = _g::KEYS_PRESSED.find(_right) != _g::KEYS_PRESSED.end();
     bool left_pressed = _g::KEYS_PRESSED.find(_left) != _g::KEYS_PRESSED.end();
     return static_cast<float>(right_pressed) - static_cast<float>(left_pressed);
 }
 
-float keyboard_axis::y() const
+float keyboard_axis::y() const noexcept
 {
     bool up_pressed = _g::KEYS_PRESSED.find(_up) != _g::KEYS_PRESSED.end();
     bool down_pressed = _g::KEYS_PRESSED.find(_down) != _g::KEYS_PRESSED.end();

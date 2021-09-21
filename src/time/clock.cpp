@@ -1,5 +1,5 @@
 #include "ion/time/clock.hpp"
-#include <SDL2/SDL_timer.h>
+#include <SDL.h>
 #include <cstdint>
 
 namespace ion {

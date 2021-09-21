@@ -1,5 +1,5 @@
 #include "ion/sdl/blit_window.hpp"
-#include <SDL2/SDL_video.h>
+#include <SDL.h>
 #include <string>
 
 namespace ion {

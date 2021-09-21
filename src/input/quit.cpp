@@ -1,5 +1,5 @@
 #include "ion/input/quit.hpp"
-#include <SDL2/SDL_events.h>
+#include <SDL.h>
 
 namespace ion::input {
 

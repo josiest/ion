@@ -27,15 +27,14 @@ public:
     sdl_context(std::uint32_t flags) noexcept;
     ~sdl_context();
 
-    /**
-     * Determine if sdl was initialized
-     */
-    bool is_ok() const noexcept;
+    /** Determine if sdl was initialized properly */
+    inline bool good() const noexcept { return _error.empty(); }
 
-    /**
-     * Get the error message for why SDL couldn't initialize
-     */
-    std::string error() const noexcept;
+    /** Determine if sdl encountered a non-recoverable error */
+    inline bool bad() const noexcept { return not _error.empty(); }
+
+    /** Why SDL couldn't initialize */
+    inline std::string error() const noexcept { return _error; }
 private:
     std::string _error;
 };

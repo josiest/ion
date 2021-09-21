@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL_render.h>
+#include <SDL.h>
 
 #include <concepts>
 #include <ranges>

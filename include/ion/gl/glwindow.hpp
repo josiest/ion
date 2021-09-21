@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL_video.h>
+#include <SDL_opengl.h>
 
 #include <cstdint>
 #include <string>
@@ -14,25 +14,32 @@ namespace ion {
 
 /** A type alias for a map of SDL_GLattrs to their values */
 using glcontext_args = std::unordered_map<SDL_GLattr, int>;
+
+/** The default GL context attributes to use */
+inline glcontext_args const default_gl_attributes{
+    {SDL_GL_CONTEXT_MAJOR_VERSION, 3}, {SDL_GL_CONTEXT_MINOR_VERSION, 1},
+    {SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE}
+};
+
 /** A type alias for a SDL_GLattr-int pair */
 using attr_pair = std::pair<SDL_GLattr, int>;
 
 /** Set a GL attribute */
-void set_glattr(attr_pair const & item)
+inline void set_glattr(attr_pair const & item)
 { SDL_GL_SetAttribute(item.first, item.second); }
 
 /** Determine if the GL attribute is set properly */
-bool glattr_is_set(attr_pair const & item) {
+inline bool glattr_is_set(attr_pair const & item) {
     int value;
     SDL_GL_GetAttribute(item.first, &value);
     return value == item.second;
 }
 
-class glew_window {
+class glwindow {
 public:
     // delete unwanted implicit constructors
-    glew_window() = delete;
-    glew_window(glew_window const &) = delete;
+    glwindow() = delete;
+    glwindow(glwindow const &) = delete;
 
     /**
      * Create a glew window with pre-initialized resources
@@ -40,10 +47,10 @@ public:
      * \param window the underlying SDL_Window
      * \param SDL_GLContext the underlying SDL_GLContext
      */
-    glew_window(SDL_Window * window, SDL_GLContext glcontext);
-    
+    inline glwindow(SDL_Window * window, SDL_GLContext glcontext);
+
     /**
-     * Create a basic glew_window
+     * Create a basic glwindow
      *
      * \param title the title of the window
      *
@@ -56,11 +63,13 @@ public:
      * The position of the window is as implemented by SDL_WINDOWPOS_UNDEFINED.
      * Any renderer-specific window flags will be ignored other than
      * SDL_WINDOW_OPENGL, which will be used regardless of it being passed.
+     *
+     * GL attributes default to use the 3.1 core profile
      */
-    glew_window(std::string const & title,
-                std::uint32_t width, std::uint32_t height,
-                std::uint32_t flags=0,
-                glcontext_args const & attributes=glcontext_args{});
+    inline glwindow(std::string const & title,
+                    std::uint32_t width, std::uint32_t height,
+                    std::uint32_t flags=0,
+                    glcontext_args const & attributes=default_gl_attributes);
 
     /**
      * Create a glew window
@@ -78,21 +87,27 @@ public:
      *
      * Any renderer-specific window flags will be ignored other than
      * SDL_WINDOW_OPENGL, which will be used regardless of it being passed.
+     *
+     * GL attributes default to use the 3.1 core profile
      */
-    glew_window(std::string const & title, int x, int y,
-                std::uint32_t width, std::uint32_t height,
-                std::uint32_t flags=0,
-                glcontext_args const & attributes=glcontext_args{});
+    inline glwindow(std::string const & title, int x, int y,
+                    std::uint32_t width, std::uint32_t height,
+                    std::uint32_t flags=0,
+                    glcontext_args const & attributes=default_gl_attributes);
 
-    ~glew_window();
+    inline ~glwindow();
 
     /** Determine if the window initialized properly */
-    inline bool is_ok() const noexcept
+    inline bool good() const noexcept
     { return _window != nullptr and _glcontext != nullptr; }
+
+    /** Determine if the window enountered an unrecoverable error */
+    inline bool bad() const noexcept
+    { return nullptr == _window or nullptr == _glcontext; }
 
     /** Determine if vsync was set */
     inline bool is_vsynced() const noexcept
-    { return is_ok() and _error.empty(); }
+    { return good() and _error.empty(); }
 
     /** The error message explaining why initialization failed */
     inline std::string error() const noexcept { return _error; }
@@ -110,7 +125,7 @@ private:
     void _init_glew() noexcept;
 };
 
-glew_window::glew_window(SDL_Window * window, SDL_GLContext glcontext)
+glwindow::glwindow(SDL_Window * window, SDL_GLContext glcontext)
     : _window{window}, _glcontext{glcontext}
 {
     if (not window and not glcontext) {
@@ -126,20 +141,19 @@ glew_window::glew_window(SDL_Window * window, SDL_GLContext glcontext)
         SDL_DestroyWindow(_window); _window = nullptr;
         return;
     }
-    _init_glew();
 }
 
-glew_window::glew_window(std::string const & title,
-                         std::uint32_t width, std::uint32_t height,
-                         std::uint32_t flags, glcontext_args const & attributes)
+glwindow::glwindow(std::string const & title,
+                   std::uint32_t width, std::uint32_t height,
+                   std::uint32_t flags, glcontext_args const & attributes)
 
-    : glew_window(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                  width, height, flags, attributes)
+    : glwindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+               width, height, flags, attributes)
 {}
 
-glew_window::glew_window(std::string const & title, int x, int y,
-                         std::uint32_t width, std::uint32_t height,
-                         std::uint32_t flags, glcontext_args const & attributes)
+glwindow::glwindow(std::string const & title, int x, int y,
+                   std::uint32_t width, std::uint32_t height,
+                   std::uint32_t flags, glcontext_args const & attributes)
 {
     namespace ranges = std::ranges;
 
@@ -167,45 +181,17 @@ glew_window::glew_window(std::string const & title, int x, int y,
         SDL_DestroyWindow(_window); _window = nullptr; // clean up
         return;
     }
-    _init_glew();
 }
 
-void glew_window::_init_glew() noexcept {
-    // try to initialize glew
-    glewExperimental = GL_TRUE;
-    GLenum const glew_error = glewInit();
-
-    // failure if glew couldn't initialize
-    if (glew_error != GLEW_OK) {
-
-        // get the error messages
-        std::string const message = "Couldn't initialize GLEW! glew error: ";
-        std::string const error =
-            reinterpret_cast<char const *>(glewGetErrorString(glew_error));
-
-        // clean up
-        SDL_DestroyWindow(_window); _window = nullptr;
-        SDL_GL_DeleteContext(_glcontext); _glcontext = nullptr;
-
-        _error = message + error;
-        return;
-    }
-
-    // try to use vsync
-    if (SDL_GL_SetSwapInterval(1) < 0) {
-        std::string const message = "Couldn't set VSync! SDL_Error: ";
-        std::string const error = SDL_GetError();
-        _error = message + error;
-    }
-}
-
-glew_window::~glew_window()
+glwindow::~glwindow()
 {
     if (_glcontext) {
         SDL_GL_DeleteContext(_glcontext);
+        _glcontext = nullptr;
     }
     if (_window) {
         SDL_DestroyWindow(_window);
+        _window = nullptr;
     }
 }
 }

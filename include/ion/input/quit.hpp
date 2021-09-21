@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL_events.h>
+#include <SDL.h>
 
 namespace ion::input {
 

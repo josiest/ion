@@ -1,9 +1,6 @@
 #include "ion/sdl/render_window.hpp"
 
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_error.h>
-
+#include <SDL.h>
 #include <cstdint>
 #include <string>
 

@@ -2,11 +2,11 @@
 #include "ion/graphics/image.hpp"
 
 // types used
-#include <SDL2/SDL_surface.h>
+#include <SDL.h>
 #include <string>
 
 // functions used
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 
 // exceptions and messages
 #include <stdexcept>

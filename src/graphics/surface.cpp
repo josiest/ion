@@ -1,5 +1,5 @@
 #include "ion/graphics/surface.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <stdexcept>
 #include <sstream>
 

@@ -1,9 +1,13 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 namespace ion {
 
+/**
+ * A resource manager for an OpenGL shader
+ */
 class shader {
 public:
     // delete unwanted implicit constructors
@@ -16,14 +20,17 @@ public:
      * \param shader_type the type of shader
      * \param source the shader source
      */
-    shader(GLenum shader_type, std::string const & source) noexcept;
-    ~shader();
+    inline shader(GLenum shader_type, std::string const & source) noexcept;
+    inline ~shader();
 
     /** The GL id of this shader */
     inline GLuint id() const noexcept { return _id; }
 
     /** Determine if the shader initialized properly */
-    inline bool is_ok() const noexcept { return _id != 0; }
+    inline bool good() const noexcept { return _id != 0; }
+
+    /** Determine if the shader encountered a nonrecoverable error */
+    inline bool bad() const noexcept { return _id == 0; }
 
     /** Explains why the shader failed to initialize */
     inline std::string error() const noexcept { return _error; }
@@ -32,7 +39,8 @@ private:
     std::string _error;
 };
 
-std::string shader_error(shader const & s)
+/** Get the error associated with a shader */
+inline std::string shader_error(shader const & s) noexcept
 {
     if (not glIsShader(s.id())) {
         return "Couldn't get shader error because shader id is invalid";
@@ -46,6 +54,26 @@ std::string shader_error(shader const & s)
     glGetShaderInfoLog(s.id(), len, nullptr, message.data());
 
     return message;
+}
+
+/**
+ * The string associated with a shader type
+ * \param shader_type the type to query
+ * \return the name associated withe the shader type or "undefined"
+ */
+inline std::string shader_string(GLenum shader_type) noexcept
+{
+    // map known shader-types to their names
+    static std::unordered_map<GLenum, std::string> as_string{
+        {GL_VERTEX_SHADER, "vertex"}, {GL_FRAGMENT_SHADER, "fragment"}
+    };
+    // return the correct name if it exists
+    auto search = as_string.find(shader_type);
+    if (search != as_string.end()) {
+        return search->second;
+    }
+    // otherwise return "undefined"
+    return "undefined";
 }
 
 shader::shader(GLenum shader_type, std::string const & source) noexcept

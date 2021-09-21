@@ -1,8 +1,7 @@
 #pragma once
 
 #include <concepts>
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_render.h>
+#include <SDL.h>
 
 namespace ion {
 
