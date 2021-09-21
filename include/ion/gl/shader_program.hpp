@@ -14,7 +14,7 @@
 namespace ion {
 
 /** Map file extensions to their respective shader-type */
-inline std::unordered_map<std::string, GLenum> const standard_extensions{
+inline std::unordered_map<std::string, GLenum> const standard_shader_extensions{
     {"vert", GL_VERTEX_SHADER}, {"tesc", GL_TESS_CONTROL_SHADER},
     {"tese", GL_TESS_EVALUATION_SHADER}, {"geom", GL_GEOMETRY_SHADER},
     {"frag", GL_FRAGMENT_SHADER}, {"comp", GL_COMPUTE_SHADER}
