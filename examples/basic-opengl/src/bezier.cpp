@@ -18,7 +18,7 @@ int main()
 
     // crash if initialization failed
     if (example.bad()) {
-        std::cout << example.error() << std::endl;
+        std::cout << example.error();
         return 1;
     }
     example.run();
@@ -36,6 +36,7 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
 
     : _window{"Bezier example", width, height}
 {
+    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
     // failure if sdl resources failed to initialize
     if (_sdl.bad()) {
         _error = "SDL couldn't initialize: "s + _sdl.error();
@@ -58,13 +59,13 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     }
 
     auto simple_paths = shader_filenames("simple", "../shaders");
+    auto simple_sources = shader_sources(std::move(simple_paths));
+
     _shaders.push_back(std::make_unique<ion::shader_program>(
-                       shader_sources(std::move(simple_paths))));
+                       std::move(simple_sources)));
 
     if (_shaders.back()->bad()) {
-        std::cout << _shaders.back()->error();
+        _error = _shaders.back()->error();
         return;
     }
-
-    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 }

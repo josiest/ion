@@ -20,7 +20,7 @@ public:
 
     void run() noexcept;
     inline bool good() const noexcept { return _error.empty(); }
-    inline bool bad() const noexcept { return _sdl.bad() or _window.bad(); }
+    inline bool bad() const noexcept { return not _error.empty(); }
     inline std::string error() const noexcept { return _error; }
 private:
     ion::sdl_context _sdl;
