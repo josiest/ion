@@ -25,7 +25,7 @@ int main()
 
     // crash if initialization failed
     if (example.bad()) {
-        std::cout << example.error();
+        std::cerr << example.error();
         return 1;
     }
     example.run();
@@ -67,17 +67,17 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     }
 
     // try to load the shader sources into filestreams
-    auto simple_sources = serialize::load_shader_sources("simple", "../shaders");
+    auto bezier_sources = serialize::load_shader_sources("bezier", "../shaders");
 
     // if any of the shader sources fail to load print out which ones
-    if (ranges::any_of(simple_sources, serialize::load_failed)) {
+    if (ranges::any_of(bezier_sources, serialize::load_failed)) {
 
         // initialize the error with a helpful message
         std::stringstream message;
         message << "The following shader files failed to load:" << std::endl;
 
         // put the error message for each file on a new line
-        auto messages = simple_sources | views::filter(serialize::load_failed)
+        auto messages = bezier_sources | views::filter(serialize::load_failed)
                                        | views::transform(serialize::load_error);
         ranges::copy(messages, std::ostream_iterator<std::string>(message, "\n"));
         _error = message.str();
@@ -85,13 +85,13 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     }
 
     // convert the load-info to a source map
-    ion::shader_program::source_map simple_shader;
-    auto into_shader = std::inserter(simple_shader, simple_shader.end());
-    ranges::transform(simple_sources, into_shader, serialize::load_source);
+    ion::shader_program::source_map bezier_shader;
+    auto into_shader = std::inserter(bezier_shader, bezier_shader.end());
+    ranges::transform(bezier_sources, into_shader, serialize::load_source);
 
     // failure if the shader sources fail to compile
     _shaders.push_back(std::make_unique<ion::shader_program>(
-                       std::move(simple_shader))
+                       std::move(bezier_shader))
     );
     if (_shaders.back()->bad()) {
         _error = _shaders.back()->error();
