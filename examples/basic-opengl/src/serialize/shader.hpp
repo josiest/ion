@@ -10,6 +10,8 @@
 #include <fstream>
 #include <filesystem>
 
+namespace serialize {
+
 /** The result type of loading a file */
 using load_info = std::tuple<std::filesystem::path, bool, std::string>;
 
@@ -36,3 +38,5 @@ inline std::string load_error(load_info & info) noexcept
 
 /** Get a type-source pair while invalidating the load result */
 std::pair<GLenum, std::string> load_source(load_info & info) noexcept;
+
+}

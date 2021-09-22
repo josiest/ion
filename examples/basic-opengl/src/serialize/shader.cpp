@@ -15,6 +15,8 @@ namespace fs = std::filesystem;
 namespace views = std::views;
 auto const & extensions = ion::standard_shader_extensions;
 
+namespace serialize {
+
 load_info load_path(std::string const & path)
 {
     // load the file into a stream
@@ -60,4 +62,5 @@ std::pair<GLenum, std::string> load_source(load_info & info) noexcept
     using namespace std;
     GLenum shader_type = extensions.at(get<fs::path>(info).extension());
     return make_pair(shader_type, move(get<string>(info)));
+}
 }
