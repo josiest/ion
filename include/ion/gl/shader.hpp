@@ -60,7 +60,7 @@ inline std::string shader_error(shader const & s) noexcept
  * \param shader_type the type to query
  * \return the name associated withe the shader type or "undefined"
  */
-inline std::string shader_string(GLenum shader_type) noexcept
+inline std::string shader_name(GLenum shader_type) noexcept
 {
     // map known shader-types to their names
     static std::unordered_map<GLenum, std::string> as_string{

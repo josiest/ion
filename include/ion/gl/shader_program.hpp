@@ -92,6 +92,7 @@ shader_program::shader_program(shader_program::source_map const & sources) noexc
     : _id{glCreateProgram()}
 {
     namespace ranges = std::ranges;
+    namespace views = std::views;
 
     if (_id == 0) {
         _error = "An error occured while creating the shader program!";
@@ -115,30 +116,19 @@ shader_program::shader_program(shader_program::source_map const & sources) noexc
     auto into_shaders = std::inserter(_shaders, _shaders.end());
     ranges::transform(sources, into_shaders, compile_shader);
 
-    // get a list of all the shaders types of the given sources
-    std::list<GLenum> failed_shaders;
-    ranges::transform(_shaders, std::back_inserter(failed_shaders),
-                      [](auto const & pair) { return pair.first; });
-
-    // filter out shaders that compiled correctly
-    auto [begin_good, end_good] = ranges::remove_if(failed_shaders,
-            [this](auto type) { return _shaders.at(type)->good(); });
-    failed_shaders.erase(begin_good, end_good);
-
+    // determine if a shader failed to compile
+    auto compile_failed = [](auto const & pair) { return pair.second->bad(); };
     // get the error message for a failed shader
-    auto compile_error = [this](auto type) {
-        using namespace std::string_literals;
-        return shader_string(type) + " shader failed to compile: "s
-                                   + _shaders.at(type)->error();
+    auto compile_error = [](auto const & pair) {
+        return shader_name(pair.first) + " shader failed to compile: "
+                                       + pair.second->error();
     };
 
-    // get all the error messages of the failed shaders
-    std::list<std::string> compile_errors;
-    auto into_compile_errors = std::back_inserter(compile_errors);
-    ranges::transform(failed_shaders, into_compile_errors, compile_error);
+    auto compile_errors = _shaders | views::filter(compile_failed)
+                                   | views::transform(compile_error);
 
     // failure if any shaders couldn't compile
-    if (not failed_shaders.empty()) {
+    if (ranges::any_of(_shaders, compile_failed)) {
 
         // reduce the errors into a single string
         _error = std::accumulate(compile_errors.begin(), compile_errors.end(),
