@@ -50,10 +50,9 @@ inline std::string shader_error(shader const & s) noexcept
     glGetShaderiv(s.id(), GL_INFO_LOG_LENGTH, &len);
 
     // get the error message
-    std::string message; message.reserve(len);
-    glGetShaderInfoLog(s.id(), len, nullptr, message.data());
-
-    return message;
+    char log[len];
+    glGetShaderInfoLog(s.id(), len, nullptr, log);
+    return log;
 }
 
 /**
@@ -91,7 +90,7 @@ shader::shader(GLenum shader_type, std::string const & source) noexcept
 
     // if the shader couldn't compile, clean up and set the error message
     if (is_compiled != GL_TRUE) {
-        _error = shader_error(*this);
+        _error = shader_error(*this) + source;
         glDeleteShader(_id); _id = 0;
     }
 }

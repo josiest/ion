@@ -15,9 +15,9 @@ namespace ion {
 
 /** Map file extensions to their respective shader-type */
 inline std::unordered_map<std::string, GLenum> const standard_shader_extensions{
-    {"vert", GL_VERTEX_SHADER}, {"tesc", GL_TESS_CONTROL_SHADER},
-    {"tese", GL_TESS_EVALUATION_SHADER}, {"geom", GL_GEOMETRY_SHADER},
-    {"frag", GL_FRAGMENT_SHADER}, {"comp", GL_COMPUTE_SHADER}
+    {".vert", GL_VERTEX_SHADER}, {".tesc", GL_TESS_CONTROL_SHADER},
+    {".tese", GL_TESS_EVALUATION_SHADER}, {".geom", GL_GEOMETRY_SHADER},
+    {".frag", GL_FRAGMENT_SHADER}, {".comp", GL_COMPUTE_SHADER}
 };
 
 /**
@@ -78,10 +78,10 @@ inline std::string shader_program_error(shader_program const & program) noexcept
     glGetProgramiv(program.id(), GL_INFO_LOG_LENGTH, &len);
 
     // get the error message
-    std::string message; message.reserve(len);
-    glGetProgramInfoLog(program.id(), len, nullptr, message.data());
+    char log[len];
+    glGetProgramInfoLog(program.id(), len, nullptr, log);
 
-    return message;
+    return log;
 }
 
 shader_program::shader_program(std::string const & vertex_source) noexcept
@@ -92,6 +92,11 @@ shader_program::shader_program(shader_program::source_map const & sources) noexc
     : _id{glCreateProgram()}
 {
     namespace ranges = std::ranges;
+
+    if (_id == 0) {
+        _error = "An error occured while creating the shader program!";
+        return;
+    }
 
     // failure if no vertex shader supplied
     if (not sources.contains(GL_VERTEX_SHADER)) {
@@ -132,18 +137,12 @@ shader_program::shader_program(shader_program::source_map const & sources) noexc
     auto into_compile_errors = std::back_inserter(compile_errors);
     ranges::transform(failed_shaders, into_compile_errors, compile_error);
 
-    // join two strings
-    auto string_join = [](std::string a, std::string const & b) {
-        return std::move(a) + '\n' + b;
-    };
-
     // failure if any shaders couldn't compile
     if (not failed_shaders.empty()) {
 
         // reduce the errors into a single string
-        auto error_message =
-            std::accumulate(compile_errors.begin(), compile_errors.end(),
-                            compile_errors.back(), string_join);
+        _error = std::accumulate(compile_errors.begin(), compile_errors.end(),
+                                 std::string{});
 
         // clean up
         _shaders.clear();
