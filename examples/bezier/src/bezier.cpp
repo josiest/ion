@@ -2,21 +2,19 @@
 #include "serialize/shader.hpp"
 
 #include <ion/ion.hpp>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include <numeric>
-#include <fstream>
-#include <filesystem>
+#include <ranges>
+#include <algorithm>
 
 // aliases and literals
 using namespace std::string_literals;
 namespace ranges = std::ranges;
 namespace views = std::views;
-namespace fs = std::filesystem;
 
 int main()
 {
@@ -73,7 +71,7 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     if (ranges::any_of(bezier_sources, serialize::load_failed)) {
 
         // initialize the error with a helpful message
-        std::stringstream message;
+        std::ostringstream message;
         message << "The following shader files failed to load:" << std::endl;
 
         // put the error message for each file on a new line
