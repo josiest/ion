@@ -4,14 +4,18 @@
 #include <ion/gl.hpp>
 
 #include <vector>
+#include <utility>
+
 #include <string>
+#include <fstream>
 #include <filesystem>
 
 /** Get the file names associated with a shader name relative to a path */
-std::vector<std::filesystem::path>
-shader_filenames(std::string const & shader_name,
-                 std::filesystem::path const & shader_dir) noexcept;
+std::vector<std::pair<std::filesystem::path, std::ifstream>>
+stream_shader_sources(std::string const & shader_name,
+                      std::filesystem::path const & shader_dir) noexcept;
 
-/** Load shader source files and map them according to their shader-type */
+/** Convert a vector path-stream pairs into shader source-map */
 ion::shader_program::source_map
-shader_sources(std::vector<std::filesystem::path> const & source_paths) noexcept;
+load_shader_sources(std::vector<std::pair<std::filesystem::path,
+                                          std::ifstream>> & streams) noexcept;

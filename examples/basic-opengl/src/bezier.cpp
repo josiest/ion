@@ -58,14 +58,19 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
         return;
     }
 
-    auto simple_paths = shader_filenames("simple", "../shaders");
-    auto simple_sources = shader_sources(std::move(simple_paths));
+    // if any of the shader sources fail to load print out which ones
+    auto simple_streams = stream_shader_sources("simple", "../shaders");
+    auto is_bad = [](auto const & pair) { return pair.second.bad(); };
+    if (ranges::any_of(simple_streams, is_bad)) {
+        _error = "some sources failed to load!";
+        return;
+    }
 
+    // failure if the shader sources fail to compile
     _shaders.push_back(std::make_unique<ion::shader_program>(
-                       std::move(simple_sources)));
-
+                       load_shader_sources(simple_streams))
+    );
     if (_shaders.back()->bad()) {
         _error = _shaders.back()->error();
-        return;
     }
 }

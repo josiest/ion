@@ -124,6 +124,7 @@ shader_program::shader_program(shader_program::source_map const & sources) noexc
                                        + pair.second->error();
     };
 
+    // get all the error message of the shaders that failed to compile
     auto compile_errors = _shaders | views::filter(compile_failed)
                                    | views::transform(compile_error);
 
