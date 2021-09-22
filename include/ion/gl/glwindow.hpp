@@ -105,10 +105,6 @@ public:
     inline bool bad() const noexcept
     { return nullptr == _window or nullptr == _glcontext; }
 
-    /** Determine if vsync was set */
-    inline bool is_vsynced() const noexcept
-    { return good() and _error.empty(); }
-
     /** The error message explaining why initialization failed */
     inline std::string error() const noexcept { return _error; }
 

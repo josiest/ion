@@ -10,18 +10,34 @@
 #include <fstream>
 #include <utility>
 
+// aliases for convenience
 namespace fs = std::filesystem;
 namespace views = std::views;
-namespace ranges = std::ranges;
-
-// some aliases for convenience
-using stream_pair = std::pair<fs::path, std::ifstream>;
-using source_map = ion::shader_program::source_map;
 auto const & extensions = ion::standard_shader_extensions;
 
-std::vector<stream_pair>
-stream_shader_sources(std::string const & shader_name,
-                      fs::path const & shader_dir) noexcept
+load_info load_path(std::string const & path)
+{
+    // load the file into a stream
+    std::ifstream stream{path};
+    bool success = false;   // determines if the load was successful
+    std::string source;     // the loaded source or an error message
+
+    try {
+        // cause an exception if the stream couldn't load
+        stream.exceptions(std::ifstream::failbit);
+        // read the file (causes an exception if the file is actually a directory)
+        source.assign(std::istreambuf_iterator<char>(stream), {});
+        success = true; // finally, signal success
+    }
+    catch (std::ios_base::failure & err) {
+        source = strerror(errno); // get the error message set by the iostreams
+    }
+    return std::make_tuple(path, success, std::move(source));
+}
+
+std::vector<load_info>
+load_shader_sources(std::string const & shader_name,
+                    fs::path const & shader_dir) noexcept
 {
     // an iterator of all paths in the shader directory
     std::vector<fs::path> all_paths(fs::directory_iterator{shader_dir}, {});
@@ -32,31 +48,16 @@ stream_shader_sources(std::string const & shader_name,
                extensions.contains(path.extension());
     };
 
-    // load a path into an ifstream
-    auto load_path = [](auto const & path) {
-        return std::make_pair(path, std::ifstream{path});
-    };
-
     // only load the shaders with valid extensions
     auto sources = all_paths | views::filter(is_shader_source)
                              | views::transform(load_path);
 
-    return std::vector<stream_pair>(sources.begin(), sources.end());
+    return std::vector<load_info>(sources.begin(), sources.end());
 }
 
-source_map load_shader_sources(std::vector<stream_pair> & streams) noexcept
+std::pair<GLenum, std::string> load_source(load_info & info) noexcept
 {
-    // convert a path-stream pair into a type-source pair
-    auto as_source_pair = [](auto & pair) {
-        std::string source(std::istreambuf_iterator<char>(pair.second), {});
-        GLenum shader_type = extensions.at(pair.first.extension());
-        return std::make_pair(shader_type, std::move(source));
-    };
-
-    // load all the path-stream pairs into a source map
-    source_map sources;
-    auto into_sources = std::inserter(sources, sources.end());
-    ranges::transform(streams, into_sources, as_source_pair);
-
-    return sources;
+    using namespace std;
+    GLenum shader_type = extensions.at(get<fs::path>(info).extension());
+    return make_pair(shader_type, move(get<string>(info)));
 }

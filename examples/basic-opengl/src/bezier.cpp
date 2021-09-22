@@ -8,8 +8,15 @@
 #include <sstream>
 #include <string>
 
+#include <numeric>
+#include <fstream>
+#include <filesystem>
+
+// aliases and literals
 using namespace std::string_literals;
 namespace ranges = std::ranges;
+namespace views = std::views;
+namespace fs = std::filesystem;
 
 int main()
 {
@@ -53,22 +60,38 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
 
     // failure if flew couldn't initialize
     if (glew_error != GLEW_OK) {
+        // glew erorr strings are unsigned chars - reinterpret to c-string
         _error = "Glew couldn't initialize: "s +
             reinterpret_cast<const char *>(glewGetErrorString(glew_error));
         return;
     }
 
+    // try to load the shader sources into filestreams
+    auto simple_sources = load_shader_sources("simple", "../shaders");
+
     // if any of the shader sources fail to load print out which ones
-    auto simple_streams = stream_shader_sources("simple", "../shaders");
-    auto is_bad = [](auto const & pair) { return pair.second.bad(); };
-    if (ranges::any_of(simple_streams, is_bad)) {
-        _error = "some sources failed to load!";
+    if (ranges::any_of(simple_sources, load_failed)) {
+
+        // initialize the error with a helpful message
+        std::stringstream message;
+        message << "The following shader files failed to load:" << std::endl;
+
+        // put the error message for each file on a new line
+        auto messages = simple_sources | views::filter(load_failed)
+                                       | views::transform(load_error);
+        ranges::copy(messages, std::ostream_iterator<std::string>(message, "\n"));
+        _error = message.str();
         return;
     }
 
+    // convert the load-info to a source map
+    ion::shader_program::source_map simple_shader;
+    auto into_shader = std::inserter(simple_shader, simple_shader.end());
+    ranges::transform(simple_sources, into_shader, load_source);
+
     // failure if the shader sources fail to compile
     _shaders.push_back(std::make_unique<ion::shader_program>(
-                       load_shader_sources(simple_streams))
+                       std::move(simple_shader))
     );
     if (_shaders.back()->bad()) {
         _error = _shaders.back()->error();
