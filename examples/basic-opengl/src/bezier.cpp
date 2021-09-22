@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 using namespace std::string_literals;
@@ -20,13 +21,6 @@ int main()
         std::cout << example.error() << std::endl;
         return 1;
     }
-    auto simple_paths = shader_filenames("simple", "../shaders");
-    auto simple_sources = shader_sources(simple_paths);
-
-    ranges::for_each(simple_sources, [](auto const & pair) {
-        std::cout << pair.second << std::endl;
-    });
-    // otherwise run the example
     example.run();
 }
 
@@ -62,5 +56,15 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
             reinterpret_cast<const char *>(glewGetErrorString(glew_error));
         return;
     }
+
+    auto simple_paths = shader_filenames("simple", "../shaders");
+    _shaders.push_back(std::make_unique<ion::shader_program>(
+                       shader_sources(std::move(simple_paths))));
+
+    if (_shaders.back()->bad()) {
+        std::cout << _shaders.back()->error();
+        return;
+    }
+
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 }

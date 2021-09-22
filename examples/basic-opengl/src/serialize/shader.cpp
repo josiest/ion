@@ -50,7 +50,7 @@ shader_sources(std::vector<fs::path> const & source_paths) noexcept
     // load the source code of a path
     auto load_source = [&extensions](fs::path const & path) {
         std::ifstream stream{path};
-        std::string source(std::istream_iterator<char>{stream}, {});
+        std::string source(std::istreambuf_iterator<char>{stream}, {});
         return std::make_pair(extensions.at(path.extension()), std::move(source));
     };
 
