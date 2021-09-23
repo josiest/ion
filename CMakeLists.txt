@@ -1,10 +1,10 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 project(ion)
 
 # versioning
 set(ion_MAJOR_VERSION 0)
-set(ion_MINOR_VERSION 3)
+set(ion_MINOR_VERSION 4)
 set(ion_PATCH_VERSION 1)
 set(ion_VERSION
     ${ion_MAJOR_VERSION}.${ion_MINOR_VERSION}.${ion_PATCH_VERSION})
@@ -16,47 +16,12 @@ include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# --- compile library ---
-
-# declare sources
+# specify file interface
 set(ion_SRCEXT cpp)
-file(GLOB_RECURSE SOURCES src/*.${ion_SRCEXT})
-
-# compile library
-add_library(ion STATIC ${SOURCES})
-
-# specify header file directories for building/installing
-target_include_directories(ion PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-# find SDL2 and SDL2_image
-include(FindPkgConfig)
-pkg_search_module(SDL2 REQUIRED sdl2)
-pkg_search_module(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
-
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS})
-target_link_libraries(ion ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
-
-# --- export library ---
-
-# specify the library targets
-install(TARGETS ion
-    EXPORT ionTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-# declare headers
 set(ion_HEXT hpp)
-file(GLOB_RECURSE HEADERS include/*.${ion_HEXT})
+set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# install header files into installation include dir
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-# install the export details
-install(EXPORT ionTargets
-    FILE ionTargets.cmake
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/ion/cmake)
+add_subdirectory(src)
 
 # --- create package for library ---
 
@@ -91,5 +56,5 @@ install(FILES
 
 # allow exporting from build tree
 export(EXPORT ionTargets
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake)
-
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake
+    NAMESPACE ion::)
