@@ -55,7 +55,7 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       _player{_player_settings.create(_entities)}
 {
     // check if sdl resources initialized properly
-    if (not _sdl.is_ok()) {
+    if (_sdl.bad()) {
         _error = _sdl.error(); return;
     }
     if (not _window.is_ok()) {
