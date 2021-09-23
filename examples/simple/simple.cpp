@@ -1,5 +1,5 @@
 #include <ion/ion.hpp>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <cmath>
 
 void render(ion::renderable_window auto & window);
