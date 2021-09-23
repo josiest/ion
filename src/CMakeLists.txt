@@ -12,13 +12,11 @@ target_include_directories(ion PUBLIC
     $<BUILD_INTERFACE:${ion_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# find SDL2 and SDL2_image
-include(FindPkgConfig)
-pkg_search_module(SDL2 REQUIRED sdl2)
-pkg_search_module(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
+# find SDL2
+find_package(SDL2 REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2IMAGE_INCLUDE_DIRS})
-target_link_libraries(ion ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
+include_directories(SDL2::SDL2)
+target_link_libraries(ion SDL2::SDL2)
 
 # --- export library ---
 
