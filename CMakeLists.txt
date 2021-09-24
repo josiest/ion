@@ -22,6 +22,7 @@ set(ion_HEXT hpp)
 set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
+add_subdirectory(src/gl)
 
 # --- create package for library ---
 
@@ -50,11 +51,16 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
 
 # install the generated files
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/ionConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/ionConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
+        ${CMAKE_CURRENT_BINARY_DIR}/ionConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/ionConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
+
+# install the include files
+install(DIRECTORY ${ion_INCLUDE_DIR}/ion
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.${ion_HEXT}")
 
 # allow exporting from build tree
 export(EXPORT ionTargets
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake
-    NAMESPACE ion::)
+       FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake
+       NAMESPACE ion::)

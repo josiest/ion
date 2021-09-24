@@ -26,7 +26,9 @@ using attr_pair = std::pair<SDL_GLattr, int>;
 
 /** Set a GL attribute */
 inline void set_glattr(attr_pair const & item)
-{ SDL_GL_SetAttribute(item.first, item.second); }
+{
+    SDL_GL_SetAttribute(item.first, item.second);
+}
 
 /** Determine if the GL attribute is set properly */
 inline bool glattr_is_set(attr_pair const & item) {
@@ -47,7 +49,7 @@ public:
      * \param window the underlying SDL_Window
      * \param SDL_GLContext the underlying SDL_GLContext
      */
-    inline glwindow(SDL_Window * window, SDL_GLContext glcontext);
+    glwindow(SDL_Window * window, SDL_GLContext glcontext) noexcept;
 
     /**
      * Create a basic glwindow
@@ -66,10 +68,10 @@ public:
      *
      * GL attributes default to use the 3.1 core profile
      */
-    inline glwindow(std::string const & title,
-                    std::uint32_t width, std::uint32_t height,
-                    std::uint32_t flags=0,
-                    glcontext_args const & attributes=default_gl_attributes);
+    glwindow(std::string const & title,
+             std::uint32_t width, std::uint32_t height,
+             std::uint32_t flags=0,
+             glcontext_args const & attributes=default_gl_attributes) noexcept;
 
     /**
      * Create a glew window
@@ -90,26 +92,24 @@ public:
      *
      * GL attributes default to use the 3.1 core profile
      */
-    inline glwindow(std::string const & title, int x, int y,
-                    std::uint32_t width, std::uint32_t height,
-                    std::uint32_t flags=0,
-                    glcontext_args const & attributes=default_gl_attributes);
+    glwindow(std::string const & title, int x, int y,
+             std::uint32_t width, std::uint32_t height,
+             std::uint32_t flags=0,
+             glcontext_args const & attributes=default_gl_attributes) noexcept;
 
-    inline ~glwindow();
-
-    /** Determine if the window initialized properly */
-    inline bool good() const noexcept
-    { return _window != nullptr and _glcontext != nullptr; }
+    ~glwindow();
 
     /** Determine if the window enountered an unrecoverable error */
-    inline bool bad() const noexcept
-    { return nullptr == _window or nullptr == _glcontext; }
+    inline bool operator!() const noexcept
+    {
+        return nullptr == _window or nullptr == _glcontext;
+    }
 
     /** The error message explaining why initialization failed */
-    inline std::string error() const noexcept { return _error; }
+    inline std::string const & error() const noexcept { return _error; }
 
     /** The underlying SDL_Window */
-    inline SDL_Window * sdl_window() noexcept { return _window; }
+    inline operator SDL_Window *() noexcept { return _window; }
 
     /** The underyling SDL_GLContxt */
     inline SDL_GLContext gl_context() noexcept { return _glcontext; }
@@ -117,77 +117,5 @@ private:
     SDL_Window * _window;
     SDL_GLContext _glcontext;
     std::string _error;
-
-    void _init_glew() noexcept;
 };
-
-glwindow::glwindow(SDL_Window * window, SDL_GLContext glcontext)
-    : _window{window}, _glcontext{glcontext}
-{
-    if (not window and not glcontext) {
-        _error = "window and glcontext initialized as null"; return;
-    }
-    if (not window) {
-        _error = "window initialized as null";
-        SDL_GL_DeleteContext(_glcontext); _glcontext = nullptr;
-        return;
-    }
-    if (not glcontext) {
-        _error = "glcontext initialized as null";
-        SDL_DestroyWindow(_window); _window = nullptr;
-        return;
-    }
-}
-
-glwindow::glwindow(std::string const & title,
-                   std::uint32_t width, std::uint32_t height,
-                   std::uint32_t flags, glcontext_args const & attributes)
-
-    : glwindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-               width, height, flags, attributes)
-{}
-
-glwindow::glwindow(std::string const & title, int x, int y,
-                   std::uint32_t width, std::uint32_t height,
-                   std::uint32_t flags, glcontext_args const & attributes)
-{
-    namespace ranges = std::ranges;
-
-    // include opengl regardless
-    flags |= SDL_WINDOW_OPENGL;
-    // exclude other renderer-specific flags
-    flags &= ~(SDL_WINDOW_VULKAN | SDL_WINDOW_METAL);
-
-    // try to create the window
-    _window = SDL_CreateWindow(title.c_str(), x, y, width, height, flags);
-    if (not _window) { _error = SDL_GetError(); return; }
-
-    // try to set the gl attributes
-    ranges::for_each(attributes, &set_glattr);
-    if (not ranges::all_of(attributes, &glattr_is_set)) {
-        _error = SDL_GetError();
-        SDL_DestroyWindow(_window); _window = nullptr; // clean up
-        return;
-    }
-
-    // try to create the gl context
-    _glcontext = SDL_GL_CreateContext(_window);
-    if (not _glcontext) {
-        _error = SDL_GetError();
-        SDL_DestroyWindow(_window); _window = nullptr; // clean up
-        return;
-    }
-}
-
-glwindow::~glwindow()
-{
-    if (_glcontext) {
-        SDL_GL_DeleteContext(_glcontext);
-        _glcontext = nullptr;
-    }
-    if (_window) {
-        SDL_DestroyWindow(_window);
-        _window = nullptr;
-    }
-}
 }

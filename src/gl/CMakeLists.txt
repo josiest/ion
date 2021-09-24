@@ -1,37 +1,34 @@
 # --- compile library ---
 
 # declare sources
-file(GLOB_RECURSE ion_SOURCES *.${ion_SRCEXT})
-
-# don't include gl component
-file(GLOB_RECURSE ion_gl_SOURCES gl/*.${ion_SRCEXT})
-list(REMOVE_ITEM ion_SOURCES ${ion_gl_SOURCES})
+file(GLOB_RECURSE gl_SOURCES *.${ion_SRCEXT})
 
 # compile library
-add_library(ion STATIC ${ion_SOURCES})
-add_library(ion::ion ALIAS ion)
+add_library(gl STATIC ${gl_SOURCES})
+add_library(ion::gl ALIAS gl)
 
 # specify header file directories for building/installing
-target_include_directories(ion PUBLIC
+target_include_directories(gl PUBLIC
     $<BUILD_INTERFACE:${ion_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-# find SDL2
+# find SDL2 and OpenGL
 find_package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
 
-include_directories(SDL2::SDL2)
-target_link_libraries(ion SDL2::SDL2)
+include_directories(SDL2::SDL2 OpenGL::OpenGL)
+target_link_libraries(gl SDL2::SDL2 OpenGL::OpenGL)
 
 # --- export library ---
 
 # specify the library targets
-install(TARGETS ion
-        EXPORT ionTargets
+install(TARGETS gl
+        EXPORT ionglTargets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # install the export details
-install(EXPORT ionTargets
-        FILE ionTargets.cmake
+install(EXPORT ionglTargets
+        FILE ionglTargets.cmake
         NAMESPACE ion::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
