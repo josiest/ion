@@ -2,15 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(pipes-example)
 
 set(CMAKE_CXX_STANDARD 20)
-find_package(SDL2 REQUIRED)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(ion_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../build)
-find_package(ion REQUIRED)
-
-file(GLOB_RECURSE SOURCES src/*.cpp)
-add_executable(pipes ${SOURCES})
-
-target_link_libraries(pipes PUBLIC ion SDL2)
-
 set(entt_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/entt)
-target_include_directories(pipes PUBLIC include ${entt_DIR})
+
+find_package(ion REQUIRED)
+find_package(SDL2 REQUIRED)
+
+file(GLOB_RECURSE sources src/*.cpp)
+add_executable(pipes ${sources})
+
+target_link_libraries(pipes ion::ion SDL2::SDL2)
+include_directories(pipes include ion::ion SDL2::SDL2 ${entt_DIR})

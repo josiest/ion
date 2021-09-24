@@ -10,6 +10,9 @@
 
 #include <random>
 #include <cstdint>
+#include <memory>
+
+#include <algorithm>
 
 class pipes {
 public:
@@ -18,8 +21,13 @@ public:
     pipes(std::uint32_t width, std::uint32_t height);
     void run();
 
-    inline bool is_ok() const noexcept { return _error.empty(); }
-    inline std::string error() const noexcept { return _error; }
+    inline bool bad() const noexcept
+    {
+        namespace ranges = std::ranges;
+        auto tile_is_bad = [](auto const & pair) { return pair.second->bad(); };
+        return _sdl.bad() or _window.bad() or _tiles.empty()
+                          or ranges::any_of(_tiles, tile_is_bad);
+    }
 
     // shared immutable resources
     inline tilemap const & tiles() const noexcept { return _tiles; }
@@ -43,7 +51,4 @@ private:
     // shared mutable resources
     engine_t _rng;
     pointset _placed_tiles;
-
-    // error handling
-    std::string _error;
 };

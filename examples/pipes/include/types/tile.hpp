@@ -4,7 +4,8 @@
 #include <utility>
 
 #include <unordered_map>
-#include <ion/graphics/image.hpp>
+#include <ion/graphics/surface.hpp>
+#include <memory>
 
 namespace tiles {
 
@@ -38,4 +39,4 @@ template<> struct hash<tiles::pair> {
 };
 }
 
-using tilemap = std::unordered_map<tiles::pair, ion::unique_surface>;
+using tilemap = std::unordered_map<tiles::pair, std::unique_ptr<ion::surface>>;

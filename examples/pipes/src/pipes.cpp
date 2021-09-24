@@ -1,4 +1,5 @@
 #include "pipes.hpp"
+#include "error.hpp"
 
 #include "systems/tile.hpp"
 #include "systems/input.hpp"
@@ -15,18 +16,21 @@
 #include <random>
 #include <iostream>
 
+#include <algorithm>
+
+namespace ranges = std::ranges;
+
 int main()
 {
     pipes game{800, 600};
 
     // crash if the game failed to initialize
-    if (not game.is_ok()) {
-        std::cout << game.error() << std::endl;
+    if (game.bad()) {
+        std::cout << get_error() << std::endl;
+        return 1;
     }
     // otherwise run the game
-    else {
-        game.run();
-    }
+    game.run();
 }
 
 pipes::pipes(std::uint32_t width, std::uint32_t height)
@@ -34,7 +38,6 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     : _window{"Pipes", width, height},
       _width{width}, _height{height},
 
-      // load the tile bitmap images
       _tiles{tiles::load_map()},
 
       // interface between grid-space and pixel-space
@@ -44,7 +47,8 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
-{}
+{
+}
 
 void pipes::run()
 {

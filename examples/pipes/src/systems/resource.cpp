@@ -9,8 +9,11 @@
 #include <SDL2/SDL_surface.h>
 
 // functionality
-#include <ion/graphics/image.hpp>
+#include <ion/graphics/surface.hpp>
 #include <utility>
+
+#include "error.hpp"
+#include <ion/error.hpp>
 
 namespace tiles {
 
@@ -23,7 +26,13 @@ std::string image_path(Name tilename, Rotation rotation)
 
 tilemap load_map()
 {
+    // keep track of the the files that fail to load
+    std::string error;
+    std::string sep = "";
+
+    // initialize the tilemap as empty, add tiles as we go
     tilemap tiles;
+
     // full cartesian product of tile names and rotations
     for (Name tilename : names) {
         for (Rotation rotation : rotations) {
@@ -32,16 +41,24 @@ tilemap load_map()
             auto const path = image_path(tilename, rotation);
 
             // load the surface as a unique pointer into the map
-            tiles.try_emplace({tilename, rotation},
-                              ion::load_surface(path), &SDL_FreeSurface);
+            tiles.emplace(std::make_pair(tilename, rotation),
+                          std::make_unique<ion::surface>(path));
+
+            // save the error message if loading failed
+            if (tiles.at({tilename, rotation})->bad()) {
+                error = sep + ion::get_error();
+                sep = "\n";
+            }
         }
     }
+    // set the game error message
+    set_error(error);
     return tiles;
 }
 
 SDL_Surface * get_surface(tilemap const & tiles, Name name, Rotation rotation)
 {
-    return tiles.at({name, rotation}).get();
+    return tiles.at({name, rotation})->sdl_surface();
 }
 
 }
