@@ -62,10 +62,10 @@ public:
     ~blit_window();
 
     /** The underyling SDL window */
-    inline SDL_Window * sdl_window() noexcept { return _window; }
+    inline operator SDL_Window *() noexcept { return _window; }
 
     /** Determine if the window encountered a non-recoverable error */
-    inline bool bad() const noexcept { return nullptr == _window; }
+    inline bool operator!() const noexcept { return nullptr == _window; }
 
     /** Get the error message explaining why initialization failed */
     inline std::string error() const noexcept { return _error; }
