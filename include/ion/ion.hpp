@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ion/sdl.hpp"
 #include "ion/window.hpp"
 #include "ion/events.hpp"
 

@@ -9,7 +9,7 @@ namespace ion {
  * Convertible to an SDL_Window pointer
  */
 template<class window_t>
-concept sdl_window_resource = std::convertible_to<window_t, SDL_Window *>;
+concept window_resource = std::convertible_to<window_t, SDL_Window *>;
 
 /**
  * Convertible to an SDL_Renderer pointer
@@ -22,5 +22,5 @@ concept renderer_resource = std::convertible_to<renderer_t, SDL_Renderer *>;
  */
 template<class window_t>
 concept renderable_window =
-    sdl_window_resource<window_t> && renderer_resource<window_t>;
+    window_resource<window_t> && renderer_resource<window_t>;
 }

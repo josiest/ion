@@ -28,11 +28,14 @@ public:
     surface(std::string const & path) noexcept;
     ~surface();
 
-    /** Determine if the surface encountered an unrecoverable error */
-    inline bool bad() const noexcept { return nullptr == _surface; }
+    /** Cast to the underlying SDL_Surface */
+    inline operator SDL_Surface *() noexcept { return _surface; }
 
-    /** The underlying SDL_Surface */
-    inline SDL_Surface * sdl_surface() noexcept { return _surface; }
+    /** Determine if the surface is not okay to use */
+    inline bool operator!() const noexcept { return nullptr == _surface; }
+
+    /** The error if the surface is not okay to use */
+    inline std::string const & error() const noexcept { return _error; }
 private:
     SDL_Surface * _surface;
     std::string _error;

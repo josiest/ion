@@ -1,4 +1,4 @@
-#include "ion/sdl/blit_window.hpp"
+#include "ion/window/blit_window.hpp"
 #include <SDL.h>
 #include <string>
 
