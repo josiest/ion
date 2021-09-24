@@ -13,31 +13,48 @@ a personal project, more features will be added as I need them.
 
 The goal is to eventually add ion to different c++ package managers, but I'm
 just a mere student and I don't have the time to do that right now. For now
-you'll need to download the source code and make it with cmake.
-
-I recommend adding this repository as a submodule for now:
-
-```console
-$ cd <project_directory>
-$ git submodule add https://github.com/josiest/ion.git external/ion
-```
-
-Then from there, you can use cmake to build the package
+you'll need to download the source code and build it with cmake, then install
+it in a place that other CMake projects can find it
 
 ```console
-$ mkdir external/ion/build && cd external/ion/build
+$ git clone https://github.com/josiest/ion.git <path/to/ion> && cd <path/to/ion>
+$ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 ```
 
-Finally add the following to your `CMakeLists.txt`
+Then if you're on linux, you should run
+
+```console
+$ sudo cmake --install . --prefix "/usr/local"
+```
+
+Finally, add the following to your `CMakeLists.txt`
 
 ```cmake
-set(ion_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/ion/build)
 find_package(ion REQUIRED)
 ...
-target_link_libraries(<project-name> PRIVATE ion)
+target_link_libraries(<project-name> PRIVATE ion::ion)
 ```
+
+If you're not on linux, you might consider installing it under an "external"
+folder in your project.
+
+```console
+$ cmake --install . --prefix "<path/to/project>/external"
+```
+
+Then you'd need to add the external folder to your cmake prefix path, as well as
+to your include directories.
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH <path/to/project>/external)
+include_directories(external)
+find_package(ion REQUIRED)
+...
+target_link_libraries(<project-name> PRIVATE ion::ion)
+```
+
 
 ## Examples
 
