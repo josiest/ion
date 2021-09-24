@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "error.hpp"
-#include <ion/error.hpp>
 
 namespace tiles {
 
@@ -45,8 +44,9 @@ tilemap load_map()
                           std::make_unique<ion::surface>(path));
 
             // save the error message if loading failed
-            if (tiles.at({tilename, rotation})->bad()) {
-                error = sep + ion::get_error();
+            auto const & surface = *tiles.at({tilename, rotation});
+            if (not surface) {
+                error = sep + surface.error();
                 sep = "\n";
             }
         }
@@ -58,7 +58,7 @@ tilemap load_map()
 
 SDL_Surface * get_surface(tilemap const & tiles, Name name, Rotation rotation)
 {
-    return tiles.at({name, rotation})->sdl_surface();
+    return *tiles.at({name, rotation});
 }
 
 }

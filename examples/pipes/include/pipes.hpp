@@ -24,9 +24,9 @@ public:
     inline bool bad() const noexcept
     {
         namespace ranges = std::ranges;
-        auto tile_is_bad = [](auto const & pair) { return pair.second->bad(); };
-        return _sdl.bad() or _window.bad() or _tiles.empty()
-                          or ranges::any_of(_tiles, tile_is_bad);
+        auto tile_is_bad = [](auto const & pair) { return not *pair.second; };
+        return not _sdl or not _window or _tiles.empty()
+                        or ranges::any_of(_tiles, tile_is_bad);
     }
 
     // shared immutable resources

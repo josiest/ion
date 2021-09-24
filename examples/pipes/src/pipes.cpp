@@ -48,6 +48,18 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
 {
+    if (not _sdl) {
+        set_error(_sdl.error());
+        return;
+    }
+    if (not _window) {
+        set_error(_window.error());
+        return;
+    }
+    auto tile_is_bad = [](auto const & pair) { return not *pair.second; };
+    if (_tiles.empty() or ranges::any_of(_tiles, tile_is_bad)) {
+        return;
+    }
 }
 
 void pipes::run()
