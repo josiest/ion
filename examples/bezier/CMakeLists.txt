@@ -2,18 +2,16 @@ cmake_minimum_required(VERSION 3.18)
 project(opengl-example)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-
-set(ion_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../build)
-find_package(ion REQUIRED)
+find_package(ion REQUIRED COMPONENTS gl)
 
 file(GLOB_RECURSE sources src/*.cpp)
-add_executable(bezier ${sources})
+add_executable(bezier src/bezier.cpp)
 
-include_directories(bezier PUBLIC
-    src ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
-
-target_link_libraries(bezier PUBLIC ion SDL2 OpenGL::OpenGL GLEW::GLEW)
+include_directories(src
+    ion::ion SDL2::SDL2 OpenGL::OpenGL)
+target_link_libraries(bezier PRIVATE
+    ion::ion ion::gl SDL2::SDL2 OpenGL::OpenGL)
