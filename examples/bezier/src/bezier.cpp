@@ -1,6 +1,8 @@
 #include "bezier.hpp"
 
 #include <ion/ion.hpp>
+#include <ion/gl.hpp>
+
 #include <SDL.h>
 
 #include <iostream>
@@ -42,6 +44,7 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     : _window{"Bezier example", width, height}
 {
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+
     // failure if sdl resources failed to initialize
     if (not _sdl) {
         _error = "SDL couldn't initialize: "s + _sdl.error();
@@ -49,6 +52,12 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
     }
     if (not _window) {
         _error = "Window couldn't initialize: "s + _window.error();
+        return;
+    }
+
+    ion::shader vertex_shader{"../shaders/bezier.vert"};
+    if (not vertex_shader) {
+        _error = "Couldn't compile vertex shader: " + vertex_shader.error();
         return;
     }
 

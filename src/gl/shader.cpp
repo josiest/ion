@@ -41,7 +41,7 @@ shader::shader(fs::path const & path) noexcept
     }
     // there might have been some os error in the process
     if (ec) {
-        _error = ec.message();
+        _error = path.string() + ": " + ec.message();
         return;
     }
 
@@ -51,7 +51,7 @@ shader::shader(fs::path const & path) noexcept
 
     // if it was found, create the shader
     if (standard_shader_extensions.end() == extension_search) {
-        _error = path.extension().string() + " isn't a valid shader extension";
+        _error = path.string() + " doesn't have a valid shader file extension";
         return;
     }
 
@@ -60,7 +60,7 @@ shader::shader(fs::path const & path) noexcept
 
     // clean up if the file couldn't load
     if (not fp) {
-        _error = std::strerror(errno);
+        _error = path.string() + ": " + std::strerror(errno);
         return;
     }
 
@@ -73,7 +73,7 @@ shader::shader(fs::path const & path) noexcept
 
     // clean up if reading the file failed
     if (std::ferror(fp)) {
-        _error = std::strerror(errno);
+        _error = path.string() + ": " + std::strerror(errno);
         std::fclose(fp);
         return;
     }
@@ -82,7 +82,7 @@ shader::shader(fs::path const & path) noexcept
     std::fclose(fp);
 
     if (source.empty()) {
-        _error = "shader source is empty";
+        _error = path.string() + " was read as empty";
         return;
     }
 
@@ -144,16 +144,19 @@ bool shader::_compile(std::string const & source) noexcept
 std::string gl_shader_error(shader const & s) noexcept
 {
     if (not glIsShader(s)) {
-        return "Couldn't get shader error because shader id is invalid";
+        return "Couldn't get shader error because shader is invalid";
     }
     // get the length of the shader info message
-    int len;
+    GLint len;
     glGetShaderiv(s, GL_INFO_LOG_LENGTH, &len);
+    if (len == 0) {
+        return "Couldn't get shader error because there is none!";
+    }
 
     // get the error message
-    char log[len];
-    glGetShaderInfoLog(s, len, nullptr, log);
-    return log;
+    std::string error(len, '\0');
+    glGetShaderInfoLog(s, error.size(), nullptr, error.data());
+    return error;
 }
 
 std::string shader_name(GLenum shader_type) noexcept
