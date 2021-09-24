@@ -2,9 +2,12 @@
 
 #include "ion/gl/shader.hpp"
 
+#include <unordered_map>
+#include <initializer_list>
+
+#include <filesystem>
 #include <string>
 #include <memory>
-#include <unordered_map>
 
 namespace ion {
 
@@ -27,6 +30,12 @@ public:
     explicit shader_program(std::string const & vertex_source) noexcept;
 
     /**
+     * Create a shader program from a list of source files
+     * \param paths the source files of the shaders to use
+     */
+    shader_program(std::initializer_list<std::filesystem::path> paths) noexcept;
+
+    /**
      * Create a shader program from a map of shader sources
      * \param sources a map of shader-types to their source code
      */
@@ -37,7 +46,10 @@ public:
     inline operator GLuint() const noexcept { return _id; }
 
     /** Determine if this shader program is not okay to use */
-    inline bool operator!() const noexcept { return _id == 0; }
+    inline bool operator!() const noexcept
+    {
+        return _id == 0 or not glIsProgram(_id);
+    }
 
     /** The error if this shader program isn't okay to use */
     inline std::string const & error() const noexcept { return _error; }

@@ -5,8 +5,10 @@
 #include "ion/gl/shader_program.hpp"
 
 #include <unordered_map>
+#include <initializer_list>
 #include <utility>
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -14,9 +16,11 @@
 #include <numeric>
 #include <ranges>
 
-// aliases and namespaces
+// aliases and namespaces for convenience
 namespace ranges = std::ranges;
 namespace views = std::views;
+namespace fs = std::filesystem;
+
 using namespace std::string_literals;
 
 namespace ion {
@@ -27,6 +31,18 @@ shader_program::shader_program(std::string const & vertex_source) noexcept
     _shaders.try_emplace(GL_VERTEX_SHADER,
                          std::make_unique<shader>(GL_VERTEX_SHADER, vertex_source));
 
+    _validate_program() and _validate_shaders() and _link_shaders();
+}
+
+shader_program::shader_program(std::initializer_list<fs::path> paths) noexcept
+    : _id{glCreateProgram()}
+{
+    // add all specified shaders to the program
+    for (auto const & path : paths) {
+        shader s{path};
+        auto const type = s.type();
+        _shaders.try_emplace(type, std::make_unique<shader>(std::move(s)));
+    }
     _validate_program() and _validate_shaders() and _link_shaders();
 }
 
@@ -41,16 +57,10 @@ bool shader_program::_validate_program() noexcept
 
 bool shader_program::_validate_shaders() noexcept
 {
-    // make sure the program has a vertex shader
-    auto const vertex_search = _shaders.find(GL_VERTEX_SHADER);
-    if (_shaders.end() == vertex_search) {
-        _error = "program must at least have a vertex shader";
-        _shaders.clear(); glDeleteProgram(_id); _id = 0;
-        return false;
-    }
-
     // make sure the shaders compiled correctly
-    auto shader_is_bad = [](auto const & pair) { return not *pair.second; };
+    auto shader_is_bad = [](auto const & pair) {
+        return not *pair.second;
+    };
     auto shader_error = [](auto const & pair) { return pair.second->error(); };
 
     if (ranges::any_of(_shaders, shader_is_bad)) {
@@ -60,10 +70,17 @@ bool shader_program::_validate_shaders() noexcept
                                | views::transform(shader_error);
 
         // and compile them into one long message
-        _error = "One or more shaders failed to compile:\n"s
+        _error = "One or more shaders failed to compile:"s
                + std::accumulate(errors.begin(), errors.end(), "\n"s);
         // then clean up
         // TODO: support non-vertex shader-failure as a recoverable failure
+        _shaders.clear(); glDeleteProgram(_id); _id = 0;
+        return false;
+    }
+    // make sure the program has a vertex shader
+    auto const vertex_search = _shaders.find(GL_VERTEX_SHADER);
+    if (_shaders.end() == vertex_search) {
+        _error = "program must at least have a vertex shader";
         _shaders.clear(); glDeleteProgram(_id); _id = 0;
         return false;
     }
