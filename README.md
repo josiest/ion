@@ -63,66 +63,73 @@ a fibonacci-like gradient pattern to the screen.
 
 ```cpp
 #include <ion/ion.hpp>
-#include <SDL2/SDL.h>
+#include <SDL.h>
+
 #include <cmath>
+#include <cstdint>
+
+#include <iostream>
 
 void render(ion::renderable_window auto & window);
+SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t);
 
 int main()
 {
-    // initialize sdl - initialize this before other sdl resources
-    ion::sdl_context sdl;
-
     // create the sdl event-handler: quit when sdl's quit event is triggered
     ion::event_system events;
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
-    // create a window, specifying the title and dimensions
-    auto window = ion::render_window("A simple window", 800, 600);
+    // initialize sdl - initialize this before other sdl resources
+    ion::sdl_context sdl;
 
-    // render once at the beginning of the program
-    render(window);
+    // create a window, specifying the title and dimensions
+    ion::render_window window{"A simple window", 800, 600};
+    render(window); // render once at the beginning of the program
 
     // busy loop until the user quits
-    while (!ion::input::has_quit()) {
+    while (not ion::input::has_quit()) {
         events.process_queue();
     }
+}
+
+// linearly interpolate between two colors
+SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
+{
+    auto intlerp = [](std::uint8_t x, std::uint8_t y, float t) {
+        return static_cast<std::uint8_t>(std::lerp(x, y, t));
+    };
+    return SDL_Color{intlerp(a.r, b.r, t), intlerp(a.g, b.g, t),
+                     intlerp(a.b, b.b, t), 0xff};
 }
 
 // draw a fibonacci-like pattern
 void render(ion::renderable_window auto & window)
 {
     // the initial color
-    int r0 = 48, g0 = 118, b0 = 217;
+    SDL_Color blue{48, 118, 217, 255};
     // the final color
-    int r1 = 219, g1 = 0, b1 = 66;
+    SDL_Color red{219, 0, 66, 255};
 
     // clear the screen
-    auto renderer = window.sdl_renderer();
-    SDL_SetRenderDrawColor(renderer, r1, g1, b1, 0xff);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(window, red.r, red.g, red.b, red.a);
+    SDL_RenderClear(window);
 
     // the dimensions of the rect to draw
     SDL_Rect rect{0, 0, 0, 0};
-    SDL_GetWindowSize(window.sdl_window(), &rect.w, &rect.h);
+    SDL_GetWindowSize(window, &rect.w, &rect.h);
     rect.w /= 2;
 
     // draw the fibonacci-like patern
     int n = 8;
-    auto intlerp = [](int a, int b, float t) {
-        return static_cast<int>(std::lerp(a, b, t));
-    };
     for (int k = 0; k < n; k++) {
 
         // calculate the intermediate color
         float const t = static_cast<float>(k)/n;
-        int const r = intlerp(r0, r1, t);
-        int const g = intlerp(g0, g1, t);
-        int const b = intlerp(b0, b1, t);
+        auto const c = lerp(blue, red, t);
 
         // draw the rect
-        SDL_SetRenderDrawColor(renderer, r, g, b, 0xff);
-        SDL_RenderFillRect(renderer, &rect);
+        SDL_SetRenderDrawColor(window, c.r, c.g, c.b, c.a);
+        SDL_RenderFillRect(window, &rect);
 
         // split in half horizontally when k is even
         if (k % 2 == 0) {
@@ -135,7 +142,7 @@ void render(ion::renderable_window auto & window)
             rect.w /= 2;
         }
     }
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(window);
 }
 ```
 
