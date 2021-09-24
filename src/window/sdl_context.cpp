@@ -1,4 +1,4 @@
-#include "ion/sdl/context.hpp"
+#include "ion/window/sdl_context.hpp"
 
 #include <SDL.h>
 #include <cstdint>
@@ -17,7 +17,7 @@ sdl_context::sdl_context(std::uint32_t flags) noexcept
 sdl_context::~sdl_context()
 {
     // quit sdl if it was initialized
-    if (good()) {
+    if (_error.empty()) {
         SDL_Quit();
     }
 }

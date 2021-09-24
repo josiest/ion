@@ -9,17 +9,13 @@ namespace ion {
  * Convertible to an SDL_Window pointer
  */
 template<class window_t>
-concept sdl_window_resource = requires(window_t window) {
-    { window.sdl_window() } -> std::same_as<SDL_Window *>;
-};
+concept sdl_window_resource = std::convertible_to<window_t, SDL_Window *>;
 
 /**
  * Convertible to an SDL_Renderer pointer
  */
 template<class renderer_t>
-concept renderer_resource = requires(renderer_t renderer) {
-    { renderer.sdl_renderer() } -> std::same_as<SDL_Renderer *>;
-};
+concept renderer_resource = std::convertible_to<renderer_t, SDL_Renderer *>;
 
 /**
  * Convertible to an SDL_Window pointer and an SDL_Renderer pointer

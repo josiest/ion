@@ -1,4 +1,4 @@
-#include "ion/sdl/render_window.hpp"
+#include "ion/window/render_window.hpp"
 
 #include <SDL.h>
 #include <cstdint>
@@ -72,14 +72,5 @@ render_window::~render_window()
         SDL_DestroyWindow(_window);
         _window = nullptr;
     }
-}
-
-bool render_window::is_ok() const noexcept
-{
-    return _window != nullptr and _renderer != nullptr;
-}
-
-std::string render_window::error() const noexcept {
-    return _error;
 }
 }

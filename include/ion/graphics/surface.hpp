@@ -35,5 +35,6 @@ public:
     inline SDL_Surface * sdl_surface() noexcept { return _surface; }
 private:
     SDL_Surface * _surface;
+    std::string _error;
 };
 }

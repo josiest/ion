@@ -2,6 +2,8 @@
 #include <SDL.h>
 #include <cmath>
 
+#include <iostream>
+
 void render(ion::renderable_window auto & window);
 
 int main()
@@ -9,12 +11,25 @@ int main()
     // initialize sdl - initialize this before other sdl resources
     ion::sdl_context sdl;
 
+    // make sure sdl properly initialized
+    if (not sdl) {
+        std::cout << "Couldn't initialize SDL: " << sdl.error() << std::endl;
+        return 1;
+    }
+
+    // create a window, specifying the title and dimensions
+    ion::render_window window{"A simple window", 800, 600};
+
+    // make sure the window properly initialized
+    if (not window) {
+        std::cout << "Couldn't create a window: "
+                  << window.error() << std::endl;
+        return 1;
+    }
+
     // create the sdl event-handler: quit when sdl's quit event is triggered
     ion::event_system events;
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
-
-    // create a window, specifying the title and dimensions
-    auto window = ion::render_window("A simple window", 800, 600);
 
     // render once at the beginning of the program
     render(window);
@@ -34,13 +49,12 @@ void render(ion::renderable_window auto & window)
     int r1 = 219, g1 = 0, b1 = 66;
 
     // clear the screen
-    auto renderer = window.sdl_renderer();
-    SDL_SetRenderDrawColor(renderer, r1, g1, b1, 0xff);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(window, r1, g1, b1, 0xff);
+    SDL_RenderClear(window);
 
     // the dimensions of the rect to draw
     SDL_Rect rect{0, 0, 0, 0};
-    SDL_GetWindowSize(window.sdl_window(), &rect.w, &rect.h);
+    SDL_GetWindowSize(window, &rect.w, &rect.h);
     rect.w /= 2;
 
     // draw the fibonacci-like patern
@@ -57,8 +71,8 @@ void render(ion::renderable_window auto & window)
         int const b = intlerp(b0, b1, t);
 
         // draw the rect
-        SDL_SetRenderDrawColor(renderer, r, g, b, 0xff);
-        SDL_RenderFillRect(renderer, &rect);
+        SDL_SetRenderDrawColor(window, r, g, b, 0xff);
+        SDL_RenderFillRect(window, &rect);
 
         // split in half horizontally when k is even
         if (k % 2 == 0) {
@@ -71,5 +85,5 @@ void render(ion::renderable_window auto & window)
             rect.w /= 2;
         }
     }
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(window);
 }

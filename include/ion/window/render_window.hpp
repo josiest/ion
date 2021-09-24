@@ -6,9 +6,7 @@
 
 namespace ion {
 
-/**
- * An SDL_Window with a renderer
- */
+/** An SDL_Window with a renderer */
 class render_window {
 public:
     // delete any unwanted implicit constructors
@@ -38,7 +36,7 @@ public:
     render_window(std::string const & title,
                   std::size_t width, std::size_t height,
                   std::uint32_t window_flags = 0) noexcept;
-
+    
     /**
      * Create a render window
      *
@@ -58,31 +56,30 @@ public:
                   std::size_t width, std::size_t height,
                   std::uint32_t window_flags, int driver_index=-1,
                   std::size_t render_flags = SDL_RENDERER_ACCELERATED) noexcept;
-
+    
     ~render_window();
 
-    /**
-     * Cast this window to its underlying SDL_Window pointer
-     */
-    inline SDL_Window * sdl_window() noexcept { return _window; }
+    /** Cast this window to its underlying SDL_Window pointer */
+    inline operator SDL_Window *() noexcept { return _window; }
 
-    /**
-     * Cast this window to its underlying SDL_Renderer pointer
-     */
-    inline SDL_Renderer * sdl_renderer() noexcept { return _renderer; }
+    /** Cast this window to its underlying SDL_Renderer pointer */
+    inline operator SDL_Renderer *() noexcept { return _renderer; }
 
-    /**
-     * Determine if this window has been initialized
-     */
-    bool is_ok() const noexcept;
+    /** Determine if this window is not okay to use */
+    inline bool operator!() noexcept
+    {
+        return nullptr == _window or nullptr == _renderer;
+    }
 
-    /**
-     * Get the error message for why the window or renderer couldn't initialize
-     */
-    std::string error() const noexcept;
+    /** The error if this window is not okay to use */
+    inline std::string error() { return _error; }
 private:
     SDL_Window * _window;
     SDL_Renderer * _renderer;
+
+    // error handling
     std::string _error;
 };
+
+
 }

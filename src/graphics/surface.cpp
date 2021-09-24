@@ -1,5 +1,4 @@
 #include "ion/graphics/surface.hpp"
-#include "ion/error.hpp"
 
 #include <SDL.h>
 #include <string>
@@ -11,7 +10,7 @@ surface::surface(SDL_Surface * surface) noexcept
 {
     // failure if given null
     if (not surface) {
-        set_error("surface initialize with null");
+        _error = "surface initialized with null";
     }
 }
 
@@ -20,7 +19,7 @@ surface::surface(std::string const & path) noexcept
 {
     // use SDL's error message if LoadBMP failed
     if (not _surface) {
-        set_error(SDL_GetError());
+        _error = SDL_GetError();
     }
 }
 
