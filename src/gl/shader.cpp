@@ -20,18 +20,13 @@ namespace fs = std::filesystem;
 
 shader::shader(GLenum shader_type, std::string const & source) noexcept
 
-    : _id{glCreateShader(shader_type)}
+    : _type{shader_type}, _id{glCreateShader(shader_type)}
 {
-    if (not _validate_shader()) {
-        return;
-    }
-    if (not _compile(source)) {
-        return;
-    }
+    _validate_shader() and _compile(source);
 }
 
 shader::shader(fs::path const & path) noexcept
-    : _id{0}
+    : _type{GL_INVALID_ENUM}, _id{0}
 {
     // make sure the path is a file and not a directory
     std::error_code ec;
@@ -87,13 +82,17 @@ shader::shader(fs::path const & path) noexcept
     }
 
     // finally, create the shader and compile it
-    _id = glCreateShader(extension_search->second);
-    if (not _validate_shader()) {
-        return;
-    }
-    if (not _compile(source)) {
-        return;
-    }
+    _type = extension_search->second;
+    _id = glCreateShader(_type);
+    _validate_shader() and _compile(source);
+}
+
+shader::shader(shader && s) noexcept
+    : _type{s._type}, _id{s._id}
+{
+    s._type = GL_INVALID_ENUM;
+    s._id = 0;
+    s._error = "shader was moved to a different object";
 }
 
 shader::~shader()
@@ -107,15 +106,15 @@ shader::~shader()
 
 bool shader::_validate_shader() noexcept
 {
+    // an invalid shader type might have been given
+    if (_type == GL_INVALID_ENUM) {
+        _error = "Shader was given an invalid type";
+        _id = 0;
+        return false;
+    }
     // glCreateShader might not have been able to create the shader
     if (_id == 0) {
         _error = "Couldn't create the shader object";
-        return false;
-    }
-    // an invalid shader type might have been given
-    if (_id == GL_INVALID_ENUM) {
-        _error = "Shader was given an invalid type";
-        _id = 0;
         return false;
     }
     return true;
@@ -123,6 +122,11 @@ bool shader::_validate_shader() noexcept
 
 bool shader::_compile(std::string const & source) noexcept
 {
+    if (source.empty()) {
+        _error = "shader source is empty";
+        glDeleteShader(_id); _id = 0;
+        return false;
+    }
     // link the source code to the shader id
     GLchar const * all_sources = source.c_str();
     glShaderSource(_id, 1, static_cast<GLchar const **>(&all_sources), nullptr);

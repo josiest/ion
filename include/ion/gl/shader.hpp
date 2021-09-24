@@ -18,7 +18,7 @@ inline std::unordered_map<std::string, GLenum> const standard_shader_extensions{
 /** A resource manager for an OpenGL shader */
 class shader {
 public:
-    // delete unwanted implicit constructors
+    // delete unwanted implicit constructors and declare wanted ones
     shader() = delete;
     shader(shader const &) = delete;
 
@@ -36,23 +36,34 @@ public:
      * \param path the path of the shader source
      */
     shader(std::filesystem::path const & path) noexcept;
+
+    /** Create a shader from another temporary shader */
+    shader(shader && s) noexcept;
+
     ~shader();
 
     /** The GL id of this shader */
     inline operator GLuint() const noexcept { return _id; }
 
+    /** What type of shader this is */
+    inline GLenum type() const noexcept { return _type; }
+
     /** Determine if this shader is okay to use */
-    inline bool operator!() const noexcept { return _id == 0; }
+    inline bool operator!() const noexcept
+    {
+        return not glIsShader(_id) or _id == 0;
+    }
 
     /** The error if this shader isn't okay to use */
     inline std::string error() const noexcept { return _error; }
 private:
+    GLenum _type;
     GLuint _id;
     std::string _error;
 
-    /** Ensure that a shader object was created properly or set errors */
+    /** \return true if this shader id is valid or invalidate the shader */
     bool _validate_shader() noexcept;
-    /** Compile a shader source or set errors */
+    /** \return true if compiling succeeds or invalidate the shader */
     bool _compile(std::string const & source) noexcept;
 };
 
