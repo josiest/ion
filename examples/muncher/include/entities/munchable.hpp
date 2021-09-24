@@ -2,6 +2,7 @@
 #include "entities/player.hpp"
 #include "components.hpp"
 
+#include <ion/window/resource.hpp>
 #include <entt/entity/registry.hpp>
 #include <SDL2/SDL_video.h>
 

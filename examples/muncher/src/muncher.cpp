@@ -8,8 +8,8 @@
 #include "systems/mechanics.hpp"
 
 #include <ion/ion.hpp>
-#include <entt/entity/registry.hpp>
 #include <SDL2/SDL.h>
+#include <entt/entity/registry.hpp>
 
 #include <iostream>
 #include <string>
@@ -48,17 +48,17 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       _rng{std::random_device{}()}, 
 
       // initialize the player and munchable prefabs
-      _player_settings{_window.sdl_window()},
-      _munchable_settings{_window.sdl_window()},
+      _player_settings{_window},
+      _munchable_settings{_window},
 
       // create the player
       _player{_player_settings.create(_entities)}
 {
     // check if sdl resources initialized properly
-    if (_sdl.bad()) {
+    if (not _sdl) {
         _error = _sdl.error(); return;
     }
-    if (not _window.is_ok()) {
+    if (not _window) {
         _error = _window.error(); return;
     }
 
@@ -75,7 +75,7 @@ void muncher::run() noexcept
     ion::clock clock;
 
     // run the program
-    while (!ion::input::has_quit()) {
+    while (not ion::input::has_quit()) {
         // handle events
         _events.process_queue();
 
@@ -97,7 +97,7 @@ void muncher::run() noexcept
 
         // get the size of the screen to filter out munchables
         int width, height;
-        SDL_GetWindowSize(_window.sdl_window(), &width, &height);
+        SDL_GetWindowSize(_window, &width, &height);
         systems::filter_munchables(_entities, width, height);
 
         // render
