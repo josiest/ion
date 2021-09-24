@@ -64,8 +64,8 @@ public:
     /** The underyling SDL window */
     inline SDL_Window * sdl_window() noexcept { return _window; }
 
-    /** Determine if the window resource initialized properly */
-    inline bool is_ok() const noexcept { return _window != nullptr; }
+    /** Determine if the window encountered a non-recoverable error */
+    inline bool bad() const noexcept { return nullptr == _window; }
 
     /** Get the error message explaining why initialization failed */
     inline std::string error() const noexcept { return _error; }

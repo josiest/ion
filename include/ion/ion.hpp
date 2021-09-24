@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ion/error.hpp"
 #include "ion/events.hpp"
 #include "ion/sdl.hpp"
 
