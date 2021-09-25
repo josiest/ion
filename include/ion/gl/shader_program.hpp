@@ -10,6 +10,8 @@
 #include <initializer_list>
 
 #include <filesystem>
+#include <system_error>
+
 #include <string>
 #include <memory>
 
@@ -32,6 +34,13 @@ public:
      * \param vertex_source the source code of the vertex shader
      */
     explicit shader_program(std::string const & vertex_source) noexcept;
+
+    /**
+     * Create a shader program from a mapping of shader-types to their sources
+     * \param sources the source mapping to compile
+     */
+    shader_program(
+        std::unordered_map<GLenum, std::string> const & sources) noexcept;
 
     /**
      * Create a shader program from a list of source files
@@ -78,7 +87,10 @@ private:
     bool _validate_shaders() noexcept;
     /** Return true if program successfully linked shaders or set errors */
     bool _link_shaders() noexcept;
+    /** Retrun true if the error code is not set otherwise invalidate program */
+    bool _validate_error_code(std::error_code const & ec) noexcept;
 };
 
+/** Get the OpenGL error message associated with this program */
 std::string gl_shader_program_error(shader_program const & program) noexcept;
 }

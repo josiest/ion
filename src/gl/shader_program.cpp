@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <filesystem>
+#include <system_error>
 #include <memory>
 #include <string>
 
@@ -24,12 +25,6 @@ namespace fs = std::filesystem;
 using namespace std::string_literals;
 
 namespace ion {
-
-// compile a shader from a path
-decltype(auto) _compile_shader_file(fs::path const & path)
-{
-    return shader{path};
-}
 
 // compile a shader from a type-source pair
 decltype(auto) _compile_shader_source(std::pair<GLenum, std::string> && pair)
@@ -59,9 +54,48 @@ shader_program::shader_program(std::initializer_list<fs::path> paths) noexcept
     : _id{glCreateProgram()}
 {
     // compile each shader
-    auto sources = paths | views::transform(&_compile_shader_file);
     auto into_shaders = std::inserter(_shaders, _shaders.end());
     ranges::transform(paths, into_shaders, &_to_pair);
+
+    // then make sure things are ok
+    _validate_program() and _validate_shaders() and _link_shaders();
+}
+
+shader_program::shader_program(std::string const & name,
+                               fs::path const & dir) noexcept
+    : _id{glCreateProgram()}
+{
+    // get all the paths in the given directory
+    std::error_code ec;
+    std::vector<fs::path> paths(fs::directory_iterator(dir, ec), {});
+
+    // clean up if an os-call failed
+    if (_validate_error_code(ec)) return;
+
+    // determine if a path is a valid source file
+    auto is_source = [&name, &ec](auto const & path) {
+        return fs::is_regular_file(path, ec) and path.stem().string() == name
+           and standard_shader_extensions.contains(path.extension());
+    };
+    // compile all paths that are valid sources with the specified name
+    auto sources = paths | views::filter(is_source);
+    auto into_shaders = std::inserter(_shaders, _shaders.end());
+    ranges::transform(sources, into_shaders, &_to_pair);
+
+    // then make sure everything is ok
+    _validate_error_code(ec) and _validate_program() and _validate_shaders()
+                             and _link_shaders();
+}
+
+shader_program::shader_program(
+        std::unordered_map<GLenum, std::string> const & sources) noexcept
+
+    : _id{glCreateProgram()}
+{
+    // compile all shader sources
+    auto compiled_shaders = sources | views::transform(&_compile_shader_source);
+    auto into_shaders = std::inserter(_shaders, _shaders.end());
+    ranges::transform(compiled_shaders, into_shaders, &_to_pair);
 
     // then make sure things are ok
     _validate_program() and _validate_shaders() and _link_shaders();
@@ -138,31 +172,16 @@ bool shader_program::_link_shaders() noexcept
     return true;
 }
 
-//shader_program::shader_program(shader_program::source_map const & sources) noexcept
-//    : _id{glCreateProgram()}
-//{
-//
-//    if (not _validate_program()) {
-//        return;
-//    }
-//
-//    // compile a shader and project it to a type-shader pair
-//    auto compile_shader = [](auto const & pair) {
-//        auto const & [shader_type, source] = pair;
-//        return std::make_pair(shader_type,
-//                              std::make_unique<shader>(shader_type, source));
-//    };
-//    // convert all the shader sources into compiled shaders
-//    auto into_shaders = std::inserter(_shaders, _shaders.end());
-//    ranges::transform(sources, into_shaders, compile_shader);
-//
-//    if (not _validate_shaders()) {
-//        return;
-//    }
-//    if (not _link_shaders()) {
-//        return;
-//    }
-//}
+bool shader_program::_validate_error_code(std::error_code const & ec) noexcept
+{
+    // clean up if the error code has been set
+    if (ec) {
+        _error = ec.message();
+        _shaders.clear(); glDeleteProgram(_id); _id = 0;
+        return false;
+    }
+    return true;
+}
 
 shader_program::~shader_program()
 {
