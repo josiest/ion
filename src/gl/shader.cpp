@@ -88,7 +88,7 @@ shader::shader(fs::path const & path) noexcept
 }
 
 shader::shader(shader && s) noexcept
-    : _type{s._type}, _id{s._id}
+    : _type{s._type}, _id{s._id}, _error{s._error}
 {
     s._type = GL_INVALID_ENUM;
     s._id = 0;

@@ -76,5 +76,4 @@ std::string gl_shader_error(shader const & s) noexcept;
  * \return the name associated withe the shader type or "undefined"
  */
 std::string shader_name(GLenum shader_type) noexcept;
-
 }
