@@ -64,3 +64,9 @@ install(DIRECTORY ${ion_INCLUDE_DIR}/ion
 export(EXPORT ionTargets
        FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake
        NAMESPACE ion::)
+
+if (UNIX)
+    set(CMAKE_INSTALL_PREFIX /usr/local)
+elseif(WIN32)
+    set(CMAKE_INSTALL_PREFIX "C:\\Program Files\\ion")
+endif()
