@@ -69,14 +69,15 @@ shader_program::shader_program(std::string const & name,
     std::error_code ec;
     std::vector<fs::path> paths(fs::directory_iterator(dir, ec), {});
 
-    // abort if an os-call failed
-    if (_validate_error_code(ec)) return;
-
     // determine if a path is a valid source file
     auto is_source = [&name, &ec](auto const & path) {
         return fs::is_regular_file(path, ec) and path.stem().string() == name
            and standard_shader_extensions.contains(path.extension());
     };
+
+    // abort if an os-call failed
+    if (not _validate_error_code(ec)) return;
+
     // compile all paths that are valid sources with the specified name
     auto sources = paths | views::filter(is_source);
     auto into_shaders = std::inserter(_shaders, _shaders.end());
