@@ -9,6 +9,10 @@
 /** A class that manages game resources */
 class bezier {
 public:
+    // delete unwanted implicit constructors
+    bezier() = delete;
+    bezier(bezier const &) = delete;
+
     /** Create a game with specified dimensions */
     bezier(std::uint32_t width, std::uint32_t height) noexcept;
 
@@ -23,6 +27,7 @@ public:
 private:
     ion::sdl_context _sdl;
     ion::glwindow _window;
+    ion::shader_program _bezier_shader;
 
     ion::event_system _events;
     std::string _error;
