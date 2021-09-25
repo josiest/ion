@@ -46,7 +46,7 @@ Examples
 Here's a simple example of how you might use :code:`ion`. This example renders
 a fibonacci-like gradient pattern to the screen.
 
-.. literalinclude:: examples/simple/simple.cpp
+.. include:: examples/simple/simple.cpp
    :language: c++
 
 To run this example from the ion project directory run the following code
