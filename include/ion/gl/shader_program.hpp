@@ -1,5 +1,9 @@
 #pragma once
 
+#define GL_GLEXT_PROTOTYPES 1
+#include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
+
 #include "ion/gl/shader.hpp"
 
 #include <unordered_map>
@@ -36,6 +40,15 @@ public:
     shader_program(std::initializer_list<std::filesystem::path> paths) noexcept;
 
     /**
+     * Create a shader program by finding its sources
+     *
+     * \param the name of the shader
+     * \param dir the directory the shader sources are located in
+     */
+    shader_program(std::string const & name,
+                   std::filesystem::path const & dir) noexcept;
+
+    /**
      * Create a shader program from a map of shader sources
      * \param sources a map of shader-types to their source code
      */
@@ -46,10 +59,7 @@ public:
     inline operator GLuint() const noexcept { return _id; }
 
     /** Determine if this shader program is not okay to use */
-    inline bool operator!() const noexcept
-    {
-        return _id == 0 or not glIsProgram(_id);
-    }
+    bool operator!() const noexcept;
 
     /** The error if this shader program isn't okay to use */
     inline std::string const & error() const noexcept { return _error; }

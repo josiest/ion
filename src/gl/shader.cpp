@@ -104,6 +104,11 @@ shader::~shader()
     _id = 0;
 }
 
+bool shader::operator!() const noexcept
+{
+    return not glIsShader(_id);
+}
+
 bool shader::_validate_shader() noexcept
 {
     // an invalid shader type might have been given

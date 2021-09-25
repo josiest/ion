@@ -1,6 +1,8 @@
 #pragma once
 
+#define GL_GLEXT_PROTOTYPES 1
 #include <SDL_opengl.h>
+#include <SDL_opengl_glext.h>
 
 #include <string>
 #include <filesystem>
@@ -49,10 +51,7 @@ public:
     inline GLenum type() const noexcept { return _type; }
 
     /** Determine if this shader is okay to use */
-    inline bool operator!() const noexcept
-    {
-        return not glIsShader(_id) or _id == 0;
-    }
+    bool operator!() const noexcept;
 
     /** The error if this shader isn't okay to use */
     inline std::string error() const noexcept { return _error; }

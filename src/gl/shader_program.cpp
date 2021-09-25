@@ -25,25 +25,51 @@ using namespace std::string_literals;
 
 namespace ion {
 
+// compile a shader from a path
+decltype(auto) _compile_shader_file(fs::path const & path)
+{
+    return shader{path};
+}
+
+// compile a shader from a type-source pair
+decltype(auto) _compile_shader_source(std::pair<GLenum, std::string> && pair)
+{
+    return shader{pair.first, std::move(pair.second)};
+}
+
+// convert a shader to a type-unique_shader pair
+decltype(auto) _to_pair(shader && s) noexcept
+{
+    GLuint const type = s.type();
+    return std::make_pair(type, std::make_unique<shader>(std::move(s)));
+}
+
 shader_program::shader_program(std::string const & vertex_source) noexcept
     : _id{glCreateProgram()}
 {
-    _shaders.try_emplace(GL_VERTEX_SHADER,
-                         std::make_unique<shader>(GL_VERTEX_SHADER, vertex_source));
+    // compile the given source as a vertex shader
+    auto source_pair = std::make_pair(GL_VERTEX_SHADER, vertex_source);
+    _shaders.insert(_to_pair(_compile_shader_source(std::move(source_pair))));
 
+    // then amke sure things are ok
     _validate_program() and _validate_shaders() and _link_shaders();
 }
 
 shader_program::shader_program(std::initializer_list<fs::path> paths) noexcept
     : _id{glCreateProgram()}
 {
-    // add all specified shaders to the program
-    for (auto const & path : paths) {
-        shader s{path};
-        auto const type = s.type();
-        _shaders.try_emplace(type, std::make_unique<shader>(std::move(s)));
-    }
+    // compile each shader
+    auto sources = paths | views::transform(&_compile_shader_file);
+    auto into_shaders = std::inserter(_shaders, _shaders.end());
+    ranges::transform(paths, into_shaders, &_to_pair);
+
+    // then make sure things are ok
     _validate_program() and _validate_shaders() and _link_shaders();
+}
+
+bool shader_program::operator!() const noexcept
+{
+    return not glIsProgram(_id);
 }
 
 bool shader_program::_validate_program() noexcept
