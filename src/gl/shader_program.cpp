@@ -69,7 +69,7 @@ shader_program::shader_program(std::string const & name,
     std::error_code ec;
     std::vector<fs::path> paths(fs::directory_iterator(dir, ec), {});
 
-    // clean up if an os-call failed
+    // abort if an os-call failed
     if (_validate_error_code(ec)) return;
 
     // determine if a path is a valid source file
@@ -106,10 +106,22 @@ bool shader_program::operator!() const noexcept
     return not glIsProgram(_id);
 }
 
+bool shader_program::_validate_error_code(std::error_code const & ec) noexcept
+{
+    // clean up if the error code has been set
+    if (ec) {
+        _error = ec.message();
+        _clean_up();
+        return false;
+    }
+    return true;
+}
+
 bool shader_program::_validate_program() noexcept
 {
-    if (_id == 0) {
+    if (not glIsProgram(_id)) {
         _error = "program couldn't be created";
+        _clean_up();
         return false;
     }
     return true;
@@ -134,14 +146,14 @@ bool shader_program::_validate_shaders() noexcept
                + std::accumulate(errors.begin(), errors.end(), "\n"s);
         // then clean up
         // TODO: support non-vertex shader-failure as a recoverable failure
-        _shaders.clear(); glDeleteProgram(_id); _id = 0;
+        _clean_up();
         return false;
     }
     // make sure the program has a vertex shader
     auto const vertex_search = _shaders.find(GL_VERTEX_SHADER);
     if (_shaders.end() == vertex_search) {
         _error = "program must at least have a vertex shader";
-        _shaders.clear(); glDeleteProgram(_id); _id = 0;
+        _clean_up();
         return false;
     }
     return true;
@@ -162,36 +174,32 @@ bool shader_program::_link_shaders() noexcept
     // set the error and clean up if not
     if (is_linked != GL_TRUE) {
         _error = gl_shader_program_error(*this);
-        _shaders.clear(); glDeleteProgram(_id); _id = 0;
+        _clean_up();
         return false;
     }
     // otherwise, free any unused references to the shaders
-    ranges::for_each(_shaders, [](auto const & pair) {
-        glDeleteShader(*pair.second);
-    });
+    _delete_shaders();
     return true;
 }
 
-bool shader_program::_validate_error_code(std::error_code const & ec) noexcept
+void shader_program::_delete_shaders() noexcept
 {
-    // clean up if the error code has been set
-    if (ec) {
-        _error = ec.message();
-        _shaders.clear(); glDeleteProgram(_id); _id = 0;
-        return false;
-    }
-    return true;
+    ranges::for_each(_shaders, [](auto const & pair) {
+        glDeleteShader(*pair.second);
+    });
+}
+
+void shader_program::_clean_up() noexcept
+{
+    _delete_shaders();
+    glDeleteProgram(_id);
+    _id = 0;
+    _shaders.clear();
 }
 
 shader_program::~shader_program()
 {
-    // release all shaders
-    _shaders.clear();
-
-    // destroy the program if it's valid
-    if (_id != 0 and glIsProgram(_id)) {
-        glDeleteProgram(_id); _id = 0;
-    }
+    _clean_up();
 }
 
 /** Get the error associated with a shader program */
