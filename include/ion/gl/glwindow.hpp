@@ -17,7 +17,7 @@ using glcontext_args = std::unordered_map<SDL_GLattr, int>;
 
 /** The default GL context attributes to use */
 inline glcontext_args const default_gl_attributes{
-    {SDL_GL_CONTEXT_MAJOR_VERSION, 3}, {SDL_GL_CONTEXT_MINOR_VERSION, 1},
+    {SDL_GL_CONTEXT_MAJOR_VERSION, 3}, {SDL_GL_CONTEXT_MINOR_VERSION, 3},
     {SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE}
 };
 
@@ -66,7 +66,7 @@ public:
      * Any renderer-specific window flags will be ignored other than
      * SDL_WINDOW_OPENGL, which will be used regardless of it being passed.
      *
-     * GL attributes default to use the 3.1 core profile
+     * GL attributes default to use the 3.3 core profile
      */
     glwindow(std::string const & title,
              std::uint32_t width, std::uint32_t height,
@@ -90,7 +90,7 @@ public:
      * Any renderer-specific window flags will be ignored other than
      * SDL_WINDOW_OPENGL, which will be used regardless of it being passed.
      *
-     * GL attributes default to use the 3.1 core profile
+     * GL attributes default to use the 3.3 core profile
      */
     glwindow(std::string const & title, int x, int y,
              std::uint32_t width, std::uint32_t height,
