@@ -160,6 +160,20 @@ bool shader_program::_validate_shaders() noexcept
     return true;
 }
 
+decltype(auto) shader_program::_detach_shader() noexcept
+{
+    return [this](auto const & pair) {
+        glDetachShader(_id, *pair.second);
+    };
+}
+
+decltype(auto) shader_program::_delete_shader() noexcept
+{
+    return [](auto const & pair) {
+        glDeleteShader(*pair.second);
+    };
+}
+
 bool shader_program::_link_shaders() noexcept
 {
     // try to link the shaders to the program
@@ -179,23 +193,16 @@ bool shader_program::_link_shaders() noexcept
         return false;
     }
     // otherwise, free any unused references to the shaders
-    _delete_shaders();
+    ranges::for_each(_shaders, _delete_shader());
     return true;
-}
-
-void shader_program::_delete_shaders() noexcept
-{
-    ranges::for_each(_shaders, [](auto const & pair) {
-        glDeleteShader(*pair.second);
-    });
 }
 
 void shader_program::_clean_up() noexcept
 {
-    _delete_shaders();
+    ranges::for_each(_shaders, _detach_shader());
+    _shaders.clear();
     glDeleteProgram(_id);
     _id = 0;
-    _shaders.clear();
 }
 
 shader_program::~shader_program()

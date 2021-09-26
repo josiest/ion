@@ -89,8 +89,10 @@ private:
     bool _link_shaders() noexcept;
     /** Retrun true if the error code is not set otherwise invalidate program */
     bool _validate_error_code(std::error_code const & ec) noexcept;
-    /** Remove any unused references to the shaders */
-    void _delete_shaders() noexcept;
+    /** Return a function that detaches a shader */
+    decltype(auto) _detach_shader() noexcept;
+    /** Return a function that deletes a shader */
+    decltype(auto) _delete_shader() noexcept;
     /** Clean up the shader program to ensure no memory leaks */
     void _clean_up() noexcept;
 };
