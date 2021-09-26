@@ -12,6 +12,7 @@ vao::vao() noexcept
     // try to create the vertex array
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
+
     // abort if failure
     if (not glIsVertexArray(_id)) {
         _error = "Couldn't create a vertex array";
@@ -22,6 +23,7 @@ vao::~vao()
 {
     if (glIsVertexArray(_id)) {
         glDeleteVertexArrays(1, &_id);
+        _id = 0;
     }
 }
 bool vao::operator!() const noexcept { return not glIsVertexArray(_id); }
