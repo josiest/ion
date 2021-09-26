@@ -4,7 +4,7 @@ ion
 :code:`ion` is a small-scoped library meant to make working with SDL easier.
 It serves two primary functions
 
-1. it result-style resource handlers for various SDL and OpenGL components
+1. it provides result-style resource handlers for various SDL and OpenGL components
 2. it provides a higher level event-handling interface than pure SDL
 
 :code:`ion` is still in the very early stages of development. Since this is
@@ -13,7 +13,7 @@ currently a personal project, more features will be added as I need them.
 Installation
 ------------
 
-The goal is to eventually add ion to different c++ package managers, but I'm
+The goal is to eventually add ion to different C++ package managers, but I'm
 just a mere student and I don't have the time to do that right now. For now
 you'll need to download the source code and build it with cmake, then install
 it in a place that other CMake projects can find it
@@ -27,9 +27,6 @@ it in a place that other CMake projects can find it
 
 Then if you're on linux, run :code:`$ sudo cmake --install .`. This will install
 the ion into :code:`/usr/include`
-
-If you're on windows, run `cmake --install .` as administrator. This will
-install ion into :code:`C:\Program Files\ion`
 
 Finally, add the following to your :code:`CMakeLists.txt`
 
