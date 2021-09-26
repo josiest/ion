@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <string>
 
+#include <filesystem>
+
 /** A class that manages game resources */
 class bezier {
 public:
@@ -27,7 +29,10 @@ public:
 private:
     ion::sdl_context _sdl;
     ion::glwindow _window;
-    ion::shader_program _bezier_shader;
+
+    std::filesystem::path _shader_path;
+    ion::shader_program _point_shader;
+    ion::vao _vao;
 
     ion::event_system _events;
     std::string _error;
