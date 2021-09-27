@@ -102,6 +102,14 @@ shader_program::shader_program(
     _validate_program() and _validate_shaders() and _link_shaders();
 }
 
+shader_program::shader_program(shader_program && temp)
+    : _id{temp._id}, _shaders{std::move(temp._shaders)},
+      _error{std::move(temp._error)}
+{
+    temp._id = 0;
+    temp._error = "shader program moved to another object";
+}
+
 bool shader_program::operator!() const noexcept
 {
     return not glIsProgram(_id);

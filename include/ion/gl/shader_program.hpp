@@ -58,6 +58,12 @@ public:
                    std::filesystem::path const & dir) noexcept;
 
     /**
+     * Create a shader program from another temporary one
+     * \param temp the temporar shader
+     */
+    shader_program(shader_program && temp);
+
+    /**
      * Create a shader program from a map of shader sources
      * \param sources a map of shader-types to their source code
      */

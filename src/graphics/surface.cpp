@@ -23,6 +23,13 @@ surface::surface(std::string const & path) noexcept
     }
 }
 
+surface::surface(surface && temp) noexcept
+    : _surface{temp._surface}, _error{std::move(temp._error)}
+{
+    temp._surface = nullptr;
+    temp._error = "surface moved to another object";
+}
+
 surface::~surface()
 {
     // it's possible that the surface may be null if initialization failed
