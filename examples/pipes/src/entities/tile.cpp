@@ -1,7 +1,7 @@
 #include "entities/tile.hpp"
 #include "types/components.hpp"
 #include <SDL2/SDL_surface.h>
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 namespace tiles {
 

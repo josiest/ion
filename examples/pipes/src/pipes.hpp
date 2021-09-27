@@ -6,7 +6,7 @@
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -15,6 +15,7 @@
 #include <random>
 #include <algorithm>
 
+/** A resource manager for all game resources */
 class pipes {
 public:
     using engine_t = std::mt19937;
@@ -42,12 +43,15 @@ public:
     inline engine_t & rng() { return _rng; }
     inline pointset & placed_tiles() { return _placed_tiles; }
 private:
+    // events
+    ion::event_system _events;
+
     // initialize sdl before other sdl resources
     ion::sdl_context _sdl;
     ion::blit_window _window;
 
-    std::uint32_t _width, _height;
-    ion::event_system _events;
+    // ecs
+    entt::registry _entities;
 
     // shared immutable resources
     tilemap _tiles;

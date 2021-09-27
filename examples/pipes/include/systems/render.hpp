@@ -11,7 +11,7 @@
 
 #include <ion/window/resource.hpp>
 #include <SDL2/SDL_surface.h>
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 void render(ion::window_resource auto & window, entt::registry & entities,
             entt::entity mouse_tile, pipes & game)

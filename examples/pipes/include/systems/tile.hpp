@@ -3,7 +3,7 @@
 #include "types/tile.hpp"
 #include "types/point.hpp"
 
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 #include <random>
 #include <iterator>

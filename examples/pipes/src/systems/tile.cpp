@@ -2,7 +2,7 @@
 #include "entities/tile.hpp"
 #include "types/components.hpp"
 
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 #include <vector>
 #include <numeric>

@@ -2,7 +2,7 @@
 
 #include "types/tile.hpp"
 #include <SDL2/SDL_rect.h>
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 namespace tiles {
 

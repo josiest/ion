@@ -9,7 +9,7 @@
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 
 #include <memory>
 #include <random>
@@ -35,8 +35,6 @@ int main()
 pipes::pipes(std::uint32_t width, std::uint32_t height)
 
     : _window{"Pipes", width, height},
-      _width{width}, _height{height},
-
       _tiles{tiles::load_map()},
 
       // interface between grid-space and pixel-space
@@ -47,6 +45,10 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
       // intialize the random engine with a random seed
       _rng{std::random_device{}()}
 {
+    // quit when SDL quit event is triggered
+    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+
+    // make sure SDL resources initialized properly
     if (not _sdl) {
         _error = "Couldn't initialize SDL: " + _sdl.error();
         return;
@@ -66,8 +68,9 @@ void pipes::run()
     entt::registry entities;
 
     // create a random initial tile in the middle of the screen
-    auto init_point = _world_space.nearest_point(
-            SDL_Point{static_cast<int>(_width)/2, static_cast<int>(_height)/2});
+    int width, height;
+    SDL_GetWindowSize(_window, &width, &height);
+    auto init_point = _world_space.nearest_point(SDL_Point{width/2, height/2});
 
     auto init_tile = tiles::make_static(entities,
             tiles::random_name(_rng), tiles::random_rotation(_rng),
@@ -79,9 +82,6 @@ void pipes::run()
     auto mouse_tile = tiles::make(entities, tiles::random_name(_rng),
                                             tiles::random_rotation(_rng),
                                             ion::input::mouse_position());
-
-    // quit when the window is quit
-    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
     // rotate the tile associated with the mouse when scrolled
     _events.subscribe_functor(SDL_MOUSEWHEEL,

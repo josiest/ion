@@ -3,7 +3,7 @@
 #include "entities/tile.hpp"
 #include "systems/tile.hpp"
 
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 #include <SDL2/SDL.h>
 
 void bind_to_mouse(entt::registry & entities, entt::entity tile,

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pipes.hpp"
-#include <entt.hpp>
+#include <entt/entity/registry.hpp>
 #include <SDL2/SDL_events.h>
 
 void bind_to_mouse(entt::registry & entities, entt::entity tile,
