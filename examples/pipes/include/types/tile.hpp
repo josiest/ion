@@ -38,5 +38,3 @@ template<> struct hash<tiles::pair> {
     }
 };
 }
-
-using tilemap = std::unordered_map<tiles::pair, std::unique_ptr<ion::surface>>;

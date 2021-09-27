@@ -32,8 +32,8 @@ void rotate_tile(entt::registry & entities, entt::entity mouse_tile,
     else if (event.wheel.y < 0) { tiles::decrement_rotation(tile.rotation); }
 }
 
-void place_tile(entt::registry & entities, entt::entity mouse_tile,
-                pipes & game, SDL_Event const & event)
+void place_tile(entt::registry & entities, prefab::tile & tile_prefab,
+                entt::entity mouse_tile, pipes & game, SDL_Event const & event)
 {
     // do nothing if not the right event type
     if (event.type != SDL_MOUSEBUTTONUP ||
@@ -53,7 +53,7 @@ void place_tile(entt::registry & entities, entt::entity mouse_tile,
     tileset.insert(p);
 
     auto & tile = entities.get<component::tile>(mouse_tile);
-    tiles::make_static(entities, tile.name, tile.rotation, p.x, p.y);
+    tile_prefab.create_static(entities, tile.name, tile.rotation, p.x, p.y);
 
     // generate a new random tile
     tile.name = tiles::random_name(game.rng());

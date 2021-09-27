@@ -3,6 +3,7 @@
 #include "types/tile.hpp"
 #include "types/point.hpp"
 #include "systems/grid.hpp"
+#include "entities/tile.hpp"
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
@@ -24,19 +25,11 @@ public:
     void run();
 
     /** Determine if the game is not okay to play */
-    inline bool operator!() const
-    {
-        namespace ranges = std::ranges;
-        auto tile_is_bad = [](auto const & pair) { return not *pair.second; };
-        return not _sdl or not _window or _tiles.empty()
-                        or ranges::any_of(_tiles, tile_is_bad);
-    }
-
+    inline bool operator!() const { return not _error.empty(); }
     /** The error message if the game isn't okay to play */
     std::string const & error() const { return _error; }
 
     // shared immutable resources
-    inline tilemap const & tiles() const { return _tiles; }
     inline grid const & world_space() const { return _world_space; }
 
     // shared mutable resources
@@ -52,9 +45,9 @@ private:
 
     // ecs
     entt::registry _entities;
+    prefab::tile _tile_prefab;
 
     // shared immutable resources
-    tilemap _tiles;
     grid _world_space;
 
     // shared mutable resources

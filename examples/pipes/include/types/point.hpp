@@ -5,13 +5,12 @@
 #include <unordered_set>
 #include <SDL2/SDL_rect.h>
 
-/**
- * A polymorphic int-point concept
- */
-template<typename point_t>
-concept point =
-    std::same_as<decltype(point_t::x), int> &&
-    std::same_as<decltype(point_t::y), int>;
+/** A polymporhic point concept */
+template<class point_t>
+concept point = requires(point_t p) {
+    { p.x } -> std::convertible_to<int>;
+    { p.y } -> std::convertible_to<int>;
+};
 
 /**
  * Define how to hash a point-like object
