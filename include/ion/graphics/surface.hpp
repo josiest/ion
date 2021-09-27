@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <string>
+#include <filesystem>
 
 namespace ion {
 
@@ -23,7 +24,7 @@ public:
      * Create a surface by loading a bitmap image
      * \param path the path of the bitmap image
      */
-    surface(std::string const & path) noexcept;
+    surface(std::filesystem::path const & path) noexcept;
 
     /**
      * Create a surface from another temporary surface
