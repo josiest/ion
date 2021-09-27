@@ -33,36 +33,27 @@ entt::entity point::create(entt::registry & entities, float x, float y)
     entities.emplace<cmpt::position>(entity, x, y);
 
     // give the point a unique vao object
-    _vaos.push_back(std::make_unique<ion::vao>());
-    entities.emplace<cmpt::vao>(entity, *_vaos.back());
+    auto & vao = _vaos.emplace_back();
+    entities.emplace<cmpt::vao>(entity, vao);
 
     // make sure that the vertex array is ok
-    if (not *_vaos.back()) {
-        _error = _vaos.back()->error();
+    if (not vao) {
+        _error = vao.error();
     }
 
     return entity;
 }
 
-bool vao_is_bad(std::unique_ptr<ion::vao> const & vao)
-{
-    return not *vao;
-}
-std::string const & vao_error(std::unique_ptr<ion::vao> const & vao)
-{
-    return vao->error();
-}
-
 bool point::operator!() const
 {
-    return ranges::any_of(_vaos, vao_is_bad);
+    return ranges::any_of(_vaos, &ion::vao::operator!);
 }
 
-std::string const & point::error() const
+std::string point::error() const
 {
     // get the error message of each vao that has failed
-    auto messages = _vaos | views::filter(vao_is_bad)
-                          | views::transform(vao_error);
+    auto messages = _vaos | views::filter(&ion::vao::operator!)
+                          | views::transform(&ion::vao::error);
 
     // concatenate with newlines
     return std::accumulate(messages.begin(), messages.end(), "\n"s);

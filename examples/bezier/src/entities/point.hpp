@@ -8,7 +8,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
-#include <memory>
 
 #include <string>
 #include <cstdint>
@@ -30,13 +29,13 @@ public:
     std::uint32_t resolution() const { return _resolution; }
 
     bool operator!() const;
-    std::string const & error() const;
+    std::string error() const;
 private:
     float _radius;
     glm::vec4 _color;
     std::uint32_t _resolution;
 
-    std::vector<std::unique_ptr<ion::vao>> _vaos;
+    std::vector<ion::vao> _vaos;
     std::string _error;
 };
 }
