@@ -13,6 +13,6 @@ file(GLOB_RECURSE sources src/*.cpp)
 add_executable(bezier ${sources})
 
 include_directories(src
-    ion::ion SDL2::SDL2 OpenGL::OpenGL glm::glm)
+    ion::ion SDL2::SDL2 OpenGL::OpenGL glm::glm entt::entt)
 target_link_libraries(bezier PRIVATE
     ion::ion ion::gl SDL2::SDL2 OpenGL::OpenGL)

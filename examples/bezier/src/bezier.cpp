@@ -1,3 +1,4 @@
+#define GL_ARB_explicit_uniform_location
 #include <ion/ion.hpp>
 #include <ion/gl.hpp>
 
@@ -5,6 +6,7 @@
 
 #include "bezier.hpp"
 #include "systems.hpp"
+#include "entities.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -14,6 +16,9 @@
 
 #include <ranges>
 #include <algorithm>
+#include <numeric>
+
+#include <array>
 
 // aliases and literals
 using namespace std::string_literals;
@@ -23,6 +28,7 @@ namespace fs = std::filesystem;
 
 int main()
 {
+
     // initialize the example
     bezier example{800, 600};
 
@@ -43,16 +49,20 @@ void bezier::run() noexcept
         _events.process_queue();
 
         // render
-        systems::render(_window, _point_shader);
+        systems::render(_window, _entities, _point_prefab, _point_shader);
         SDL_GL_SwapWindow(_window);
     }
 }
 
 bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
 
+      // sdl resources
     : _window{"Bezier example", width, height},
       _shader_path{"../shaders"},
-      _point_shader("point", _shader_path)
+      _point_shader("point", _shader_path),
+
+      // some arbitrary values that seem to work nicely
+      _point_prefab{15.f, pink}
 {
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
@@ -71,7 +81,15 @@ bezier::bezier(std::uint32_t width, std::uint32_t height) noexcept
         _error = "Couldn't create point shader: "s + _point_shader.error();
         return;
     }
-    if (not _vao) {
-        _error = "Couldn't create a vertex array object: " + _vao.error();
+
+    std::vector<glm::vec2> points{
+        {width/4.f,   height/4.f}, {3*width/4.f,   height/4.f},
+        {width/4.f, 3*height/4.f}, {3*width/4.f, 3*height/4.f}
+    };
+    ranges::for_each(points, [this](auto const & p) {
+        return _point_prefab.create(_entities, p.x, p.y);
+    });
+    if (not _point_prefab) {
+        _error = "Couldn't create points: " + _point_prefab.error();
     }
 }

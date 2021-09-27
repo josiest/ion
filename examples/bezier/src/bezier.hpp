@@ -3,6 +3,10 @@
 #include <ion/ion.hpp>
 #include <ion/gl.hpp>
 
+#include "entities.hpp"
+
+#include <entt/entity/registry.hpp>
+
 #include <cstdint>
 #include <string>
 
@@ -27,13 +31,20 @@ public:
     /** The error if this game isn't okay to run */
     inline std::string const & error() const noexcept { return _error; }
 private:
+    // events
+    ion::event_system _events;
+
+    // sdl/opengl resources
     ion::sdl_context _sdl;
     ion::glwindow _window;
 
     std::filesystem::path _shader_path;
     ion::shader_program _point_shader;
-    ion::vao _vao;
 
-    ion::event_system _events;
+    // ecs
+    entt::registry _entities;
+    prefab::point _point_prefab;
+
+    // error handling
     std::string _error;
 };

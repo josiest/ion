@@ -1,8 +1,18 @@
 #pragma once
 
-namespace {
+#include <SDL_opengl.h>
+#include <ion/gl.hpp>
+#include <glm/glm.hpp>
 
-struct color {
-    float r, g, b, a;
+namespace component {
+
+struct position {
+    float x, y;
+    operator glm::vec2() const { return glm::vec2(x, y); }
+};
+
+struct vao {
+    GLuint value;
+    operator GLuint() const { return value; }
 };
 }
