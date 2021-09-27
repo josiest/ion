@@ -1,7 +1,8 @@
 #pragma once
 
+#include "types/components.hpp"
 #include "types/tile.hpp"
-#include "types/point.hpp"
+#include "systems/point.hpp"
 #include "systems/grid.hpp"
 #include "entities/tile.hpp"
 

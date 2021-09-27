@@ -1,5 +1,5 @@
 #pragma once
-#include "types/point.hpp"
+#include "systems/point.hpp"
 #include "types/components.hpp"
 
 #include <cstdint>

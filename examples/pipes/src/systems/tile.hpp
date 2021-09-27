@@ -2,7 +2,7 @@
 
 #include "types/components.hpp"
 #include "types/tile.hpp"
-#include "types/point.hpp"
+#include "systems/point.hpp"
 
 #include <entt/entity/registry.hpp>
 
@@ -65,19 +65,6 @@ void randomize_tile(entt::registry & entities, entt::entity entity,
     auto & tile = entities.get<component::tile>(entity);
     tile.name = random_name(rng);
     tile.rotation = random_rotation(rng);
-}
-
-/** Move a tile */
-void move_tile(entt::registry & registry, entt::entity tile, int x, int y);
-/** Rotate a tile */
-void rotate_tile(entt::registry & registry, entt::entity tile,
-                 tiles::Rotation rotation);
-
-/** Determine if a tile is adjacent to others */
-bool is_adjacent(pointset const & tileset, int x, int y);
-inline bool is_adjacent(pointset const & tileset, point auto const & p)
-{
-    return is_adjacent(tileset, p.x, p.y);
 }
 
 }

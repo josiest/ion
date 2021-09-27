@@ -55,7 +55,7 @@ void render_mouse_tile(ion::window_resource auto & window,
 {
     auto const & p = entities.get<component::position>(mouse_tile);
     // do nothing if a static tile already exists at p
-    if (game.placed_tiles().contains(SDL_Point{p.x, p.y})) { return; }
+    if (game.placed_tiles().contains({p.x, p.y})) { return; }
     // otherwise get the grid square
     auto grid_square = game.world_space().unit_square(p.x, p.y);
 

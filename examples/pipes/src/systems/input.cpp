@@ -16,10 +16,10 @@ void bind_to_mouse(entt::registry & entities, entt::entity tile,
     // get the mouse coordinates and translate them to grid-space
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-    auto const q = world_space.nearest_point(mouse);
 
     // update the desired entity to correspond to the mouse position
-    move_tile(entities, tile, q.x, q.y);
+    auto & p = entities.get<cmpt::position>(tile);
+    p = world_space.nearest_point(mouse);
 }
 
 void rotate_tile(entt::registry & entities, entt::entity mouse_tile, int dy)

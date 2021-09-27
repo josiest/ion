@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types/tile.hpp"
-#include "types/point.hpp"
 #include "types/components.hpp"
+#include "systems/point.hpp"
 #include "systems/tile.hpp"
 
 #include <ion/graphics/surface.hpp>
@@ -31,9 +31,10 @@ public:
     }
 
     /** Create a static random tile object */
-    template<class engine_t>
-    entt::entity random_static(entt::registry & entities, pointset & placed_tiles,
-                               point auto const & p, engine_t & rng) const
+    template<class engine_t, point point_t>
+    entt::entity random_static(entt::registry & entities,
+                               pointset & placed_tiles,
+                               point_t const & p, engine_t & rng) const
     {
         auto const entity = random_dynamic(entities, rng, p);
         entities.emplace<component::static_tile>(entity);
@@ -42,8 +43,27 @@ public:
     }
 
     /** Create a static copy of a tile entity */
-    entt::entity static_copy(entt::registry & entities, pointset & placed_tiles,
-                             entt::entity tile) const;
+    entt::entity static_copy(entt::registry & entities,
+                             pointset & placed_tiles,
+                             entt::entity other) const
+    {
+        // get the required components
+        auto const & [info, p] = entities.get<component::tile,
+                                              component::position>(other);
+
+        // return the existing entity if it already has been placed
+        auto const search = placed_tiles.find(p);
+        if (search != placed_tiles.end()) {
+            return search->second;
+        }
+        // otherwise create a copy of the tile
+        auto const entity = create(entities, info.name, info.rotation, p.x, p.y);
+        entities.emplace<component::static_tile>(entity);
+
+        // and mark it as placed
+        placed_tiles.try_emplace(search, p, entity);
+        return entity;
+    }
 
     /** Create a tile entity */
     entt::entity create(entt::registry & entities,
