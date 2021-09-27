@@ -70,18 +70,11 @@ void pipes::run()
     int width, height;
     SDL_GetWindowSize(_window, &width, &height);
     auto init_point = _world_space.nearest_point(SDL_Point{width/2, height/2});
-
-    auto init_tile = _tile_prefab.create_static(_entities,
-            tiles::random_name(_rng), tiles::random_rotation(_rng),
-            init_point.x, init_point.y);
-
-    _placed_tiles.insert(init_point);
+    _tile_prefab.random_static(_entities, _placed_tiles, init_point, _rng);
 
     // create a random tile associated with the mouse and save a reference
-    auto mouse_tile = _tile_prefab.create(
-        _entities, tiles::random_name(_rng),
-                   tiles::random_rotation(_rng), ion::input::mouse_position()
-    );
+    auto mouse_tile = _tile_prefab.random_dynamic( _entities, _rng,
+                                                  ion::input::mouse_position());
 
     // rotate the tile associated with the mouse when scrolled
     _events.subscribe_functor(SDL_MOUSEWHEEL,
@@ -92,7 +85,8 @@ void pipes::run()
     // place the tile associated with the mouse when clicked
     _events.subscribe_functor(SDL_MOUSEBUTTONUP,
             [this, mouse_tile](SDL_Event const & event) {
-            place_tile(_entities, _tile_prefab, mouse_tile, *this, event);
+            place_tile(_entities, _tile_prefab, _placed_tiles,
+                       mouse_tile, *this, event);
             });
 
     // create the window and run the game

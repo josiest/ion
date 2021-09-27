@@ -33,7 +33,8 @@ void rotate_tile(entt::registry & entities, entt::entity mouse_tile,
 }
 
 void place_tile(entt::registry & entities, prefab::tile & tile_prefab,
-                entt::entity mouse_tile, pipes & game, SDL_Event const & event)
+                pointset & placed_tiles, entt::entity mouse_tile,
+                pipes & game, SDL_Event const & event)
 {
     // do nothing if not the right event type
     if (event.type != SDL_MOUSEBUTTONUP ||
@@ -45,17 +46,14 @@ void place_tile(entt::registry & entities, prefab::tile & tile_prefab,
     auto p = game.world_space().nearest_point(event.button.x, event.button.y);
 
     // do nothing if the tile is already placed or if no adjacent tiles
-    auto & tileset = game.placed_tiles();
-    if (tileset.contains(p) || !tiles::is_adjacent(tileset, p.x, p.y)) {
+    if (placed_tiles.contains(p) || !tiles::is_adjacent(placed_tiles, p.x, p.y)) {
         return;
     }
     // keep track of the positions that have been placed
-    tileset.insert(p);
-
-    auto & tile = entities.get<component::tile>(mouse_tile);
-    tile_prefab.create_static(entities, tile.name, tile.rotation, p.x, p.y);
+    tile_prefab.static_copy(entities, placed_tiles, mouse_tile);
 
     // generate a new random tile
+    auto & tile = entities.get<component::tile>(mouse_tile);
     tile.name = tiles::random_name(game.rng());
     tile.rotation = tiles::random_rotation(game.rng());
 }

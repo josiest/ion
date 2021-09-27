@@ -13,4 +13,5 @@ void rotate_tile(entt::registry & entities, entt::entity tile,
                  SDL_Event const & event);
 
 void place_tile(entt::registry & entities, prefab::tile & tile_prefab,
-                entt::entity tile, pipes & game, SDL_Event const & event);
+                pointset & placed_tiles, entt::entity tile,
+                pipes & game, SDL_Event const & event);

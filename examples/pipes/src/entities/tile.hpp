@@ -2,6 +2,7 @@
 
 #include "types/tile.hpp"
 #include "types/point.hpp"
+#include "types/components.hpp"
 #include "systems/tile.hpp"
 
 #include <ion/graphics/surface.hpp>
@@ -20,20 +21,34 @@ public:
          SDL_Color const & static_color, SDL_Color const & placable_color,
          SDL_Color const & distant_color);
 
-    /** Create a dynamic tile object */
-    entt::entity create(entt::registry & entities,
-                        tiles::Name name, tiles::Rotation rotation,
-                        point auto const & p)
-    { return create(entities, name, rotation, p.x, p.y); }
+    /** Create a dynamic random tile object */
+    template<class engine_t>
+    entt::entity random_dynamic(entt::registry & entities, engine_t & rng,
+                                point auto const & p) const
+    {
+        return create(entities, tiles::random_name(rng),
+                                tiles::random_rotation(rng), p.x, p.y);
+    }
 
+    /** Create a static random tile object */
+    template<class engine_t>
+    entt::entity random_static(entt::registry & entities, pointset & placed_tiles,
+                               point auto const & p, engine_t & rng) const
+    {
+        auto const entity = random_dynamic(entities, rng, p);
+        entities.emplace<component::static_tile>(entity);
+        placed_tiles.insert(p);
+        return entity;
+    }
+
+    /** Create a static copy of a tile entity */
+    entt::entity static_copy(entt::registry & entities, pointset & placed_tiles,
+                             entt::entity tile) const;
+
+    /** Create a tile entity */
     entt::entity create(entt::registry & entities,
                         tiles::Name name, tiles::Rotation rotation,
                         int x, int y) const;
-
-    /** Create a static tile object */
-    entt::entity create_static(entt::registry & entities,
-                               tiles::Name name, tiles::Rotation rotation,
-                               int x, int y) const;
 
     /** Determine if the tile prefab is not okay to use */
     bool operator!() const;
@@ -60,6 +75,8 @@ public:
 private:
     SDL_Color _static_color, _placeable_color, _distant_color;
     std::filesystem::path _images_path;
+
+    // the loaded tile surfaces
     std::unordered_map<tiles::pair, ion::surface> _tiles;
 
     /** Get the filepath for a tile bitmap image */

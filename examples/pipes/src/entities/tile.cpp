@@ -52,13 +52,14 @@ entt::entity tile::create(entt::registry & entities,
     return tile;
 }
 
-entt::entity tile::create_static(entt::registry & entities,
-                                 tiles::Name tilename, tiles::Rotation rotation,
-                                 int x, int y) const
+entt::entity tile::static_copy(entt::registry & entities, pointset & placed_tiles,
+                               entt::entity other) const
 {
-    auto const tile = create(entities, tilename, rotation, x, y);
-    entities.emplace<cmpt::static_tile>(tile);
-    return tile;
+    auto const & [info, p] = entities.get<cmpt::tile, cmpt::position>(other);
+    auto const entity = create(entities, info.name, info.rotation, p.x, p.y);
+    entities.emplace<cmpt::static_tile>(entity);
+    placed_tiles.insert(p);
+    return entity;
 }
 
 bool tile::operator!() const
