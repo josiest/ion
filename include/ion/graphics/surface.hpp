@@ -24,7 +24,7 @@ public:
      * Create a surface by loading a bitmap image
      * \param path the path of the bitmap image
      */
-    surface(std::filesystem::path const & path) noexcept;
+    explicit surface(std::filesystem::path const & path) noexcept;
 
     /**
      * Create a surface from another temporary surface
