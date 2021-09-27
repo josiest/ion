@@ -8,8 +8,14 @@ namespace ion {
 /** A resource handler for an opengl vertex array object */
 class vao {
 public:
+    // delete unwanted implicit constructors
+    vao(vao const &) = delete;
+
     /** Create a basic vao */
     vao() noexcept;
+
+    /** Create a vao from a temporary vao */
+    vao(vao && other) noexcept;
     ~vao();
 
     /** Cast this vao to its underling opengl id */

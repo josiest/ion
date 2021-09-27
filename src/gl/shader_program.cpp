@@ -46,7 +46,7 @@ shader_program::shader_program(std::string const & vertex_source) noexcept
     auto source_pair = std::make_pair(GL_VERTEX_SHADER, vertex_source);
     _shaders.insert(_to_pair(_compile_shader_source(std::move(source_pair))));
 
-    // then amke sure things are ok
+    // then make sure things are ok
     _validate_program() and _validate_shaders() and _link_shaders();
 }
 
@@ -200,9 +200,9 @@ bool shader_program::_link_shaders() noexcept
 void shader_program::_clean_up() noexcept
 {
     ranges::for_each(_shaders, _detach_shader());
-    _shaders.clear();
     glDeleteProgram(_id);
     _id = 0;
+    _shaders.clear();
 }
 
 shader_program::~shader_program()

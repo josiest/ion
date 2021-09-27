@@ -19,6 +19,12 @@ vao::vao() noexcept
         return;
     }
 }
+vao::vao(vao && other) noexcept
+    : _id{other._id}, _error{other._error}
+{
+    other._id = 0;
+    other._error = "vertex array object was moved";
+}
 vao::~vao()
 {
     if (glIsVertexArray(_id)) {

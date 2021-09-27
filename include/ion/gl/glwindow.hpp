@@ -79,7 +79,7 @@ public:
      * \param title the title of the window
      *
      * \param x the x-coordinate of the window
-     * \param y the y-coordinate of the windwo
+     * \param y the y-coordinate of the window
      *
      * \param width the width of the window
      * \param height the height of the window
