@@ -60,7 +60,8 @@ void pipes::run()
 
         // process any events then render the window
         _events.process_queue();
-        render(_window, _entities, _tile_prefab, mouse_tile, *this);
+        systems::render(_window, _world_space, _entities,
+                        _tile_prefab, _placed_tiles, mouse_tile);
     }
 }
 
