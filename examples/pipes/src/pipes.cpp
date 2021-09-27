@@ -1,5 +1,4 @@
 #include "pipes.hpp"
-#include "error.hpp"
 
 #include "systems/tile.hpp"
 #include "systems/input.hpp"
@@ -25,8 +24,8 @@ int main()
     pipes game{800, 600};
 
     // crash if the game failed to initialize
-    if (game.bad()) {
-        std::cout << get_error() << std::endl;
+    if (not game) {
+        std::cout << game.error() << std::endl;
         return 1;
     }
     // otherwise run the game
@@ -49,11 +48,11 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
       _rng{std::random_device{}()}
 {
     if (not _sdl) {
-        set_error(_sdl.error());
+        _error = "Couldn't initialize SDL: " + _sdl.error();
         return;
     }
     if (not _window) {
-        set_error(_window.error());
+        _error = "Couldn't create a window: " + _window.error();
         return;
     }
     auto tile_is_bad = [](auto const & pair) { return not *pair.second; };

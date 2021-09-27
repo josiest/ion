@@ -12,8 +12,6 @@
 #include <ion/graphics/surface.hpp>
 #include <utility>
 
-#include "error.hpp"
-
 namespace tiles {
 
 std::string image_path(Name tilename, Rotation rotation)
@@ -52,7 +50,6 @@ tilemap load_map()
         }
     }
     // set the game error message
-    set_error(error);
     return tiles;
 }
 
