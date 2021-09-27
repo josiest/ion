@@ -65,7 +65,7 @@ void render_mouse_tile(ion::window_resource auto & window,
 
     // get the appropriate color: is the mouse next to an already placed tile?
     auto color = tile_prefab.placeable_color();
-    if (!tiles::is_adjacent(game.placed_tiles(), p.x, p.y)) {
+    if (not systems::is_adjacent(game.placed_tiles(), p)) {
         color = tile_prefab.distant_color();
     }
     // finally render

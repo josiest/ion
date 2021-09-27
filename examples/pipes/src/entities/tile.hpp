@@ -26,8 +26,8 @@ public:
     entt::entity random_dynamic(entt::registry & entities, engine_t & rng,
                                 point auto const & p) const
     {
-        return create(entities, tiles::random_name(rng),
-                                tiles::random_rotation(rng), p.x, p.y);
+        return create(entities, systems::random_name(rng),
+                                systems::random_rotation(rng), p.x, p.y);
     }
 
     /** Create a static random tile object */

@@ -19,15 +19,15 @@ void bind_to_mouse(entt::registry & entities, entt::entity tile,
     auto const q = world_space.nearest_point(mouse);
 
     // update the desired entity to correspond to the mouse position
-    tiles::move(entities, tile, q.x, q.y);
+    move_tile(entities, tile, q.x, q.y);
 }
 
 void rotate_tile(entt::registry & entities, entt::entity mouse_tile, int dy)
 {
     // get a reference to the tile and change its rotation
     auto & tile = entities.get<cmpt::tile>(mouse_tile);
-    if (dy > 0) { tiles::increment_rotation(tile.rotation); }
-    else if (dy < 0) { tiles::decrement_rotation(tile.rotation); }
+    if (dy > 0) { increment_rotation(tile.rotation); }
+    else if (dy < 0) { decrement_rotation(tile.rotation); }
 }
 
 }

@@ -48,7 +48,7 @@ void pipes::run()
     _events.subscribe_functor(SDL_MOUSEBUTTONUP,
         [this, mouse_tile](SDL_Event const & event) {
             _tile_prefab.static_copy(_entities, _placed_tiles, mouse_tile);
-            tiles::randomize(_entities, mouse_tile, _rng);
+            systems::randomize_tile(_entities, mouse_tile, _rng);
         });
 
     // create the window and run the game
