@@ -30,7 +30,7 @@ public:
     std::string const & error() const { return _error; }
 
     // shared immutable resources
-    inline grid const & world_space() const { return _world_space; }
+    inline systems::grid const & world_space() const { return _world_space; }
 
     // shared mutable resources
     inline engine_t & rng() { return _rng; }
@@ -42,16 +42,12 @@ private:
     // initialize sdl before other sdl resources
     ion::sdl_context _sdl;
     ion::blit_window _window;
+    systems::grid _world_space;
 
     // ecs
+    engine_t _rng;
     entt::registry _entities;
     prefab::tile _tile_prefab;
-
-    // shared immutable resources
-    grid _world_space;
-
-    // shared mutable resources
-    engine_t _rng;
     pointset _placed_tiles;
 
     // error handling

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <concepts>
+#include <entt/entity/registry.hpp>
+#include <SDL.h>
 
-#include <unordered_set>
-#include <SDL2/SDL_rect.h>
+#include <unordered_map>
+#include <concepts>
 
 /** A polymporhic point concept */
 template<class point_t>
@@ -36,4 +37,4 @@ constexpr bool operator==(point auto const & p, point auto const & q) noexcept
 /**
  * An alias for a set of SDL_Points
  */
-using pointset = std::unordered_set<SDL_Point>;
+using pointset = std::unordered_map<SDL_Point, entt::entity>;

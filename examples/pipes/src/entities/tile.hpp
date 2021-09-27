@@ -37,7 +37,7 @@ public:
     {
         auto const entity = random_dynamic(entities, rng, p);
         entities.emplace<component::static_tile>(entity);
-        placed_tiles.insert(p);
+        placed_tiles.try_emplace(p, entity);
         return entity;
     }
 

@@ -31,21 +31,53 @@ int main()
     game.run();
 }
 
+void pipes::run()
+{
+    // create a random tile associated with the mouse
+    auto const mouse_tile = _tile_prefab.random_dynamic(
+        _entities, _rng, ion::input::mouse_position()
+    );
+
+    // rotate the tile associated with the mouse when scrolled
+    _events.subscribe_functor(SDL_MOUSEWHEEL,
+        [this, mouse_tile](SDL_Event const & event) {
+            systems::rotate_tile(_entities, mouse_tile, event.wheel.y);
+        });
+
+    // place the tile associated with the mouse when clicked
+    _events.subscribe_functor(SDL_MOUSEBUTTONUP,
+        [this, mouse_tile](SDL_Event const & event) {
+            _tile_prefab.static_copy(_entities, _placed_tiles, mouse_tile);
+            tiles::randomize(_entities, mouse_tile, _rng);
+        });
+
+    // create the window and run the game
+    while (not ion::input::has_quit()) {
+
+        // bind the mouse-tile entity to the mouse position
+        systems::bind_to_mouse(_entities, mouse_tile, _world_space);
+
+        // process any events then render the window
+        _events.process_queue();
+        render(_window, _entities, _tile_prefab, mouse_tile, *this);
+    }
+}
+
 pipes::pipes(std::uint32_t width, std::uint32_t height)
     : _window{"Pipes", width, height},
 
-      // tile creation infromation
-      _tile_prefab{"../resources", {0x42, 0x87, 0xf5, 0xff},    // static
-                                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
-                                   {0xd3, 0xd3, 0xd3, 0xff}},   // distant
-
       // interface between grid-space and pixel-space
-      //   origin is at (0, height) because pixel-space vertical axis is weird
-      //   50 seems like a decent unit-size for now
-      _world_space{0, static_cast<int>(height), width, height, 100},
+      //   100 seems like a decent unit-size for now
+      _world_space{width, height, 100},
 
       // intialize the random engine with a random seed
-      _rng{std::random_device{}()}
+      _rng{std::random_device{}()},
+
+      // tell the tile prefab where to find the tile images
+      // and what colors should be used
+      _tile_prefab{"../resources", {0x42, 0x87, 0xf5, 0xff},    // static color
+                                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
+                                   {0xd3, 0xd3, 0xd3, 0xff}}    // distant
 {
     // quit when SDL quit event is triggered
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
@@ -59,44 +91,13 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
         _error = "Couldn't create a window: " + _window.error();
         return;
     }
+
+    // make sure the tile images were loaded properly
     if (not _tile_prefab) {
         _error = "Couldn't load tiles:\n" + _tile_prefab.error();
     }
-}
 
-void pipes::run()
-{
     // create a random initial tile in the middle of the screen
-    int width, height;
-    SDL_GetWindowSize(_window, &width, &height);
-    auto init_point = _world_space.nearest_point(SDL_Point{width/2, height/2});
+    auto init_point = _world_space.nearest_point(width/2, height/2);
     _tile_prefab.random_static(_entities, _placed_tiles, init_point, _rng);
-
-    // create a random tile associated with the mouse and save a reference
-    auto mouse_tile = _tile_prefab.random_dynamic( _entities, _rng,
-                                                  ion::input::mouse_position());
-
-    // rotate the tile associated with the mouse when scrolled
-    _events.subscribe_functor(SDL_MOUSEWHEEL,
-            [this, mouse_tile](SDL_Event const & event) {
-            rotate_tile(_entities, mouse_tile, event);
-            });
-
-    // place the tile associated with the mouse when clicked
-    _events.subscribe_functor(SDL_MOUSEBUTTONUP,
-            [this, mouse_tile](SDL_Event const & event) {
-            place_tile(_entities, _tile_prefab, _placed_tiles,
-                       mouse_tile, *this, event);
-            });
-
-    // create the window and run the game
-    while (!ion::input::has_quit()) {
-
-        // bind the mouse-tile entity to the mouse position
-        bind_to_mouse(_entities, mouse_tile, _world_space);
-
-        // process any events then render the window
-        _events.process_queue();
-        render(_window, _entities, _tile_prefab, mouse_tile, *this);
-    }
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include "entities/tile.hpp"
-#include <SDL2/SDL.h>
+
+#include "types/tile.hpp"
+#include <SDL.h>
 
 namespace component {
 struct tile {

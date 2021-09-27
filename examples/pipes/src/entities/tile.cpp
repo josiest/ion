@@ -55,10 +55,20 @@ entt::entity tile::create(entt::registry & entities,
 entt::entity tile::static_copy(entt::registry & entities, pointset & placed_tiles,
                                entt::entity other) const
 {
+    // get the required components
     auto const & [info, p] = entities.get<cmpt::tile, cmpt::position>(other);
+
+    // return the existing entity if it already has been placed
+    auto const search = placed_tiles.find(p);
+    if (search != placed_tiles.end()) {
+        return search->second;
+    }
+    // otherwise create a copy of the tile
     auto const entity = create(entities, info.name, info.rotation, p.x, p.y);
     entities.emplace<cmpt::static_tile>(entity);
-    placed_tiles.insert(p);
+
+    // and mark it as placed
+    placed_tiles.try_emplace(search, p, entity);
     return entity;
 }
 
