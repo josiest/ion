@@ -44,18 +44,22 @@ public:
     }
 
     /** Create a static copy of a tile entity */
-    entt::entity static_copy(entt::registry & entities,
-                             pointset & placed_tiles,
-                             entt::entity other) const
+    template<class engine_t>
+    entt::entity static_copy(entt::registry & entities, pointset & placed_tiles,
+                             entt::entity mouse_tile, engine_t & rng) const
     {
         // get the required components
         auto const & [info, p] = entities.get<component::tile,
-                                              component::position>(other);
+                                              component::position>(mouse_tile);
 
         // return the existing entity if it already has been placed
         auto const search = placed_tiles.find(p);
         if (search != placed_tiles.end()) {
             return search->second;
+        }
+        // return mouse entity if mouse is too far
+        else if (not systems::is_adjacent(placed_tiles, p)) {
+            return mouse_tile;
         }
         // otherwise create a copy of the tile
         auto const entity = create(entities, info.name, info.rotation, p.x, p.y);
@@ -63,6 +67,9 @@ public:
 
         // and mark it as placed
         placed_tiles.try_emplace(search, p, entity);
+
+        // then randomize the mouse tile
+        systems::randomize_tile(entities, mouse_tile, rng);
         return entity;
     }
 
