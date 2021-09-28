@@ -1,8 +1,7 @@
 #pragma once
 
-#include "types/components.hpp"
-
-#include <entt/entity/registry.hpp>
+#include "components.hpp"
+#include <entt/entt.hpp>
 
 #include <unordered_map>
 #include <algorithm>

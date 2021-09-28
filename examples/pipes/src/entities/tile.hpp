@@ -1,17 +1,18 @@
 #pragma once
 
-#include "types/tile.hpp"
-#include "types/components.hpp"
+#include "components.hpp"
 #include "systems/point.hpp"
 #include "systems/tile.hpp"
 
-#include <ion/graphics/surface.hpp>
-#include <entt/entity/registry.hpp>
+#include <ion/ion.hpp>
+#include <entt/entt.hpp>
 #include <SDL.h>
 
 #include <filesystem>
 
 namespace prefab {
+
+namespace tileinfo = component::tileinfo;
 
 /** A resource manager for tile surfaces */
 class tile {
@@ -67,7 +68,7 @@ public:
 
     /** Create a tile entity */
     entt::entity create(entt::registry & entities,
-                        tiles::Name name, tiles::Rotation rotation,
+                        tileinfo::name name, tileinfo::rotation rotation,
                         int x, int y) const;
 
     /** Determine if the tile prefab is not okay to use */
@@ -76,12 +77,8 @@ public:
     /** The error if the tile prefab isn't okay to use */
     std::string error() const;
 
-    /** Get the surface associated with the given pair */
-    inline ion::surface & at(tiles::Name name, tiles::Rotation rotation)
-    {
-        return _tiles.at(std::make_pair(name, rotation));
-    }
-    inline ion::surface & at(tiles::pair const & tile)
+    /** Get the surface associated with the given tile */
+    inline ion::surface & at(component::tile const & tile)
     {
         return _tiles.at(tile);
     }
@@ -97,9 +94,9 @@ private:
     std::filesystem::path _images_path;
 
     // the loaded tile surfaces
-    std::unordered_map<tiles::pair, ion::surface> _tiles;
+    std::unordered_map<component::tile, ion::surface> _tiles;
 
     /** Get the filepath for a tile bitmap image */
-    ion::surface _load_image(tiles::pair const & pair);
+    ion::surface _load_image(component::tile const & tile);
 };
 }

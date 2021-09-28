@@ -1,10 +1,12 @@
-#include "pipes.hpp"
-#include "types/components.hpp"
-#include "entities/tile.hpp"
+#include "components.hpp"
+
+#include "systems/grid.hpp"
 #include "systems/tile.hpp"
 
-#include <entt/entity/registry.hpp>
-#include <SDL2/SDL.h>
+#include "entities/tile.hpp"
+
+#include <entt/entt.hpp>
+#include <SDL.h>
 
 namespace cmpt = component;
 

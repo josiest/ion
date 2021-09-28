@@ -1,24 +1,24 @@
-#include "entities/tile.hpp"
-#include "types/components.hpp"
+#include "components.hpp"
 
-#include <ion/graphics/surface.hpp>
-#include <entt/entity/registry.hpp>
+#include "systems/tile.hpp"
+#include "entities/tile.hpp"
+
+#include <ion/ion.hpp>
+#include <entt/entt.hpp>
 #include <SDL.h>
 
 #include <string>
 #include <filesystem>
 
-#include <utility>
 #include <algorithm>
 #include <numeric>
+#include <ranges>
 
 // namespace aliases
 namespace cmpt = component;
 namespace fs = std::filesystem;
 namespace ranges = std::ranges;
 namespace views = std::views;
-
-using namespace std::string_literals;
 
 namespace prefab {
 
@@ -30,8 +30,8 @@ tile::tile(std::filesystem::path const & images_path,
       _distant_color{distant_color}, _images_path{images_path}
 {
     // full cartesian product of tile names and rotations
-    std::unordered_set<tiles::pair> pairs;
-    for (auto name : tiles::names) { for (auto rotation : tiles::rotations) {
+    std::unordered_set<cmpt::tile> pairs;
+    for (auto name : tileinfo::names) { for (auto rotation : tileinfo::rotations) {
         pairs.emplace(name, rotation);
     }}
 
@@ -43,7 +43,7 @@ tile::tile(std::filesystem::path const & images_path,
 }
 
 entt::entity tile::create(entt::registry & entities,
-                          tiles::Name name, tiles::Rotation rotation,
+                          tileinfo::name name, tileinfo::rotation rotation,
                           int x, int y) const
 {
     auto const tile = entities.create();
@@ -74,11 +74,11 @@ std::string tile::error() const
                            *messages.begin(), string_join);
 }
 
-ion::surface tile::_load_image(tiles::pair const & pair)
+ion::surface tile::_load_image(cmpt::tile const & tile)
 {
     std::stringstream path;
     path << _images_path.string() << "/"
-         << pair.first << "-" << pair.second << ".bmp";
+         << tile.name << "-" << tile.rotation << ".bmp";
     return ion::surface{path.str()};
 }
 

@@ -1,21 +1,16 @@
 #pragma once
 
-#include "types/components.hpp"
-#include "types/tile.hpp"
-#include "systems/point.hpp"
-#include "systems/grid.hpp"
-#include "entities/tile.hpp"
+#include "components.hpp"
+#include "systems.hpp"
+#include "entities.hpp"
 
 #include <ion/ion.hpp>
-#include <SDL2/SDL.h>
-#include <entt/entity/registry.hpp>
+#include <entt/entt.hpp>
+#include <SDL.h>
 
-#include <cstdint>
-#include <memory>
 #include <string>
-
+#include <cstdint>
 #include <random>
-#include <algorithm>
 
 /** A resource manager for all game resources */
 class pipes {
@@ -29,13 +24,6 @@ public:
     inline bool operator!() const { return not _error.empty(); }
     /** The error message if the game isn't okay to play */
     std::string const & error() const { return _error; }
-
-    // shared immutable resources
-    inline systems::grid const & world_space() const { return _world_space; }
-
-    // shared mutable resources
-    inline engine_t & rng() { return _rng; }
-    inline pointset & placed_tiles() { return _placed_tiles; }
 private:
     // events
     ion::event_system _events;

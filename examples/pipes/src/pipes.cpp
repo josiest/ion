@@ -1,14 +1,11 @@
 #include "pipes.hpp"
 
-#include "systems/tile.hpp"
-#include "systems/input.hpp"
-#include "systems/render.hpp"
-
-#include "entities/tile.hpp"
+#include "systems.hpp"
+#include "entities.hpp"
 
 #include <ion/ion.hpp>
-#include <SDL2/SDL.h>
-#include <entt/entity/registry.hpp>
+#include <entt/entt.hpp>
+#include <SDL.h>
 
 #include <memory>
 #include <random>

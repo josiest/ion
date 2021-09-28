@@ -1,6 +1,5 @@
 #pragma once
-#include "types/tile.hpp"
-#include "types/components.hpp"
+#include "components.hpp"
 
 #include "systems/point.hpp"
 #include "systems/grid.hpp"
@@ -8,8 +7,8 @@
 
 #include "entities/tile.hpp"
 
-#include <ion/window/resource.hpp>
-#include <entt/entity/registry.hpp>
+#include <ion/ion.hpp>
+#include <entt/entt.hpp>
 #include <SDL.h>
 
 namespace systems {
@@ -39,6 +38,7 @@ void render_static_tiles(ion::window_resource auto & window,
     auto static_tiles = entities.view<component::tile, component::position,
                                       component::static_tile>();
 
+    // get the background color as a uint to pass to FillRect
     auto const & color = tile_prefab.static_color();
     auto const bg_color = SDL_MapRGB(screen->format, color.r, color.g, color.b);
 
@@ -46,7 +46,7 @@ void render_static_tiles(ion::window_resource auto & window,
             (auto const & tile, auto const & p) {
 
         // get the sdl surface to render from and the grid sqaure to render to
-        auto & tile_surface = tile_prefab.at(tile.name, tile.rotation);
+        auto & tile_surface = tile_prefab.at(tile);
         SDL_Rect grid_square = world_space.unit_square(p.x, p.y);
 
         // color the background
@@ -70,7 +70,7 @@ void render_mouse_tile(ion::window_resource auto & window,
 
     // then the bitmap surface
     auto const & tile = entities.get<component::tile>(mouse_tile);
-    auto & tile_surface = tile_prefab.at(tile.name, tile.rotation);
+    auto & tile_surface = tile_prefab.at(tile);
 
     // get the appropriate color: is the mouse next to an already placed tile?
     auto color = tile_prefab.placeable_color();

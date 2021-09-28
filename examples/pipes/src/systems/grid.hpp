@@ -1,6 +1,7 @@
 #pragma once
+
+#include "components.hpp"
 #include "systems/point.hpp"
-#include "types/components.hpp"
 
 #include <cstdint>
 #include <SDL.h>

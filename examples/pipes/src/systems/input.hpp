@@ -3,7 +3,7 @@
 #include "entities/tile.hpp"
 #include "systems/grid.hpp"
 
-#include <entt/entity/registry.hpp>
+#include <entt/entt.hpp>
 #include <SDL.h>
 
 namespace systems {
