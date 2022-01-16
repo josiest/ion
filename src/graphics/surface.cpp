@@ -17,15 +17,6 @@ surface::surface(SDL_Surface * surface) noexcept
     }
 }
 
-surface::surface(fs::path const & path) noexcept
-    : _surface{SDL_LoadBMP(path.c_str())}
-{
-    // use SDL's error message if LoadBMP failed
-    if (not _surface) {
-        _error = SDL_GetError();
-    }
-}
-
 surface::surface(surface && temp) noexcept
     : _surface{temp._surface}, _error{std::move(temp._error)}
 {
@@ -42,4 +33,17 @@ surface::~surface()
     }
     _surface = nullptr;
 }
+
+surface surface::load_bitmap(fs::path const & path) noexcept
+{
+    surface image{SDL_LoadBMP(path.c_str())};
+
+    // use SDL's error message if LoadBMP failed
+    if (not image) {
+        image._error = SDL_GetError();
+    }
+
+    return image;
+}
+
 }

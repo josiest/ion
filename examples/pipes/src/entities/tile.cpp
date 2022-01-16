@@ -79,7 +79,7 @@ ion::surface tile::_load_image(cmpt::tile const & tile)
     std::stringstream path;
     path << _images_path.string() << "/"
          << tile.name << "-" << tile.rotation << ".bmp";
-    return ion::surface{path.str()};
+    return ion::surface::load_bitmap(path.str());
 }
 
 }

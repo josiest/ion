@@ -21,12 +21,6 @@ public:
     surface(SDL_Surface * surface) noexcept;
 
     /**
-     * Create a surface by loading a bitmap image
-     * \param path the path of the bitmap image
-     */
-    explicit surface(std::filesystem::path const & path) noexcept;
-
-    /**
      * Create a surface from another temporary surface
      * \param temp the temporary surface
      */
@@ -41,6 +35,12 @@ public:
 
     /** The error if the surface is not okay to use */
     inline std::string const & error() const noexcept { return _error; }
+
+    /**
+     * Create a surface by loading a bitmap image
+     * \param path the path of the bitmap image
+     */
+    static surface load_bitmap(std::filesystem::path const & path) noexcept;
 private:
     SDL_Surface * _surface;
     std::string _error;
