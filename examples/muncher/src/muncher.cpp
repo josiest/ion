@@ -27,8 +27,8 @@ int main()
     auto & game = get_game();
 
     // crash if the game failed to initialize properly
-    if (not game.is_ok()) {
-        std::cout << game.error() << std::endl;
+    if (not game) {
+        std::cout << game.get_error() << std::endl;
     }
     // otherwise run the game
     else {
@@ -56,10 +56,10 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
 {
     // check if sdl resources initialized properly
     if (not _sdl) {
-        _error = _sdl.error(); return;
+        set_error(_sdl.get_error()); return;
     }
     if (not _window) {
-        _error = _window.error(); return;
+        set_error(_window.get_error()); return;
     }
 
     // quit when the user exits the window

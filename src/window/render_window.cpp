@@ -12,17 +12,8 @@ render_window::render_window(SDL_Window * window,
     : _window{window}, _renderer{renderer}
 {
     // set the error message if window is null
-    if (not window) {
-        _error = "window initialized with null";
-    }
-    // update the error message if renderer is null
-    if (not renderer) {
-
-        // if both are null, make sure to say it in a neat way
-        if (not window) {
-            _error += " and ";
-        }
-        _error += "renderer initialized with null";
+    if (not window or not renderer) {
+        set_error("render_window initialized with null window or renderer");
     }
 }
 
@@ -47,7 +38,7 @@ render_window::render_window(
 
     // set the error message and quit if window initialization failed
     if (not _window) {
-        _error = SDL_GetError();
+        set_error(SDL_GetError());
         return;
     }
 
@@ -56,7 +47,7 @@ render_window::render_window(
 
     // set the error message and clean up if renderer initialization failed
     if (not _renderer) {
-        _error = SDL_GetError();
+        set_error(SDL_GetError());
         SDL_DestroyWindow(_window);
         _window = nullptr;
     }

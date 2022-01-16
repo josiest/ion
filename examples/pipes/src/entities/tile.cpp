@@ -52,28 +52,6 @@ entt::entity tile::create(entt::registry & entities,
     return tile;
 }
 
-bool tile::operator!() const
-{
-    // return true if any surface is not okay
-    auto tiles = views::values(_tiles);
-    return ranges::any_of(tiles, &ion::surface::operator!);
-}
-
-std::string tile::error() const
-{
-    // get the error message of each failed surface
-    auto messages = views::values(_tiles)
-                  | views::filter(&ion::surface::operator!)
-                  | views::transform(&ion::surface::error);
-
-    // and concatenate them into one string with a newline delimeter
-    auto string_join = [](std::string && a, std::string const & b) {
-        return std::move(a) + "\n" + b;
-    };
-    return std::accumulate(std::next(messages.begin()), messages.end(),
-                           *messages.begin(), string_join);
-}
-
 ion::surface tile::_load_image(cmpt::tile const & tile)
 {
     std::stringstream path;

@@ -10,14 +10,14 @@ sdl_context::sdl_context(std::uint32_t flags) noexcept
 {
     // set the error message if sdl couldn't initialize
     if (SDL_Init(flags) < 0) {
-        _error = SDL_GetError();
+        set_error(SDL_GetError());
     }
 }
 
 sdl_context::~sdl_context()
 {
     // quit sdl if it was initialized
-    if (_error.empty()) {
+    if (get_error().empty()) {
         SDL_Quit();
     }
 }

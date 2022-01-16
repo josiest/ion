@@ -1,12 +1,13 @@
 #pragma once
 
+#include "ion/isotope.hpp"
 #include <cstdint>
 #include <string>
 
 namespace ion {
 
 /** A resource handler for SDL-initialization and termination */
-class sdl_context {
+class sdl_context : public isotope {
 public:
     // delete any unwanted implicit constructors
     sdl_context(sdl_context const &) = delete;
@@ -26,13 +27,5 @@ public:
      */
     sdl_context(std::uint32_t flags) noexcept;
     ~sdl_context();
-
-    /** Determine if sdl is not okay to use */
-    inline bool operator!() const noexcept { return not _error.empty(); }
-
-    /** The error if sdl is not okay to use */
-    inline std::string error() const noexcept { return _error; }
-private:
-    std::string _error;
 };
 }

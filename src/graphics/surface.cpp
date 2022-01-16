@@ -1,4 +1,5 @@
 #include "ion/graphics/surface.hpp"
+#include "ion/isotope.hpp"
 
 #include <SDL.h>
 #include <string>
@@ -13,15 +14,16 @@ surface::surface(SDL_Surface * surface) noexcept
 {
     // failure if given null
     if (not surface) {
-        _error = "surface initialized with null";
+        set_error("surface initialized with null");
     }
 }
 
 surface::surface(surface && temp) noexcept
-    : _surface{temp._surface}, _error{std::move(temp._error)}
+    : _surface{temp._surface}
 {
     temp._surface = nullptr;
-    temp._error = "surface moved to another object";
+    set_error(temp.get_error());
+    temp.set_error("surface moved to another object");
 }
 
 surface::~surface()
@@ -40,7 +42,7 @@ surface surface::load_bitmap(fs::path const & path) noexcept
 
     // use SDL's error message if LoadBMP failed
     if (not image) {
-        image._error = SDL_GetError();
+        image.set_error(SDL_GetError());
     }
 
     return image;

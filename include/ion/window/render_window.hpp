@@ -1,13 +1,15 @@
 #pragma once
 
+#include "ion/isotope.hpp"
 #include <SDL.h>
+
 #include <cstdint>
 #include <string>
 
 namespace ion {
 
 /** An SDL_Window with a renderer */
-class render_window {
+class render_window : public isotope {
 public:
     // delete any unwanted implicit constructors
     render_window() = delete;
@@ -64,21 +66,9 @@ public:
 
     /** Cast this window to its underlying SDL_Renderer pointer */
     inline operator SDL_Renderer *() noexcept { return _renderer; }
-
-    /** Determine if this window is not okay to use */
-    inline bool operator!() noexcept
-    {
-        return nullptr == _window or nullptr == _renderer;
-    }
-
-    /** The error if this window is not okay to use */
-    inline std::string error() { return _error; }
 private:
     SDL_Window * _window;
     SDL_Renderer * _renderer;
-
-    // error handling
-    std::string _error;
 };
 
 

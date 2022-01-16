@@ -1,6 +1,8 @@
 #pragma once
 
+#include "ion/isotope.hpp"
 #include <SDL.h>
+
 #include <string>
 #include <cstdint>
 
@@ -9,12 +11,8 @@ namespace ion {
 /**
  * A render-less window meant to present by blitting surfaces.
  */
-class blit_window {
+class blit_window : public isotope {
 public:
-    /**
-     * An owning reference to SDL_Surfaces
-     */
-
     // delete unwanted implicit constructors
     blit_window() = delete;
     blit_window(blit_window const &) = delete;
@@ -63,15 +61,8 @@ public:
 
     /** The underyling SDL window */
     inline operator SDL_Window *() noexcept { return _window; }
-
-    /** Determine if the window encountered a non-recoverable error */
-    inline bool operator!() const noexcept { return nullptr == _window; }
-
-    /** Get the error message explaining why initialization failed */
-    inline std::string error() const noexcept { return _error; }
 private:
     SDL_Window * _window;
-    std::string _error;
 };
 
 }

@@ -1,5 +1,8 @@
 #pragma once
+#include "ion/isotope.hpp"
+
 #include <SDL.h>
+
 #include <string>
 #include <filesystem>
 
@@ -8,7 +11,7 @@ namespace ion {
 /**
  * A resource handler for a surface image
  */
-class surface {
+class surface : public isotope {
 public:
     // delete unwanted implicit constructors
     surface() = delete;
@@ -30,12 +33,6 @@ public:
     /** Cast to the underlying SDL_Surface */
     inline operator SDL_Surface *() noexcept { return _surface; }
 
-    /** Determine if the surface is not okay to use */
-    inline bool operator!() const noexcept { return not _surface; }
-
-    /** The error if the surface is not okay to use */
-    inline std::string const & error() const noexcept { return _error; }
-
     /**
      * Create a surface by loading a bitmap image
      * \param path the path of the bitmap image
@@ -43,6 +40,5 @@ public:
     static surface load_bitmap(std::filesystem::path const & path) noexcept;
 private:
     SDL_Surface * _surface;
-    std::string _error;
 };
 }

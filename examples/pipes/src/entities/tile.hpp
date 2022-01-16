@@ -15,7 +15,7 @@ namespace prefab {
 namespace tileinfo = component::tileinfo;
 
 /** A resource manager for tile surfaces */
-class tile {
+class tile : public ion::isotope {
 public:
     /** Create a tile prefab with the specified colors */
     tile(std::filesystem::path const & images_path,
@@ -77,12 +77,6 @@ public:
     entt::entity create(entt::registry & entities,
                         tileinfo::name name, tileinfo::rotation rotation,
                         int x, int y) const;
-
-    /** Determine if the tile prefab is not okay to use */
-    bool operator!() const;
-
-    /** The error if the tile prefab isn't okay to use */
-    std::string error() const;
 
     /** Get the surface associated with the given tile */
     inline ion::surface & at(component::tile const & tile)

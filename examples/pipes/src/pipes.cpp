@@ -21,7 +21,7 @@ int main()
 
     // crash if the game failed to initialize
     if (not game) {
-        std::cout << game.error() << std::endl;
+        std::cout << game.get_error() << std::endl;
         return 1;
     }
     // otherwise run the game
@@ -81,17 +81,17 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 
     // make sure SDL resources initialized properly
     if (not _sdl) {
-        _error = "Couldn't initialize SDL: " + _sdl.error();
+        set_error("Couldn't initialize SDL: " + _sdl.get_error());
         return;
     }
     if (not _window) {
-        _error = "Couldn't create a window: " + _window.error();
+        set_error("Couldn't create a window: " + _window.get_error());
         return;
     }
 
     // make sure the tile images were loaded properly
     if (not _tile_prefab) {
-        _error = "Couldn't load tiles:\n" + _tile_prefab.error();
+        set_error("Couldn't load tiles:\n" + _tile_prefab.get_error());
     }
 
     // create a random initial tile in the middle of the screen

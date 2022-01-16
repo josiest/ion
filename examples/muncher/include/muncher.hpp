@@ -14,7 +14,7 @@
 /**
  * A manager class for game resources
  */
-class muncher {
+class muncher : public ion::isotope {
 public:
     // delete any unwanted implicit constructors
     muncher() = delete;
@@ -42,30 +42,6 @@ public:
      * Reset the game
      */
     void reset() noexcept;
-
-    /**
-     * Determine if the game is in a valid state to run
-     */
-    inline bool is_ok() const noexcept
-    {
-        return _error.empty();
-    }
-
-    /**
-     * Get the error message explaining why the game can't run
-     */
-    inline std::string error() const noexcept
-    {
-        return _error;
-    }
-
-    /**
-     * Set the error message that explains why the game can't run
-     */
-    inline void error(std::string const & message) noexcept
-    {
-        _error = message;
-    }
 private:
     // sdl resources
 
@@ -87,9 +63,6 @@ private:
 
     // entity references
     entt::entity _player;
-
-    // error handling
-    std::string _error;
 };
 
 muncher & get_game() noexcept;

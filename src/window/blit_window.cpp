@@ -9,7 +9,7 @@ blit_window::blit_window(SDL_Window * window) noexcept
 {
     // failure if null was given
     if (not window) {
-        _error = "blit window initialized with a nullptr";
+        set_error("blit window initialized with a nullptr");
     }
 }
 
@@ -41,7 +41,7 @@ blit_window::blit_window(std::string const & title, int x, int y,
 
     // use sdl's error if it fails
     if (not _window) {
-        _error = SDL_GetError();
+        set_error(SDL_GetError());
     }
 }
 }
