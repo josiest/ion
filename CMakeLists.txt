@@ -1,5 +1,5 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.13)
 project(ion)
 
 # versioning
@@ -23,6 +23,10 @@ set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
 add_subdirectory(src/gl)
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(ion SDL2::Core SDL2::TTF)
 
 # --- create package for library ---
 
@@ -57,7 +61,7 @@ install(FILES
 
 # install cmake sdl2 modules
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2/
-        DESTINATION ${CMAKE_ROOT}/Modules
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/Modules
         FILES_MATCHING PATTERN *.cmake)
 
 # install the include files
