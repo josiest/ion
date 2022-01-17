@@ -21,6 +21,6 @@ concept renderer_resource = std::convertible_to<renderer_t, SDL_Renderer *>;
  * Convertible to an SDL_Window pointer and an SDL_Renderer pointer
  */
 template<class window_t>
-concept renderable_window =
+concept hardware_renderable =
     window_resource<window_t> && renderer_resource<window_t>;
 }
