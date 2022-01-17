@@ -1,11 +1,13 @@
 #include "ion/window/sdl_context.hpp"
 
 #include <SDL.h>
+#include <SDL_ttf.h>
+
 #include <cstdint>
+#include <ranges>
 
 namespace ion {
 
-sdl_context::sdl_context() noexcept : sdl_context(SDL_INIT_VIDEO) {}
 sdl_context::sdl_context(std::uint32_t flags) noexcept
 {
     // set the error message if sdl couldn't initialize
@@ -17,8 +19,32 @@ sdl_context::sdl_context(std::uint32_t flags) noexcept
 sdl_context::~sdl_context()
 {
     // quit sdl if it was initialized
-    if (get_error().empty()) {
-        SDL_Quit();
+    if (not *this) {
+        return;
     }
+    cleanup_everything();
+
+}
+
+void sdl_context::init_ttf() noexcept
+{
+    // make sure sdl was properly initialed before intializing anything else
+    if (not *this) {
+        return;
+    }
+    if (TTF_Init() < 0) {
+        set_error(TTF_GetError());
+        cleanup_everything();
+        return;
+    }
+    subsystem_destructors.push_back(&TTF_Quit);
+}
+
+void sdl_context::cleanup_everything() {
+    // clean up subsystems in reverse order they were initialized
+    for (auto cleanup : subsystem_destructors | std::views::reverse) {
+        cleanup();
+    }
+    SDL_Quit();
 }
 }
