@@ -6,6 +6,10 @@
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
+#include "div.hpp"
+
+// factories
+#include "button_template.hpp"
 
 // i/o
 #include <iostream>
@@ -20,34 +24,8 @@ fs::path const ASSET_DIR = fs::absolute("../assets");
 fs::path const FONT_DIR = ASSET_DIR/"fonts";
 fs::path const DEJAVUSANS_FILEPATH = FONT_DIR/"DejaVuSans.ttf";
 
-void render(ion::window_resource auto & window, ion::texture & text)
-{
-    // clear the screen
-    SDL_SetRenderDrawColor(window, 0, 0, 0, 0xff);
-    SDL_RenderClear(window);
-
-    // get the button dimensions
-    int button_width, button_height;
-    SDL_QueryTexture(text, nullptr, nullptr, &button_width, &button_height);
-
-    // get the screen dimensions
-    int screen_width, screen_height;
-    SDL_GetWindowSize(window, &screen_width, &screen_height);
-
-    // calculate the button position
-    SDL_Rect button_rect{
-        (screen_width - button_width)/2, (screen_height - button_height)/2,
-        button_width, button_height
-    };
-
-    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderFillRect(window, &button_rect);
-
-    // render the text to the button
-    SDL_RenderCopy(window, text, nullptr, &button_rect);
-
-    SDL_RenderPresent(window);
-}
+void render(ion::hardware_renderer & window, divider & main_div,
+            ion::texture & text);
 
 int main()
 {
@@ -84,11 +62,53 @@ int main()
         std::cout << "Unable to render button! " + button_text.get_error();
         return EXIT_FAILURE;
     }
-    render(window, button_text); // render once at the beginning of the program
+
+    // create the main window div
+    SDL_Rect screen_dim{0};
+    SDL_GetWindowSize(window, &screen_dim.w, &screen_dim.h);
+    divider main_div(screen_dim);
+
+    // create the factory for making buttons
+    button_template button_maker(40);
+    main_div.produce_element_from(&button_maker);
+
+    render(window, main_div, button_text); // render once at the beginning of the program
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
         events.process_queue();
     }
     return EXIT_SUCCESS;
+}
+
+void render(ion::hardware_renderer & window, divider & main_div,
+            ion::texture & text)
+{
+    // clear the screen
+    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(window);
+
+    main_div.render(window);
+
+    // get the button dimensions
+    int button_width, button_height;
+    SDL_QueryTexture(text, nullptr, nullptr, &button_width, &button_height);
+
+    // get the screen dimensions
+    int screen_width, screen_height;
+    SDL_GetWindowSize(window, &screen_width, &screen_height);
+
+    // calculate the button position
+    SDL_Rect button_rect{
+        (screen_width - button_width)/2, (screen_height - button_height)/2,
+        button_width, button_height
+    };
+
+    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderFillRect(window, &button_rect);
+
+    // render the text to the button
+    SDL_RenderCopy(window, text, nullptr, &button_rect);
+
+    SDL_RenderPresent(window);
 }
