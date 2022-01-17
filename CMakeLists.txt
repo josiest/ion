@@ -55,6 +55,11 @@ install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/ionConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
 
+# install cmake sdl2 modules
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2/
+        DESTINATION ${CMAKE_ROOT}/Modules
+        FILES_MATCHING PATTERN *.cmake)
+
 # install the include files
 install(DIRECTORY ${ion_INCLUDE_DIR}/ion
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
