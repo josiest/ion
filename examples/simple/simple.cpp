@@ -4,8 +4,6 @@
 #include <cmath>
 #include <cstdint>
 
-#include <iostream>
-
 SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
 {
     auto intlerp = [](std::uint8_t x, std::uint8_t y, float t) {
