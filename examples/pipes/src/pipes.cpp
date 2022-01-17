@@ -61,7 +61,7 @@ void pipes::run()
 }
 
 pipes::pipes(std::uint32_t width, std::uint32_t height)
-    : _window{"Pipes", width, height},
+    : _window{ion::software_renderer::basic_window("Pipes", width, height)},
 
       // interface between grid-space and pixel-space
       //   100 seems like a decent unit-size for now

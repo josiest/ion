@@ -25,7 +25,7 @@ private:
 
     // initialize sdl before other sdl resources
     ion::sdl_context _sdl;
-    ion::blit_window _window;
+    ion::software_renderer _window;
     systems::grid _world_space;
 
     // ecs

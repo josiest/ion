@@ -54,7 +54,7 @@ int main()
     }
 
     // create a window, specifying the title and dimensions
-    ion::blit_window window{"Potionology", 800, 600};
+    auto window = ion::software_renderer::basic_window("Potionology", 800, 600);
     if (not window) {
         std::cout << window.get_error() << std::endl;
         return EXIT_FAILURE;
