@@ -13,15 +13,20 @@ using uint = std::uint32_t;
 
 namespace ion {
 
-font::font(fs::path const & path, uint size) noexcept
+font::font(TTF_Font * ttf_font) noexcept
+    : _font{ttf_font}
 {
-    if (not fs::exists(path)) {
-        set_error("The path "s + path.c_str() + " doesn't exist");
+    if (not ttf_font) {
+        set_error("font initialized as null");
     }
-    _font = TTF_OpenFont(path.c_str(), size);
-    if (not _font) {
-        set_error(TTF_GetError());
-    }
+}
+
+font::font(font && temp) noexcept
+    : _font(temp._font)
+{
+    temp._font = nullptr;
+    set_error(temp.get_error());
+    temp.set_error("font moved to another object");
 }
 
 font::~font()
@@ -32,8 +37,8 @@ font::~font()
     }
 }
 
-surface font::render_text(std::string const & text,
-                          SDL_Color const & color) noexcept
+surface font::soft_render_text(std::string const & text,
+                               SDL_Color const & color) noexcept
 {
     auto text_surface = TTF_RenderText_Solid(*this, text.c_str(), color);
     surface rendered_text(text_surface);
@@ -42,4 +47,25 @@ surface font::render_text(std::string const & text,
     }
     return rendered_text;
 }
+
+font font::from_file(fs::path const & path, uint size) noexcept
+{
+    std::string message;
+    // make sure the font path exists
+    if (not fs::exists(path)) {
+        message = "The path "s + path.c_str() + " doesn't exist";
+    }
+    // try to open the font
+    auto ttf_font = TTF_OpenFont(path.c_str(), size);
+    if (not ttf_font and message.empty()) {
+        message = TTF_GetError();
+    }
+    // create an isotope font and set any error message that occured
+    font loaded_font(ttf_font);
+    if (not message.empty()) {
+        loaded_font.set_error(message);
+    }
+    return loaded_font;
+}
+
 }
