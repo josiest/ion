@@ -52,8 +52,8 @@ a fibonacci-like gradient pattern to the screen.
     #include <cstdint>
     
     #include <iostream>
-    
-    void render(ion::renderable_window auto & window);
+
+    void render(ion::hardware_renderable auto & window);
     SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t);
     
     int main()
@@ -66,7 +66,7 @@ a fibonacci-like gradient pattern to the screen.
         ion::sdl_context sdl;
     
         // create a window, specifying the title and dimensions
-        ion::render_window window{"A simple window", 800, 600};
+        auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
         render(window); // render once at the beginning of the program
     
         // busy loop until the user quits
@@ -84,9 +84,9 @@ a fibonacci-like gradient pattern to the screen.
         return SDL_Color{intlerp(a.r, b.r, t), intlerp(a.g, b.g, t),
                          intlerp(a.b, b.b, t), 0xff};
     }
-    
+
     // draw a fibonacci-like pattern
-    void render(ion::renderable_window auto & window)
+    void render(ion::hardware_renderable auto & window)
     {
         // the initial color
         SDL_Color blue{48, 118, 217, 255};
