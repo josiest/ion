@@ -4,12 +4,10 @@ project(potionology)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
 find_package(ion REQUIRED)
 
 file(GLOB sources *cpp)
 add_executable(potionology ${sources})
 
-include_directories(src ion::ion SDL2::Core SDL2:TTF)
-target_link_libraries(potionology ion::ion SDL2::Core SDL2::TTF)
+include_directories(src ion::ion)
+target_link_libraries(potionology ion::ion)

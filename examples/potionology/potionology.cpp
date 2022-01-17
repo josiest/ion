@@ -20,22 +20,33 @@ fs::path const ASSET_DIR = fs::absolute("../assets");
 fs::path const FONT_DIR = ASSET_DIR/"fonts";
 fs::path const DEJAVUSANS_FILEPATH = FONT_DIR/"DejaVuSans.ttf";
 
-void render(ion::window_resource auto & window, ion::surface & text)
+void render(ion::window_resource auto & window, ion::texture & text)
 {
+    // clear the screen
+    SDL_SetRenderDrawColor(window, 0, 0, 0, 0xff);
+    SDL_RenderClear(window);
 
-    // clear the screen and update
-    auto screen = SDL_GetWindowSurface(window);
-    SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format, 0, 0, 0));
+    // get the button dimensions
+    int button_width, button_height;
+    SDL_QueryTexture(text, nullptr, nullptr, &button_width, &button_height);
 
-    // draw the button
-    int constexpr width = 300;
-    int constexpr height = 100;
-    SDL_Rect button{
-        (screen->w - width)/2, (screen->h - height)/2, width, height
+    // get the screen dimensions
+    int screen_width, screen_height;
+    SDL_GetWindowSize(window, &screen_width, &screen_height);
+
+    // calculate the button position
+    SDL_Rect button_rect{
+        (screen_width - button_width)/2, (screen_height - button_height)/2,
+        button_width, button_height
     };
-    SDL_FillRect(screen, &button, SDL_MapRGB(screen->format, 255, 255, 255));
-    SDL_BlitSurface(text, nullptr, screen, &button);
-    SDL_UpdateWindowSurface(window);
+
+    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderFillRect(window, &button_rect);
+
+    // render the text to the button
+    SDL_RenderCopy(window, text, nullptr, &button_rect);
+
+    SDL_RenderPresent(window);
 }
 
 int main()
@@ -54,23 +65,23 @@ int main()
     }
 
     // create a window, specifying the title and dimensions
-    auto window = ion::software_renderer::basic_window("Potionology", 800, 600);
+    auto window = ion::hardware_renderer::basic_window("Potionology", 800, 600);
     if (not window) {
         std::cout << window.get_error() << std::endl;
         return EXIT_FAILURE;
     }
-    // create the static font
-    ion::font dejavu_sans{DEJAVUSANS_FILEPATH.c_str(), 40};
+    // create the font
+    auto dejavu_sans = ion::font::from_file(DEJAVUSANS_FILEPATH.c_str(), 40);
     if (not dejavu_sans) {
-        window.set_error("Unable to create font! " + dejavu_sans.get_error());
+        std::cout << "Unable to create font! " + dejavu_sans.get_error();
         return EXIT_FAILURE;
     }
 
     // render the button text
     SDL_Color const black{0, 0, 0, 255};
-    auto button_text = dejavu_sans.render_text("Click me!", black);
+    auto button_text = dejavu_sans.render_text(window, "Click me!", black);
     if (not button_text) {
-        window.set_error("Unable to render button! " + button_text.get_error());
+        std::cout << "Unable to render button! " + button_text.get_error();
         return EXIT_FAILURE;
     }
     render(window, button_text); // render once at the beginning of the program

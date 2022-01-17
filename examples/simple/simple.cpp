@@ -6,29 +6,6 @@
 
 #include <iostream>
 
-void render(ion::hardware_renderable auto & window);
-SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t);
-
-int main()
-{
-    // create the sdl event-handler: quit when sdl's quit event is triggered
-    ion::event_system events;
-    events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
-
-    // initialize sdl - initialize this before other sdl resources
-    ion::sdl_context sdl;
-
-    // create a window, specifying the title and dimensions
-    auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
-    render(window); // render once at the beginning of the program
-
-    // busy loop until the user quits
-    while (not ion::input::has_quit()) {
-        events.process_queue();
-    }
-}
-
-// linearly interpolate between two colors
 SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
 {
     auto intlerp = [](std::uint8_t x, std::uint8_t y, float t) {
@@ -38,7 +15,6 @@ SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
                      intlerp(a.b, b.b, t), 0xff};
 }
 
-// draw a fibonacci-like pattern
 void render(ion::hardware_renderable auto & window)
 {
     // the initial color
@@ -79,4 +55,23 @@ void render(ion::hardware_renderable auto & window)
         }
     }
     SDL_RenderPresent(window);
+}
+
+int main()
+{
+    // create the sdl event-handler: quit when sdl's quit event is triggered
+    ion::event_system events;
+    events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+
+    // initialize sdl - initialize this before other sdl resources
+    ion::sdl_context sdl;
+
+    // create a window, specifying the title and dimensions
+    auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
+    render(window); // render once at the beginning of the program
+
+    // busy loop until the user quits
+    while (not ion::input::has_quit()) {
+        events.process_queue();
+    }
 }
