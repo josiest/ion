@@ -10,6 +10,7 @@
 
 // factories
 #include "button_template.hpp"
+#include "div_template.hpp"
 
 // i/o
 #include <iostream>
@@ -66,13 +67,20 @@ int main()
     // create the main window div
     SDL_Rect screen_dim{0};
     SDL_GetWindowSize(window, &screen_dim.w, &screen_dim.h);
-    divider main_div(screen_dim);
+    div_template div_factory(20);
+    divider * main_div = div_factory.make(screen_dim);
+
+    // create the left and right divs inside the main div
+    auto [left_div, right_div] = main_div->vsplit(div_factory, .3f);
 
     // create the factory for making buttons
     button_template button_maker(40);
-    main_div.produce_element_from(&button_maker);
+    for (int i = 0; i < 3; i ++) {
+        left_div->produce_element_from(&button_maker);
+    }
 
-    render(window, main_div, button_text); // render once at the beginning of the program
+    // render once at the beginning of the program
+    render(window, *main_div, button_text);
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
