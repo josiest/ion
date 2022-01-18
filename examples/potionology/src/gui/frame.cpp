@@ -14,10 +14,13 @@ frame::frame(SDL_Rect const & bounds, uint padding)
 {
 }
 
-void frame::produce_element_from(IWidgetFactory * factory)
+void frame::produce_element(IWidgetFactory * factory,
+                            ion::hardware_renderer & window,
+                            std::string const & text)
 {
     SDL_Point const next = next_point();
-    _elements.push_back(factory->make(next.x, next.y, padded_width()));
+    _elements.push_back(factory->make(window, next.x, next.y,
+                                      padded_width(), text));
 }
 
 std::pair<frame *, frame *>

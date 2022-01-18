@@ -21,6 +21,8 @@ public:
 private:
     friend class button_template;
     SDL_Rect _bounds;
+    int _padding;
+    ion::texture _text;
 
-    button(SDL_Rect bounds);
+    button(SDL_Rect bounds, ion::texture && text, std::uint32_t padding);
 };

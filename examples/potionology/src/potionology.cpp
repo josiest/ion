@@ -8,6 +8,9 @@
 #include <filesystem>
 #include "gui/frame.hpp"
 
+// data structures
+#include <vector>
+
 // factories
 #include "gui/button_template.hpp"
 #include "gui/frame_template.hpp"
@@ -25,8 +28,7 @@ fs::path const ASSET_DIR = fs::absolute("../assets");
 fs::path const FONT_DIR = ASSET_DIR/"fonts";
 fs::path const DEJAVUSANS_FILEPATH = FONT_DIR/"DejaVuSans.ttf";
 
-void render(ion::hardware_renderer & window, frame & main_frame,
-            ion::texture & text);
+void render(ion::hardware_renderer & window, frame & main_frame);
 
 int main()
 {
@@ -50,7 +52,7 @@ int main()
         return EXIT_FAILURE;
     }
     // create the font
-    auto dejavu_sans = ion::font::from_file(DEJAVUSANS_FILEPATH.c_str(), 40);
+    auto dejavu_sans = ion::font::from_file(DEJAVUSANS_FILEPATH.c_str(), 30);
     if (not dejavu_sans) {
         std::cout << "Unable to create font! " + dejavu_sans.get_error();
         return EXIT_FAILURE;
@@ -74,13 +76,18 @@ int main()
     auto [left_frame, right_frame] = main_frame->vsplit(frame_factory, .4f);
 
     // create the factory for making buttons
-    button_template button_maker(40);
-    for (int i = 0; i < 3; i ++) {
-        left_frame->produce_element_from(&button_maker);
+    button_template button_maker(dejavu_sans, 5);
+
+    // create the buttons for each action
+    std::vector<std::string> actions{
+        "forage", "brew"
+    };
+    for (std::string const & action : actions) {
+        left_frame->produce_element(&button_maker, window, action);
     }
 
     // render once at the beginning of the program
-    render(window, *main_frame, button_text);
+    render(window, *main_frame);
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
@@ -89,34 +96,12 @@ int main()
     return EXIT_SUCCESS;
 }
 
-void render(ion::hardware_renderer & window, frame & main_frame,
-            ion::texture & text)
+void render(ion::hardware_renderer & window, frame & main_frame)
 {
     // clear the screen
     SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
     SDL_RenderClear(window);
 
     main_frame.render(window);
-
-    // get the button dimensions
-    int button_width, button_height;
-    SDL_QueryTexture(text, nullptr, nullptr, &button_width, &button_height);
-
-    // get the screen dimensions
-    int screen_width, screen_height;
-    SDL_GetWindowSize(window, &screen_width, &screen_height);
-
-    // calculate the button position
-    SDL_Rect button_rect{
-        (screen_width - button_width)/2, (screen_height - button_height)/2,
-        button_width, button_height
-    };
-
-    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderFillRect(window, &button_rect);
-
-    // render the text to the button
-    SDL_RenderCopy(window, text, nullptr, &button_rect);
-
     SDL_RenderPresent(window);
 }

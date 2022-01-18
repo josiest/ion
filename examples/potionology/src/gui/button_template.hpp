@@ -9,6 +9,7 @@
 // data types
 #include <cstdint>
 #include <memory>
+#include <string>
 
 // data structures
 #include <vector>
@@ -16,11 +17,17 @@
 class button_template : public ion::isotope, public IWidgetFactory {
 public:
     button_template() = delete;
-    button_template(std::uint32_t h);
+    button_template(ion::font & font, std::uint32_t padding);
 
     // interface methods
-    IWidget * make(int x, int y, std::uint32_t w);
+    IWidget * make(ion::hardware_renderer & window, int x, int y,
+                   std::uint32_t w, std::string const & text);
 private:
-    std::uint32_t _button_height;
+    ion::font & _font;
+    SDL_Color _font_color;
+
+    std::uint32_t _padding;
     std::vector<std::unique_ptr<button>> _buttons;
+
+    std::uint32_t padded(std::uint32_t value) const;
 };

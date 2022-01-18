@@ -8,6 +8,7 @@
 // data types
 #include <cstdint>
 #include <utility>
+#include <string>
 
 // data structures
 #include <vector>
@@ -19,9 +20,12 @@ public:
     frame() = delete;
 
     /** Use a gui element factory to create an element in this frame
-     * \param element a pointer to the element to add
+     * \param factory the factory object to use
+     * \param window the window to render to
+     * \param the text to display in the element
      */
-    void produce_element_from(IWidgetFactory * factory);
+    void produce_element(IWidgetFactory * factory, ion::hardware_renderer & window,
+                         std::string const & text);
 
     /** Add two frames, vertically splitting this frame
      * \param left_ratio the fraction of the frame to allocate to the left side

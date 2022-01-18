@@ -18,7 +18,13 @@ public:
 
 class IWidgetFactory {
 public:
-    /** Create a GUI element */
-    virtual IWidget * make(int x, int y, std::uint32_t height) = 0;
+    /** Create a GUI element
+     * \param window the window to render to
+     * \param x, y the position of the element
+     * \param width the width of the element
+     * \param text the text displayed in the element
+     **/
+    virtual IWidget * make(ion::hardware_renderer & window, int x, int y,
+                           std::uint32_t width, std::string const & text) = 0;
     virtual ~IWidgetFactory() {}
 };
