@@ -6,12 +6,12 @@
 
 // data types
 #include <cstdint>
-#include "gui_element.hpp"
+#include "gui/widget.hpp"
 
 // forward declare button template in order to make it a friend
 class button_template;
 
-class button : public IGuiElement {
+class button : public IWidget {
 public:
     button() = delete;
 

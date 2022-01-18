@@ -6,11 +6,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include "div.hpp"
+#include "gui/frame.hpp"
 
 // factories
-#include "button_template.hpp"
-#include "div_template.hpp"
+#include "gui/button_template.hpp"
+#include "gui/frame_template.hpp"
 
 // i/o
 #include <iostream>
@@ -25,7 +25,7 @@ fs::path const ASSET_DIR = fs::absolute("../assets");
 fs::path const FONT_DIR = ASSET_DIR/"fonts";
 fs::path const DEJAVUSANS_FILEPATH = FONT_DIR/"DejaVuSans.ttf";
 
-void render(ion::hardware_renderer & window, divider & main_div,
+void render(ion::hardware_renderer & window, frame & main_frame,
             ion::texture & text);
 
 int main()
@@ -64,23 +64,23 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // create the main window div
+    // create the main window frame
     SDL_Rect screen_dim{0};
     SDL_GetWindowSize(window, &screen_dim.w, &screen_dim.h);
-    div_template div_factory(20);
-    divider * main_div = div_factory.make(screen_dim);
+    frame_template frame_factory(20);
+    frame * main_frame = frame_factory.make(screen_dim);
 
-    // create the left and right divs inside the main div
-    auto [left_div, right_div] = main_div->vsplit(div_factory, .3f);
+    // create the left and right frames inside the main frame
+    auto [left_frame, right_frame] = main_frame->vsplit(frame_factory, .4f);
 
     // create the factory for making buttons
     button_template button_maker(40);
     for (int i = 0; i < 3; i ++) {
-        left_div->produce_element_from(&button_maker);
+        left_frame->produce_element_from(&button_maker);
     }
 
     // render once at the beginning of the program
-    render(window, *main_div, button_text);
+    render(window, *main_frame, button_text);
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
@@ -89,14 +89,14 @@ int main()
     return EXIT_SUCCESS;
 }
 
-void render(ion::hardware_renderer & window, divider & main_div,
+void render(ion::hardware_renderer & window, frame & main_frame,
             ion::texture & text)
 {
     // clear the screen
     SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
     SDL_RenderClear(window);
 
-    main_div.render(window);
+    main_frame.render(window);
 
     // get the button dimensions
     int button_width, button_height;

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(ion REQUIRED)
 
-file(GLOB sources src/*cpp)
+file(GLOB_RECURSE sources src/*cpp)
 add_executable(potionology ${sources})
 
 include_directories(src ion::ion)

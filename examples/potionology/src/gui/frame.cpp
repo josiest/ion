@@ -1,6 +1,6 @@
-#include "div.hpp"
-#include "gui_element.hpp"
-#include "div_template.hpp"
+#include "gui/widget.hpp"
+#include "gui/frame.hpp"
+#include "gui/frame_template.hpp"
 
 #include <SDL.h>
 #include <cstdint>
@@ -9,23 +9,23 @@
 
 using uint = std::uint32_t;
 
-divider::divider(SDL_Rect const & bounds, uint padding)
+frame::frame(SDL_Rect const & bounds, uint padding)
     : _bounds(bounds), _padding(padding)
 {
 }
 
-void divider::produce_element_from(IGuiElementFactory * factory)
+void frame::produce_element_from(IWidgetFactory * factory)
 {
     SDL_Point const next = next_point();
     _elements.push_back(factory->make(next.x, next.y, padded_width()));
 }
 
-std::pair<divider *, divider *>
-divider::vsplit(div_template & factory, float left_ratio)
+std::pair<frame *, frame *>
+frame::vsplit(frame_template & factory, float left_ratio)
 {
-    // calculate the widths to use for each new div
+    // calculate the widths to use for each new frame
 
-    // there'll be an extra layer of padding between the left and right divs
+    // there'll be an extra layer of padding between the left and right frames
     // so we'll need to take it off the normal padded width
     int const width = padded_width() - _padding;
 
@@ -42,7 +42,7 @@ divider::vsplit(div_template & factory, float left_ratio)
     // calculate the height to use for both
     int const height = _bounds.h - _padding - left_point.y;
 
-    // create the bounding rects and use the factory to create the div objects
+    // create the bounding rects and use the factory to create the frame objects
     SDL_Rect const left_bounds{
         left_point.x, left_point.y, left_width, height
     };
@@ -50,33 +50,33 @@ divider::vsplit(div_template & factory, float left_ratio)
         right_point.x, right_point.y, right_width, height
     };
 
-    divider * left_div = factory.make(left_bounds);
-    divider * right_div = factory.make(right_bounds);
+    frame * left_frame = factory.make(left_bounds);
+    frame * right_frame = factory.make(right_bounds);
 
     // add the new objects to the elements and return their pointers
-    _elements.push_back(left_div);
-    _elements.push_back(right_div);
-    return std::make_pair(left_div, right_div);
+    _elements.push_back(left_frame);
+    _elements.push_back(right_frame);
+    return std::make_pair(left_frame, right_frame);
 }
 
-SDL_Rect divider::bounds() const { return _bounds; }
-void divider::render(ion::hardware_renderer & window)
+SDL_Rect frame::bounds() const { return _bounds; }
+void frame::render(ion::hardware_renderer & window)
 {
-    for (IGuiElement * element : _elements) {
+    for (IWidget * element : _elements) {
         element->render(window);
     }
 }
 
-SDL_Point divider::next_point() const
+SDL_Point frame::next_point() const
 {
-    // always start from a static x point - the div x + padding
+    // always start from a static x point - the frame x + padding
     int const x = _bounds.x + _padding;
 
     // initialize the next point at the first appropriate point
     if (_elements.empty()) {
         return {x, _bounds.y + _padding};
     }
-    // if the divider has elements, calculate the next position using the previous
+    // if the frame has elements, calculate the next position using the previous
     SDL_Rect const last_bounds = _elements.back()->bounds();
     return {x, last_bounds.y + last_bounds.h + _padding};
 }
