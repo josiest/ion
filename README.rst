@@ -20,7 +20,7 @@ it in a place that other CMake projects can find it
 
 .. code:: console
 
-    $ git clone https://github.com/josiest/ion.git <path/to/ion> && cd <path/to/ion>
+    $ git clone https://github.com/josiest/ion.git && cd ion
     $ mkdir build && cd build
     $ cmake ..
     $ cmake --build .
