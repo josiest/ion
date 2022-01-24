@@ -52,7 +52,9 @@ void event_system::process_queue()
         auto fxn_search = _listener_functors.find(event.type);
         if (fxn_search != _listener_functors.end()) {
             auto listeners = fxn_search->second;
-            for (auto callback : listeners) { callback(event); }
+            for (auto callback : listeners) {
+                callback(event);
+            }
         }
     }
 }

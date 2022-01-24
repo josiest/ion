@@ -1,37 +1,33 @@
-#include <ion/ion.hpp>
+
+// frameworks
 #include <SDL.h>
+#include <ion/ion.hpp>
+#include <gold/gold.hpp>
 
 // datatypes
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <filesystem>
-#include "gui/frame.hpp"
 
-// data structures
+// data structures and resource handlers
 #include <vector>
-
-// factories
-#include "gui/button_template.hpp"
-#include "gui/frame_template.hpp"
+#include <memory>
 
 // i/o
+#include <filesystem>
 #include <iostream>
-#include <memory>
 
 // aliases
 namespace fs = std::filesystem;
 using uint = std::uint32_t;
 
-// path constants
-fs::path const ASSET_DIR = fs::absolute("../assets");
-fs::path const FONT_DIR = ASSET_DIR/"fonts";
-fs::path const DEJAVUSANS_FILEPATH = FONT_DIR/"DejaVuSans.ttf";
-
-void render(ion::hardware_renderer & window, frame & main_frame);
-
 int main()
 {
+    // path constants
+    fs::path const asset_dir = fs::absolute("../assets");
+    fs::path const font_dir = asset_dir/"fonts";
+    fs::path const config_dir = asset_dir/"config";
+
     // create the sdl event-handler: quit when sdl's quit event is triggered
     ion::event_system events;
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
@@ -46,62 +42,67 @@ int main()
     }
 
     // create a window, specifying the title and dimensions
-    auto window = ion::hardware_renderer::basic_window("Potionology", 800, 600);
+    uint const screen_width = 800;
+    uint const screen_height = 600;
+    auto window = ion::hardware_renderer::basic_window(
+            "Potionology", screen_width, screen_height);
     if (not window) {
         std::cout << window.get_error() << std::endl;
         return EXIT_FAILURE;
     }
-    // create the font
-    auto dejavu_sans = ion::font::from_file(DEJAVUSANS_FILEPATH.c_str(), 30);
-    if (not dejavu_sans) {
-        std::cout << "Unable to create font! " + dejavu_sans.get_error();
+
+    // load fonts and color definitions
+    auto colors = au::load_colors(config_dir/"colors.yaml");
+    if (not colors) {
+        std::cout << "Unable to load colors! " << colors.error() << std::endl;
         return EXIT_FAILURE;
     }
 
-    // render the button text
-    SDL_Color const black{0, 0, 0, 255};
-    auto button_text = dejavu_sans.render_text(window, "Click me!", black);
-    if (not button_text) {
-        std::cout << "Unable to render button! " + button_text.get_error();
+    auto fonts = au::load_all_fonts(font_dir);
+    if (not fonts) {
+        std::cout << "Unable to load fonts! " << fonts.error() << std::endl;
         return EXIT_FAILURE;
     }
 
-    // create the main window frame
-    SDL_Rect screen_dim{0};
-    SDL_GetWindowSize(window, &screen_dim.w, &screen_dim.h);
-    frame_template frame_factory(20);
-    frame * main_frame = frame_factory.make(screen_dim);
-
-    // create the left and right frames inside the main frame
-    auto [left_frame, right_frame] = main_frame->vsplit(frame_factory, .4f);
-
-    // create the factory for making buttons
-    button_template button_maker(dejavu_sans, 5);
-
-    // create the buttons for each action
-    std::vector<std::string> actions{
-        "forage", "brew"
-    };
-    for (std::string const & action : actions) {
-        left_frame->produce_element(&button_maker, window, action);
+    // create the factory that will make buttons
+    au::button_factory::update_fonts(au::observe_fonts(*fonts));
+    au::button_factory::update_colors(*colors);
+    auto button_maker = au::button_factory::from_file(config_dir/"button.yaml");
+    if (not button_maker) {
+        std::cout << "Unable to load button configuration! "
+                  << button_maker.error() << std::endl;
+        return EXIT_FAILURE;
     }
 
-    // render once at the beginning of the program
-    render(window, *main_frame);
+    // create a frame to render buttons in
+    SDL_Rect action_bounds{0, 0, 3*screen_width/7, screen_height};
+    auto action_frame = au::frame::from_file(
+            window, action_bounds, config_dir/"frame.yaml");
+    if (not action_frame) {
+        std::cout << "Unable to load frame configuration! "
+                  << action_frame.error() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    // busy loop until the user quits
+    // create a button
+    auto forage_button = action_frame->produce_text_widget(
+            *button_maker, "forage");
+    if (not forage_button) {
+        std::cout << "Unable to create a forage button! "
+                  << forage_button.error() << std::endl;
+        return EXIT_FAILURE;
+    }
+
     while (not ion::input::has_quit()) {
         events.process_queue();
+
+        // clear the screen white
+        SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
+        SDL_RenderClear(window);
+
+        // draw all the widgets in the frame
+        action_frame->render();
+        SDL_RenderPresent(window);
     }
     return EXIT_SUCCESS;
-}
-
-void render(ion::hardware_renderer & window, frame & main_frame)
-{
-    // clear the screen
-    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderClear(window);
-
-    main_frame.render(window);
-    SDL_RenderPresent(window);
 }
