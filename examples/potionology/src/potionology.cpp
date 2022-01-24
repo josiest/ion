@@ -1,4 +1,3 @@
-
 // frameworks
 #include <SDL.h>
 #include <ion/ion.hpp>
@@ -18,69 +17,16 @@
 #include <filesystem>
 #include <iostream>
 
+// systems
+#include "systems/gui.hpp"
+
 // aliases
 namespace fs = std::filesystem;
 using uint = std::uint32_t;
-using click_fn = std::function<void(SDL_MouseButtonEvent const &)>;
 
 template<class widget_subclass>
 au::iwidget * as_widget(widget_subclass * widget) {
     return dynamic_cast<au::iwidget *>(widget);
-}
-
-// global variables
-
-// find some way to get the id of the button that was clicked
-// compare that with the id of the current button
-namespace _g {
-    std::size_t clicked_button = 0;
-}
-void click(au::iwidget * button) { _g::clicked_button = button->id(); }
-bool is_clicked(au::iwidget * button) { return button->id() == _g::clicked_button; }
-
-// callbacks
-
-// call when creating a button to register when it clicks
-auto click_button(au::iwidget * button)
-{
-    return [button](SDL_Event const & event) {
-        // don't register click if the button isn't active
-        if (not button->is_active()) { return; }
-
-        // get the relevant event information
-        SDL_Rect const bounds = button->bounds();
-        SDL_Point const mouse{event.button.x, event.button.y};
-
-        // register the click if the mouse is in bounds
-        if (au::within_closed_bounds(mouse, bounds)) { click(button); }
-    };
-}
-
-// call when adding functionality to a button
-auto on_click(au::iwidget * button, click_fn callback)
-{
-    return [button, callback](SDL_Event const & event) {
-        if (not button->is_active() or not is_clicked(button)) { return; }
-
-        // get the event information
-        SDL_Rect const bounds = button->bounds();
-        SDL_Point const mouse{event.button.x, event.button.y};
-
-        // call the function
-        if (au::within_closed_bounds(mouse, bounds)) { callback(event.button); }
-    };
-}
-
-auto flip_menus(au::frame & a, au::frame & b)
-{
-    return [&a, &b](SDL_MouseButtonEvent const & event) {
-        if (a.is_active()) {
-            a.deactivate(); b.activate();
-        }
-        else {
-            a.activate(); b.deactivate();
-        }
-    };
 }
 
 int main()
