@@ -77,5 +77,5 @@ export(EXPORT ionTargets
 if (UNIX)
     set(CMAKE_INSTALL_PREFIX /usr/local)
 elseif(WIN32)
-    set(CMAKE_INSTALL_PREFIX "C:\\Program Files\\ion")
+    set(CMAKE_INSTALL_PREFIX "C:\\Program Files")
 endif()
