@@ -7,7 +7,7 @@
 // datatypes
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
+#include <cstdlib> // std::size_t
 #include <functional>
 
 // data structures and resource handlers
@@ -21,35 +21,65 @@
 // aliases
 namespace fs = std::filesystem;
 using uint = std::uint32_t;
+using click_fn = std::function<void(SDL_MouseButtonEvent const &)>;
 
 template<class widget_subclass>
 au::iwidget * as_widget(widget_subclass * widget) {
     return dynamic_cast<au::iwidget *>(widget);
 }
 
-using click_fn = std::function<void(SDL_Point const &, SDL_Rect const &)>;
+// global variables
+
+// find some way to get the id of the button that was clicked
+// compare that with the id of the current button
+namespace _g {
+    std::size_t clicked_button = 0;
+}
+void click(au::iwidget * button) { _g::clicked_button = button->id(); }
+bool is_clicked(au::iwidget * button) { return button->id() == _g::clicked_button; }
+
+// callbacks
+
+// call when creating a button to register when it clicks
+auto click_button(au::iwidget * button)
+{
+    return [button](SDL_Event const & event) {
+        // don't register click if the button isn't active
+        if (not button->is_active()) { return; }
+
+        // get the relevant event information
+        SDL_Rect const bounds = button->bounds();
+        SDL_Point const mouse{event.button.x, event.button.y};
+
+        // register the click if the mouse is in bounds
+        if (au::within_closed_bounds(mouse, bounds)) { click(button); }
+    };
+}
+
+// call when adding functionality to a button
 auto on_click(au::iwidget * button, click_fn callback)
 {
     return [button, callback](SDL_Event const & event) {
-        // don't do anything if the clicked button isn't active
-        if (not button->is_active()) { return; }
+        if (not button->is_active() or not is_clicked(button)) { return; }
 
         // get the event information
         SDL_Rect const bounds = button->bounds();
         SDL_Point const mouse{event.button.x, event.button.y};
 
         // call the function
-        if (au::within_closed_bounds(mouse, bounds)) {
-            callback(mouse, bounds);
-        }
+        if (au::within_closed_bounds(mouse, bounds)) { callback(event.button); }
     };
 }
 
-auto activate_menu(au::frame & menu, bool active)
+auto flip_menus(au::frame & a, au::frame & b)
 {
-    return [active, &menu](SDL_Point const & mouse, SDL_Rect const & button) {
-        if (active) { menu.activate(); }
-        else { menu.deactivate(); }
+    return [&a, &b](SDL_MouseButtonEvent const & event) {
+        if (a.is_active()) {
+            a.deactivate(); b.activate();
+        }
+        else {
+            a.activate(); b.deactivate();
+        }
     };
 }
 
@@ -106,15 +136,14 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // create a frame to render buttons in
-    auto main_menu = au::frame::from_file(window, config_dir/"main-menu.yaml");
+    // create a main menu frame to render buttons in
+    fs::path const menu_config = config_dir/"menu.yaml";
+    auto main_menu = au::frame::from_file(window, menu_config);
     if (not main_menu) {
         std::cout << "Unable to load frame configuration! "
                   << main_menu.error() << std::endl;
         return EXIT_FAILURE;
     }
-    auto activate_main_menu = activate_menu(*main_menu, true);
-    auto deactivate_main_menu = activate_menu(*main_menu, false);
 
     // create the forage button
     auto forage_button = main_menu->produce_text_widget(
@@ -124,11 +153,41 @@ int main()
                   << forage_button.error() << std::endl;
         return EXIT_FAILURE;
     }
+    // save the id of this button when clicked
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*forage_button));
 
+    // create the forage menu frame
+    auto forage_menu = au::frame::from_file(window, menu_config);
+    if (not forage_menu) {
+        std::cout << "Unable to load frame configuration from "
+                  << menu_config << std::endl
+                  << forage_menu.error() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // create the return button in the forage menu
+    auto forage_return = forage_menu->produce_text_widget(
+            *button_maker, "return");
+    if (not forage_return) {
+        std::cout << "Unable to create a forage return button! "
+                  << forage_return.error() << std::endl;
+        return EXIT_FAILURE;
+    }
+    forage_menu->deactivate(); // make sure not to display the forage menu
+    // save the id of this button when clicked
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*forage_return));
+
+    // it's important that these callbacks are registered *after* the
+    // click_button callbacks have been registered
+    auto flip_forage_main = flip_menus(*main_menu, *forage_menu);
+    // activate the forage menu when forage is clicked
+    events.subscribe_functor(
+            SDL_MOUSEBUTTONDOWN,
+            on_click(as_widget(*forage_button), flip_forage_main));
     // deactivate the main menu when forage is clicked
     events.subscribe_functor(
             SDL_MOUSEBUTTONDOWN,
-            on_click(as_widget(*forage_button), deactivate_main_menu));
+            on_click(as_widget(*forage_return), flip_forage_main));
 
     while (not ion::input::has_quit()) {
         events.process_queue();
@@ -139,6 +198,7 @@ int main()
 
         // draw all the widgets in the frame
         main_menu->render();
+        forage_menu->render();
         SDL_RenderPresent(window);
     }
     return EXIT_SUCCESS;
