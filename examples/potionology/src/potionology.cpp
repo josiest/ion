@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 
 // data structures and resource handlers
 #include <vector>
@@ -20,6 +21,37 @@
 // aliases
 namespace fs = std::filesystem;
 using uint = std::uint32_t;
+
+template<class widget_subclass>
+au::iwidget * as_widget(widget_subclass * widget) {
+    return dynamic_cast<au::iwidget *>(widget);
+}
+
+using click_fn = std::function<void(SDL_Point const &, SDL_Rect const &)>;
+auto on_click(au::iwidget * button, click_fn callback)
+{
+    return [button, callback](SDL_Event const & event) {
+        // don't do anything if the clicked button isn't active
+        if (not button->is_active()) { return; }
+
+        // get the event information
+        SDL_Rect const bounds = button->bounds();
+        SDL_Point const mouse{event.button.x, event.button.y};
+
+        // call the function
+        if (au::within_closed_bounds(mouse, bounds)) {
+            callback(mouse, bounds);
+        }
+    };
+}
+
+auto activate_menu(au::frame & menu, bool active)
+{
+    return [active, &menu](SDL_Point const & mouse, SDL_Rect const & button) {
+        if (active) { menu.activate(); }
+        else { menu.deactivate(); }
+    };
+}
 
 int main()
 {
@@ -75,23 +107,28 @@ int main()
     }
 
     // create a frame to render buttons in
-    SDL_Rect action_bounds{0, 0, 3*screen_width/7, screen_height};
-    auto action_frame = au::frame::from_file(
-            window, action_bounds, config_dir/"frame.yaml");
-    if (not action_frame) {
+    auto main_menu = au::frame::from_file(window, config_dir/"main-menu.yaml");
+    if (not main_menu) {
         std::cout << "Unable to load frame configuration! "
-                  << action_frame.error() << std::endl;
+                  << main_menu.error() << std::endl;
         return EXIT_FAILURE;
     }
+    auto activate_main_menu = activate_menu(*main_menu, true);
+    auto deactivate_main_menu = activate_menu(*main_menu, false);
 
-    // create a button
-    auto forage_button = action_frame->produce_text_widget(
+    // create the forage button
+    auto forage_button = main_menu->produce_text_widget(
             *button_maker, "forage");
     if (not forage_button) {
         std::cout << "Unable to create a forage button! "
                   << forage_button.error() << std::endl;
         return EXIT_FAILURE;
     }
+
+    // deactivate the main menu when forage is clicked
+    events.subscribe_functor(
+            SDL_MOUSEBUTTONDOWN,
+            on_click(as_widget(*forage_button), deactivate_main_menu));
 
     while (not ion::input::has_quit()) {
         events.process_queue();
@@ -101,7 +138,7 @@ int main()
         SDL_RenderClear(window);
 
         // draw all the widgets in the frame
-        action_frame->render();
+        main_menu->render();
         SDL_RenderPresent(window);
     }
     return EXIT_SUCCESS;
