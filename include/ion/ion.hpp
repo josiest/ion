@@ -6,5 +6,3 @@
 #include "ion/graphics.hpp"
 #include "ion/input.hpp"
 #include "ion/time.hpp"
-
-#include "ion/finite_fields.hpp"
