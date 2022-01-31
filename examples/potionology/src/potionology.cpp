@@ -24,11 +24,6 @@
 namespace fs = std::filesystem;
 using uint = std::uint32_t;
 
-template<class widget_subclass>
-au::iwidget * as_widget(widget_subclass * widget) {
-    return dynamic_cast<au::iwidget *>(widget);
-}
-
 int main()
 {
     // path constants
@@ -100,7 +95,7 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*forage_button));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*forage_button));
 
     // create the brew button
     auto brew_button = main_menu->produce_text_widget(
@@ -111,7 +106,7 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*brew_button));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*brew_button));
 
     // create the sell button
     auto sell_button = main_menu->produce_text_widget(
@@ -122,7 +117,7 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*sell_button));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*sell_button));
 
     // create the forage menu frame
     auto forage_menu = au::frame::from_file(window, menu_config);
@@ -142,7 +137,7 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*forest_button));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*forest_button));
 
     // create the button for foraging in the field
     auto field_button = forage_menu->produce_text_widget(
@@ -153,7 +148,7 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*field_button));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*field_button));
 
     // create the return button in the forage menu
     auto forage_return = forage_menu->produce_text_widget(
@@ -164,22 +159,22 @@ int main()
         return EXIT_FAILURE;
     }
     // save the id of this button when clicked
-    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, click_button(*forage_return));
+    events.subscribe_functor(SDL_MOUSEBUTTONDOWN, au::click_button(*forage_return));
 
     // the forage menu should be initially deactivated
     forage_menu->deactivate();
 
     // it's important that these callbacks are registered *after* the
-    // click_button callbacks have been registered
+    // au::click_button callbacks have been registered
     auto flip_forage_main = flip_menus(*main_menu, *forage_menu);
     // activate the forage menu when forage is clicked
     events.subscribe_functor(
             SDL_MOUSEBUTTONDOWN,
-            on_click(as_widget(*forage_button), flip_forage_main));
+            au::on_click(au::as_widget(*forage_button), flip_forage_main));
     // deactivate the main menu when forage is clicked
     events.subscribe_functor(
             SDL_MOUSEBUTTONDOWN,
-            on_click(as_widget(*forage_return), flip_forage_main));
+            au::on_click(au::as_widget(*forage_return), flip_forage_main));
 
     while (not ion::input::has_quit()) {
         events.process_queue();
