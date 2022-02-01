@@ -20,7 +20,7 @@ cmake --build .
 #### Simple
 
 A simple demonstration of the basic ion features needed to get a game up and
-running.
+running. A statically rendered mathy color gradient.
 
 #### Muncher
 
