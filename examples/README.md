@@ -29,7 +29,11 @@ running. A statically rendered mathy color gradient.
 A classic arcade game of big-fish/little-fish, eat or be eaten. Move around a
 screen and avoid large objects while eating smaller objects and growing.
 
+![Muncher example](../images/muncher-example.gif)
+
 #### Pipes
 
 The skeleton of a pipe puzzle game, loosely inspired by Simon Tatham's net, and
 mechanically similar to [Dorfromantik](https://toukana.com/dorfromantik/).
+
+![Pipes example](../images/pipes-example.gif)
