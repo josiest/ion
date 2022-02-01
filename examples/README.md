@@ -14,3 +14,20 @@ cmake ..
 cmake --build .
 ./simple
 ```
+
+## Examples
+
+#### Simple
+
+A simple demonstration of the basic ion features needed to get a game up and
+running.
+
+#### Muncher
+
+A classic arcade game of big-fish/little-fish, eat or be eaten. Move around a
+screen and avoid large objects while eating smaller objects and growing.
+
+#### Pipes
+
+The skeleton of a pipe puzzle game, loosely inspired by Simon Tatham's net, and
+mechanically similar to [Dorfromantik](https://toukana.com/dorfromantik/).
