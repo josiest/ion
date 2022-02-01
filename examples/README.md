@@ -22,6 +22,8 @@ cmake --build .
 A simple demonstration of the basic ion features needed to get a game up and
 running. A statically rendered mathy color gradient.
 
+![Simple example](../images/simple-example.png)
+
 #### Muncher
 
 A classic arcade game of big-fish/little-fish, eat or be eaten. Move around a
