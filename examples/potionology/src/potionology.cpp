@@ -61,14 +61,16 @@ int main()
         return EXIT_FAILURE;
     }
 
-    auto fonts = au::load_all_fonts(font_dir);
-    if (not fonts) {
-        std::cout << "Unable to load fonts! " << fonts.error() << std::endl;
+    auto dejavu_sans = ion::font::from_file(font_dir/"DejaVuSans.ttf", 100);
+    if (not dejavu_sans) {
+        std::cout << "Unable to load DejaVuSans! "
+                  << dejavu_sans.get_error() << std::endl;
         return EXIT_FAILURE;
     }
+    au::font_table fonts{{"DejaVuSans", dejavu_sans}};
 
     // create the factory that will make buttons
-    au::button_factory::update_fonts(au::observe_fonts(*fonts));
+    au::button_factory::update_fonts(fonts);
     au::button_factory::update_colors(*colors);
     auto button_maker = au::button_factory::from_file(config_dir/"button.yaml");
     if (not button_maker) {

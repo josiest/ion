@@ -19,8 +19,8 @@ target_include_directories(ion PUBLIC
 # find SDL2
 find_package(SDL2 REQUIRED)
 
-include_directories(SDL2::SDL2)
-target_link_libraries(ion SDL2::SDL2)
+include_directories(SDL2::Core)
+target_link_libraries(ion SDL2::Core)
 
 # --- export library ---
 
