@@ -4,7 +4,7 @@ project(ion)
 
 # versioning
 set(ion_MAJOR_VERSION 0)
-set(ion_MINOR_VERSION 6)
+set(ion_MINOR_VERSION 7)
 set(ion_PATCH_VERSION 0)
 set(ion_VERSION
     ${ion_MAJOR_VERSION}.${ion_MINOR_VERSION}.${ion_PATCH_VERSION})
