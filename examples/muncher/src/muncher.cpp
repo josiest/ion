@@ -39,7 +39,9 @@ int main()
 muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
 
       // intialize the window with specified dimensions
-    : _window{"Muncher", width, height, SDL_WINDOW_RESIZABLE},
+    : _window{ion::hardware_renderer::basic_window(
+          "Muncher", width, height, SDL_WINDOW_RESIZABLE
+      )},
 
       // create a wasd keyboard input axis
       _input(_events, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
