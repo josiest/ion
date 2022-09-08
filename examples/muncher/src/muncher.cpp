@@ -16,15 +16,14 @@
 #include <cstdint>
 #include <random>
 
-muncher & get_game() noexcept
-{
-    static muncher game{800, 600};
-    return game;
-}
-
 int main()
 {
-    auto & game = get_game();
+    auto game_result = muncher::with_dimensions(800, 600);
+    if (not game_result) {
+        std::cerr << game_result.error() << "\n";
+        return EXIT_FAILURE;
+    }
+    auto game = *std::move(game_result);
 
     // crash if the game failed to initialize properly
     if (not game) {
@@ -36,11 +35,28 @@ int main()
     }
 }
 
-muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
+tl::expected<ion::window, std::string>
+muncher::with_dimensions(std::uint32_t width, std::uint32_t height)
+{
+    auto window_result = ion::window::at_anywhere(
+            "Muncher", width, height, SDL_WINDOW_RESIZABLE);
+    if (not window_result) {
+        return tl::unexpected{SDL_GetError()};
+    }
+
+    auto renderer_result = ion::renderer::with_default_driver(
+            *window_result, SDL_RENDERER_ACCELERATED);
+    if (not renderer_result) {
+        return tl::unexpected{SDL_GetError()};
+    }
+
+    return muncher{*std::move(window_result), *std::move(renderer_result)};
+}
+
+muncher::muncher(ion::window && window, ion::renderer && renderer)
 
       // intialize the window with specified dimensions
-    : _window{ion::hardware_renderer::basic_window(
-            "Muncher", width, height, SDL_WINDOW_RESIZABLE)},
+    : _window{window}, _renderer{renderer},
 
       // create a wasd keyboard input axis
       _input(_events, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
@@ -59,10 +75,6 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
     if (not _sdl) {
         set_error(_sdl.get_error()); return;
     }
-    if (not _window) {
-        set_error(_window.get_error()); return;
-    }
-
     // quit when the user exits the window
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 

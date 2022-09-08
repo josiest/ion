@@ -31,7 +31,8 @@ public:
      * \param width the width of the game window
      * \param height the height of the game window
      */
-    muncher(std::uint32_t width, std::uint32_t height) noexcept;
+    static tl::expected<muncher, std::string>
+    with_dimensions(std::uint32_t width, std::uint32_t height);
 
     /**
      * Run the game
@@ -47,7 +48,8 @@ private:
 
     // it's important to put the sdl context before any other sdl resources
     ion::sdl_context _sdl;
-    ion::hardware_renderer _window;
+    ion::window _window;
+    ion::renderer _renderer;
 
     // events and input
     ion::event_system _events;
@@ -63,6 +65,10 @@ private:
 
     // entity references
     entt::entity _player;
+
+    // private constructors
+    muncher(ion::window && window, ion::renderer && renderer);
+
 };
 
 muncher & get_game() noexcept;
