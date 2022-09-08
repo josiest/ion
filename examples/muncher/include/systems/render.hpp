@@ -8,10 +8,10 @@
 
 namespace systems {
 
-void render_munchies(ion::renderable_window auto & window,
+void render_munchies(ion::hardware_renderable auto & window,
                      entt::registry & registry);
 
-void render(ion::renderable_window auto & window, entt::registry & registry)
+void render(ion::hardware_renderable auto & window, entt::registry & registry)
 {
     // clear the screen with white
     SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
@@ -22,7 +22,7 @@ void render(ion::renderable_window auto & window, entt::registry & registry)
     SDL_RenderPresent(window);
 }
 
-void render_munchies(ion::renderable_window auto & window,
+void render_munchies(ion::hardware_renderable auto & window,
                      entt::registry & registry)
 {
     auto munchies = registry.view<component::bbox, component::color>();

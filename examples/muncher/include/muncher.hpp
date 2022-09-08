@@ -47,7 +47,7 @@ private:
 
     // it's important to put the sdl context before any other sdl resources
     ion::sdl_context _sdl;
-    ion::render_window _window;
+    ion::hardware_renderer _window;
 
     // events and input
     ion::event_system _events;
