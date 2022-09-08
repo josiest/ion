@@ -3,10 +3,6 @@
 # declare sources
 file(GLOB_RECURSE ion_SOURCES *.${ion_SRCEXT})
 
-# don't include gl component
-file(GLOB_RECURSE ion_gl_SOURCES gl/*.${ion_SRCEXT})
-list(REMOVE_ITEM ion_SOURCES ${ion_gl_SOURCES})
-
 # compile library
 add_library(ion STATIC ${ion_SOURCES})
 add_library(ion::ion ALIAS ion)

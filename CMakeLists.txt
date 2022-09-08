@@ -23,7 +23,6 @@ set(ion_HEXT hpp)
 set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
-add_subdirectory(src/gl)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
