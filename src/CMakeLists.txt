@@ -6,17 +6,21 @@ file(GLOB_RECURSE ion_SOURCES *.${ion_SRCEXT})
 # compile library
 add_library(ion STATIC ${ion_SOURCES})
 add_library(ion::ion ALIAS ion)
+set_target_properties(ion PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED True)
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(ion PUBLIC SDL2::Core SDL2::TTF)
+
+find_package(tl-expected REQUIRED)
+target_link_libraries(ion INTERFACE tl::expected)
 
 # specify header file directories for building/installing
 target_include_directories(ion PUBLIC
     $<BUILD_INTERFACE:${ion_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-# find SDL2
-find_package(SDL2 REQUIRED)
-
-include_directories(SDL2::Core)
-target_link_libraries(ion SDL2::Core)
 
 # --- export library ---
 

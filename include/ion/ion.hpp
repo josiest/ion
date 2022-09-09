@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ion/system.hpp"
 #include "ion/window.hpp"
 #include "ion/events.hpp"
 

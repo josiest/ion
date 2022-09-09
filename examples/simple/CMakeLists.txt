@@ -8,3 +8,6 @@ set_target_properties(simple PROPERTIES
 
 find_package(ion REQUIRED)
 target_link_libraries(simple PRIVATE ion::ion)
+
+find_package(tl-expected REQUIRED)
+target_link_libraries(simple INTERFACE tl::expected)

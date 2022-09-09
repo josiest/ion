@@ -13,8 +13,6 @@ set(ion_VERSION
 include(GNUInstallDirs)
 
 # compiler flags
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 # specify file interface
@@ -23,10 +21,6 @@ set(ion_HEXT hpp)
 set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
-
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-target_link_libraries(ion SDL2::Core SDL2::TTF)
 
 # --- create package for library ---
 
