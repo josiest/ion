@@ -16,15 +16,15 @@
 #include <cstdint>
 #include <random>
 
-muncher & get_game() noexcept
-{
-    static muncher game{800, 600};
-    return game;
-}
-
 int main()
 {
-    auto & game = get_game();
+    auto game_result = muncher::with_dimensions(800, 600);
+    if (not game_result) {
+        std::cerr << "Coudln't initialize muncher: "
+                  << game_result.error() << "\n";
+        return EXIT_FAILURE;
+    }
+    auto game = *std::move(game_result);
 
     // crash if the game failed to initialize properly
     if (not game) {
@@ -34,12 +34,26 @@ int main()
     else {
         game.run();
     }
+    return EXIT_SUCCESS;
 }
 
-muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
+tl::expected<muncher, std::string>
+muncher::with_dimensions(std::uint32_t width, std::uint32_t height)
+{
+    auto system_result = ion::system::with_defaults();
+    if (not system_result) {
+        return tl::unexpected{system_result.error()};
+    }
+    return muncher(*std::move(system_result), width, height);
+}
+
+muncher::muncher(ion::system && sys,
+                 std::uint32_t width, std::uint32_t height)
+
+    : _system{std::move(sys)},
 
       // intialize the window with specified dimensions
-    : _window{ion::hardware_renderer::basic_window(
+      _window{ion::hardware_renderer::basic_window(
             "Muncher", width, height, SDL_WINDOW_RESIZABLE)},
 
       // create a wasd keyboard input axis
@@ -55,10 +69,6 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       // create the player
       _player{_player_settings.create(_entities)}
 {
-    // check if sdl resources initialized properly
-    if (not _sdl) {
-        set_error(_sdl.get_error()); return;
-    }
     if (not _window) {
         set_error(_window.get_error()); return;
     }
@@ -67,7 +77,11 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
     _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
     // reset the game when the user presses the reset key
-    _events.subscribe(SDL_KEYUP, &reset_game);
+    _events.subscribe_functor(SDL_KEYUP, [this](SDL_Event const & event) {
+        if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_r) {
+            reset();
+        }
+    });
 }
 
 void muncher::run() noexcept
@@ -114,13 +128,4 @@ void muncher::reset() noexcept
     }
     // then reinstantiate them with default settings
     _player = _player_settings.create(_entities);
-}
-
-void reset_game(SDL_Event const & event)
-{
-    // do nothing if not the right event or not the right key
-    if (event.type != SDL_KEYUP || event.key.keysym.sym != SDLK_r) {
-        return;
-    }
-    get_game().reset();
 }

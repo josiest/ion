@@ -8,6 +8,12 @@
 
 namespace prefab {
 
+player::player(player && temp)
+    : player(temp._window)
+{
+    temp._window = nullptr;
+}
+
 player::player(SDL_Window * window) noexcept
 
       // player starts in the middle of the screen

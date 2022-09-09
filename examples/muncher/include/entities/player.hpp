@@ -11,6 +11,9 @@ public:
     player() = delete;
     player(player const &) = delete;
 
+    // resource management
+    player(player && temp);
+
     /**
      * Create a player prefab within the given bounds
      * \param window the sdl window the player is bound to

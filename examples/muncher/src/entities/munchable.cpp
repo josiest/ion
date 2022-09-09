@@ -16,6 +16,17 @@
 namespace prefab {
 
 using namespace std::numbers;
+
+munchable::munchable(munchable && temp)
+    : _window(temp._window), _colors{temp._colors},
+      _minspeed{temp._minspeed}, _maxspeed{temp._maxspeed},
+      _angle_variation{temp._angle_variation},
+      _size_variation{temp._size_variation},
+      _munchtime_likelihood{temp._munchtime_likelihood}
+{
+    temp._window = nullptr;
+}
+
 munchable::munchable(SDL_Window * window) noexcept
 
       // a reference to the window that defines the bounds

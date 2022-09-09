@@ -20,6 +20,9 @@ public:
     muncher() = delete;
     muncher(muncher const &) = delete;
 
+    // resource management
+    muncher(muncher && temp) = default;
+
     /**
      * The type of the random engine used
      */
@@ -31,7 +34,8 @@ public:
      * \param width the width of the game window
      * \param height the height of the game window
      */
-    muncher(std::uint32_t width, std::uint32_t height) noexcept;
+    static tl::expected<muncher, std::string>
+    with_dimensions(std::uint32_t width, std::uint32_t height);
 
     /**
      * Run the game
@@ -43,10 +47,12 @@ public:
      */
     void reset() noexcept;
 private:
+    muncher(ion::system && sys, std::uint32_t width, std::uint32_t height);
+
     // sdl resources
 
     // it's important to put the sdl context before any other sdl resources
-    ion::sdl_context _sdl;
+    ion::system _system;
     ion::hardware_renderer _window;
 
     // events and input
@@ -65,5 +71,4 @@ private:
     entt::entity _player;
 };
 
-muncher & get_game() noexcept;
 void reset_game(SDL_Event const & event);
