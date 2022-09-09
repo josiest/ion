@@ -22,6 +22,10 @@ public:
     // delete any unwanted implicit constructors
     munchable() = delete;
     munchable(munchable const &) = delete;
+
+    // resource management
+    munchable(munchable && temp);
+
     /**
      * Create a munchable prefab with bounds connected to a window's size
      * \param window the window that defines the bounds

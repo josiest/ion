@@ -13,4 +13,5 @@ find_package(ion REQUIRED)
 target_link_libraries(muncher PRIVATE ion::ion)
 
 find_package(EnTT REQUIRED)
-target_link_libraries(muncher INTERFACE EnTT::EnTT)
+find_package(tl-expected REQUIRED)
+target_link_libraries(muncher INTERFACE EnTT::EnTT tl::expected)

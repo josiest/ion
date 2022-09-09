@@ -1,8 +1,13 @@
+// frameworks
 #include <ion/ion.hpp>
 #include <SDL.h>
 
+// data types
 #include <cmath>
 #include <cstdint>
+
+// i/o
+#include <iostream>
 
 SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
 {
@@ -62,7 +67,12 @@ int main()
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
     // initialize sdl - initialize this before other sdl resources
-    ion::sdl_context sdl;
+    auto system_result = ion::system::with_defaults();
+    if (not system_result) {
+        std::cerr << "Couldn't initialize SDL: "
+                  << system_result.error() << "\n";
+        return EXIT_FAILURE;
+    }
 
     // create a window, specifying the title and dimensions
     auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
@@ -72,4 +82,5 @@ int main()
     while (not ion::input::has_quit()) {
         events.process_queue();
     }
+    return EXIT_SUCCESS;
 }
