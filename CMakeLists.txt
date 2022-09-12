@@ -1,62 +1,65 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.13)
-project(ion)
+cmake_minimum_required(VERSION 3.18)
+project(ion VERSION 0.8.0)
 
-# versioning
-set(ion_MAJOR_VERSION 0)
-set(ion_MINOR_VERSION 7)
-set(ion_PATCH_VERSION 0)
-set(ion_VERSION
-    ${ion_MAJOR_VERSION}.${ion_MINOR_VERSION}.${ion_PATCH_VERSION})
-
-# make cache variables for install destinations
-include(GNUInstallDirs)
-
-# compiler flags
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
-
-# specify file interface
-set(ion_SRCEXT cpp)
-set(ion_HEXT hpp)
-set(ion_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# add addnl modules
+list(APPEND CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 add_subdirectory(src)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-target_link_libraries(ion SDL2::Core SDL2::TTF)
+#
+# Export and install the libary
+#
 
-# --- create package for library ---
+include(GNUInstallDirs)
 
-# include helper functions for creating config files
+# specify header file directories for building/installing
+target_include_directories(ion PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+# specify the library targets
+install(TARGETS ion
+        EXPORT ion-targets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# install the export details
+install(EXPORT ion-targets
+        FILE ion-targets.cmake
+        NAMESPACE ion::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
+
+# install the include files
+install(DIRECTORY ${ion_INCLUDE_DIR}/ion
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.${ion_HEXT}")
+
+add_library(ion::ion STATIC IMPORTED)
+set_target_properties(ion::ion PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include")
+
+#
+# Create and install the package
+#
+
 include(CMakePackageConfigHelpers)
 
-# set versions
-set_property(TARGET ion PROPERTY VERSION ${ion_VERSION})
-set_property(TARGET ion PROPERTY
-    INTERFACE_ion_MAJOR_VERSION ${ion_MAJOR_VERSION})
-
-# must be compatibale with dependencies of any depender
-set_property(TARGET ion APPEND PROPERTY
-  COMPATIBLE_INTERFACE_STRING ion_MAJOR_VERSION)
+# generate the package configuration file
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/ion-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/ion-config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
 
 # generate the version file for the config file
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/ionConfigVersion.cmake
-    VERSION ${ion_VERSION}
+    ${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake
     COMPATIBILITY AnyNewerVersion)
-
-# generate the package configuration file
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/ionConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
 
 # install the generated files
 install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/ionConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/ionConfigVersion.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/ion-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
 
 # install cmake sdl2 modules
@@ -64,18 +67,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2/
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/Modules
         FILES_MATCHING PATTERN *.cmake)
 
-# install the include files
-install(DIRECTORY ${ion_INCLUDE_DIR}/ion
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        FILES_MATCHING PATTERN "*.${ion_HEXT}")
-
 # allow exporting from build tree
-export(EXPORT ionTargets
-       FILE ${CMAKE_CURRENT_BINARY_DIR}/ionTargets.cmake
+export(EXPORT ion-targets
+       FILE ${CMAKE_CURRENT_BINARY_DIR}/ion-targets.cmake
        NAMESPACE ion::)
-
-if (UNIX)
-    set(CMAKE_INSTALL_PREFIX /usr/local)
-elseif(WIN32)
-    set(CMAKE_INSTALL_PREFIX "C:\\Program Files")
-endif()
