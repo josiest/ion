@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+include(${CMAKE_CURRENT_LIST_DIR}/ionTargets.cmake)
+
+find_dependency(SDL2 REQUIRED)
+find_dependency(SDL2_ttf REQUIRED)
+find_dependency(tl-expected REQUIRED)
+
+check_required_components(${PROJECT_NAME})
