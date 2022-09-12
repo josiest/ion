@@ -2,6 +2,7 @@
 
 // frameworks
 #include <SDL.h>
+#include <raisin/raisin.hpp>
 
 // data types
 #include <cstdint>
@@ -9,6 +10,9 @@
 
 // resource handles
 #include <tl/expected.hpp>
+
+// algorithms
+#include <iterator>
 
 namespace ion {
 
@@ -64,9 +68,38 @@ public:
     static tl::expected<renderer, std::string>
     with_default_driver(SDL_Window * sdl_window, std::uint32_t flags = 0);
 
+    /**
+     * \brief Create a renderer from a config file.
+     *
+     * \param sdl_window the window to render to
+     * \param config_path the path of the config file
+     * \param invalid_names a place to write invalid render flag names
+     */
+    template<std::weakly_incrementable name_writer>
+    static tl::expected<renderer, std::string>
+    from_config(SDL_Window * sdl_window, std::string const & path,
+                name_writer invalid_names);
+
     inline operator SDL_Renderer * () { return _renderer; }
 private:
     renderer(SDL_Renderer * sdl_renderer);
     SDL_Renderer * _renderer;
 };
+
+//
+// Template Implementation
+//
+
+template<std::weakly_incrementable name_writer>
+tl::expected<renderer, std::string>
+renderer::from_config(SDL_Window * window, std::string const & path,
+                      name_writer invalid_names)
+{
+    auto renderer_result = raisin::make_renderer_from_config(
+            path, window, invalid_names);
+    if (not renderer_result) {
+        return tl::unexpected(renderer_result.error());
+    }
+    return renderer{std::move(renderer_result).value()};
+}
 }

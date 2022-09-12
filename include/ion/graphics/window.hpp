@@ -2,6 +2,7 @@
 
 // frameworks
 #include <SDL.h>
+#include <raisin/raisin.hpp>
 
 // data types
 #include <string>
@@ -9,6 +10,9 @@
 
 // resource handles
 #include <tl/expected.hpp>
+
+// algorithms
+#include <iterator>
 
 namespace ion {
 
@@ -72,9 +76,34 @@ public:
                 std::uint32_t width, std::uint32_t height,
                 std::uint32_t flags = 0);
 
+    /**
+     * \brief Create a window from a config file.
+     *
+     * \param path the path of the config file
+     * \param invalid_names a place to write invalid names to
+     */
+    template<std::weakly_incrementable name_output>
+    static tl::expected<window, std::string>
+    from_config(std::string const & path, name_output invalid_names);
+
     inline operator SDL_Window * () { return _window; }
 private:
     window(SDL_Window * sdl_window);
     SDL_Window * _window;
 };
+
+//
+// Template Implementation
+//
+
+template<std::weakly_incrementable name_output>
+tl::expected<window, std::string>
+window::from_config(std::string const & path, name_output invalid_names)
+{
+    auto window_result = raisin::make_window_from_config(path, invalid_names);
+    if (not window_result) {
+        return tl::unexpected(window_result.error());
+    }
+    return window{std::move(window_result).value()};
+}
 }
