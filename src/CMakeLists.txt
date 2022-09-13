@@ -13,5 +13,5 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 target_link_libraries(ion PUBLIC SDL2::SDL2 SDL2::TTF)
 
-find_package(raisin REQUIRED)
-target_link_libraries(ion INTERFACE raisin::raisin)
+find_package(tl-expected REQUIRED)
+target_link_libraries(ion INTERFACE tl::expected)
