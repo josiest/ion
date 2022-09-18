@@ -34,4 +34,28 @@ texture::~texture()
     }
     _texture = nullptr;
 }
+
+texture
+texture::load_image(SDL_Renderer * renderer, fs::path const & filepath)
+{
+    // load the image and create a texture
+    auto image_surface = IMG_Load(filepath.c_str());
+    texture image{
+        renderer,
+        SDL_CreateTextureFromSurface(renderer, image_surface)
+    };
+
+    // set the errors respective to what failed first
+    if (not image_surface) {
+        image.set_error(IMG_GetError());
+        return image; // return the failed object
+                      // before freeing the null surface
+    }
+    if (not image) {
+        image.set_error(SDL_GetError());
+    }
+    // clean up and return resulting texture
+    SDL_FreeSurface(image_surface);
+    return image;
+}
 }

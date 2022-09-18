@@ -86,7 +86,7 @@ public:
     static tl::expected<window, std::string>
     from_config(std::string const & path, name_output invalid_names);
 
-    inline operator SDL_Window * () { return _window; }
+    inline operator SDL_Window * () const { return _window; }
 private:
     window(SDL_Window * sdl_window);
     SDL_Window * _window;

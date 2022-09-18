@@ -32,9 +32,9 @@ install(EXPORT ion-targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
 
 # install the include files
-install(DIRECTORY ${ion_INCLUDE_DIR}/ion
+install(DIRECTORY include/ion
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        FILES_MATCHING PATTERN "*.${ion_HEXT}")
+        FILES_MATCHING PATTERN "*.hpp")
 
 add_library(ion::ion STATIC IMPORTED)
 set_target_properties(ion::ion PROPERTIES

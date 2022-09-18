@@ -80,7 +80,7 @@ public:
     from_config(SDL_Window * sdl_window, std::string const & path,
                 name_writer invalid_names);
 
-    inline operator SDL_Renderer * () { return _renderer; }
+    inline operator SDL_Renderer * () const { return _renderer; }
 private:
     renderer(SDL_Renderer * sdl_renderer);
     SDL_Renderer * _renderer;
