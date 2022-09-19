@@ -7,6 +7,7 @@ system::~system()
     if (not moved) {
         SDL_Quit();
     }
+    SDL_Quit();
 }
 
 tl::expected<system, std::string>

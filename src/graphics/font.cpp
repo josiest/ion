@@ -68,4 +68,32 @@ font font::from_file(fs::path const & path, uint size) noexcept
     return loaded_font;
 }
 
+texture
+font::render_text(SDL_Renderer * renderer, std::string const & text,
+                  SDL_Color const & color) noexcept
+{
+    std::string message;
+    // render the text using this font
+    auto text_surface = TTF_RenderText_Solid(*this, text.c_str(), color);
+    if (not text_surface) {
+        message = TTF_GetError();
+    }
+    // transform surface into texture
+    auto sdl_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+
+    // update error message only if no other errors have occured yet
+    if (not sdl_texture and message.empty()) {
+        message = SDL_GetError();
+    }
+    // only free the text surface if it succesfully rendered
+    if (text_surface) {
+        SDL_FreeSurface(text_surface);
+    }
+    // finally, create an isotope texture and set any errors that occured
+    texture rendered_text(renderer, sdl_texture);
+    if (not message.empty()) {
+        rendered_text.set_error(message);
+    }
+    return rendered_text;
+}
 }

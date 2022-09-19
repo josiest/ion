@@ -2,6 +2,7 @@
 
 // frameworks
 #include <SDL.h>
+#include <raisin/raisin.hpp>
 
 // data types
 #include <cstdint>
@@ -9,6 +10,8 @@
 
 // resource handles
 #include <tl/expected.hpp>
+
+// algorithms
 
 namespace ion {
 
@@ -45,8 +48,34 @@ public:
      */
     static tl::expected<system, std::string>
     with_defaults(std::uint32_t flags = 0);
+
+    /**
+     * \brief create an SDL context from a config file
+     *
+     * \param config_path the path to the config file
+     * \pram invalid_names a place to write invalid flag names to
+     */
+    template<std::weakly_incrementable name_writer>
+    static tl::expected<system, std::string>
+    from_config(std::string const & path, name_writer invalid_names);
 private:
     inline system() {}
     bool moved = false;
 };
+
+//
+// Template Implementation
+//
+
+template<std::weakly_incrementable name_writer>
+tl::expected<system, std::string>
+system::from_config(std::string const & path, name_writer invalid_names)
+{
+    auto system_result = raisin::init_sdl_from_config(path, invalid_names);
+    if (not system_result) {
+        return tl::unexpected(system_result.error());
+    }
+    return system{};
+}
+
 }
