@@ -20,6 +20,10 @@ int main()
     }
 
     auto game = std::move(game_result).value();
+
+    SDL_SetRenderDrawColor(game.renderer(), 255, 255, 255, 255);
+    SDL_RenderClear(game.renderer());
+    SDL_RenderPresent(game.renderer());
     SDL_Delay(2000);
 
     return EXIT_SUCCESS;
@@ -28,8 +32,9 @@ int main()
 muncher::muncher(ion::system && system, ion::window && window,
                  ion::renderer && renderer)
 
-    : _system{std::move(system)}, _window{std::move(window)},
-      _renderer{std::move(renderer)}
+    : _system{ std::move(system) },
+      _window{ std::move(window) },
+      _renderer{ std::move(renderer) }
 {
 }
 

@@ -1,0 +1,10 @@
+[system]
+subsytems = ["video"]
+
+[window]
+title = "Muncher"
+width = 800
+height = 640
+
+[renderer]
+flags = ["accelerated"]
