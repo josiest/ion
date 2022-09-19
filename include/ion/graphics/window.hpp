@@ -81,6 +81,40 @@ public:
      *
      * \param path the path of the config file
      * \param invalid_names a place to write invalid names to
+     *
+     * All window parameters must be found under a "window" table.
+     * Parameters for the window:
+     *
+     *  [window]
+     *  title = <string>
+     *  x = [<int>]
+     *  y = [<int>]
+     *  width = <int>
+     *  height = <int>
+     *  flags = [<string>...]
+     *
+     * Acceptable flag names from a config file:
+     *
+     *  fullscreen:             SDL_WINDOW_FULLSCREEN
+     *  fullscreen-desktop:     SDL_WINDOW_FULLSCREEN_DESKTOP
+     *  opengl:                 SDL_WINDOW_OPENGL
+     *  vulkan:                 SDL_WINDOW_VULKAN
+     *  metal:                  SDL_WINDOW_METAL
+     *  hidden:                 SDL_WINDOW_HIDDEN
+     *  borderless:             SDL_WINDOW_BORDERLESS
+     *  resizable:              SDL_WINDOW_RESIZABLE
+     *  minimized:              SDL_WINDOW_MINIMIZED
+     *  maximized:              SDL_WINDOW_MAXIMIZED
+     *  input-grabbed:          SDL_WINDOW_INPUT_GRABBED
+     *  allow-high-dpi:         SDL_WINDOW_ALLOW_HIGH_DPI
+     *  shown:                  SDL_WINDOW_SHOWN
+     *
+     * example:
+     *
+     *  [window]
+     *  title = "A Simple Example"
+     *  width = 640
+     *  height = 480
      */
     template<std::weakly_incrementable name_output>
     static tl::expected<window, std::string>

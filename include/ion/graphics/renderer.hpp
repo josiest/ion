@@ -74,6 +74,25 @@ public:
      * \param sdl_window the window to render to
      * \param config_path the path of the config file
      * \param invalid_names a place to write invalid render flag names
+     *
+     * All renderer parameters must be found under a "renderer" table
+     * Parameters for the renderer
+     *
+     *  [renderer]
+     *  driver_index = [<int>]
+     *  flags = [<string>...]
+     *
+     * Acceptable flag names from a config file:
+     *
+     *  software:       SDL_RENDERER_SOFTWARE
+     *  accelerated:    SDL_RENDERER_ACCELERATED
+     *  present-vsync:  SDL_RENDERER_PRESENT_VSYNC
+     *  target-texture: SDL_RENDERER_TARGET_TEXTURE
+     *
+     * example:
+     *
+     *  [renderer]
+     *  flags = ["accelerated"]
      */
     template<std::weakly_incrementable name_writer>
     static tl::expected<renderer, std::string>

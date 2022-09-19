@@ -54,6 +54,27 @@ public:
      *
      * \param config_path the path to the config file
      * \pram invalid_names a place to write invalid flag names to
+     *
+     * All subsystem flags must found under a "system" table
+     * Parameters for the system
+     *
+     *  [system]
+     *  subsystems = [<string>...]
+     *
+     * Acceptable flag names from a config file:
+     *
+     *  timer           - SDL_INIT_TIMER
+     *  audio           - SDL_INIT_AUDIO
+     *  video           - SDL_INIT_VIDEO
+     *  joystick        - SDL_INIT_JOYSTICK
+     *  game-controller - SDL_INIT_GAMECONTROLLER
+     *  events          - SDL_INIT_EVENTS
+     *  everything      - SDL_INIT_EVERYTHING
+     *
+     * example:
+     *
+     *  [system]
+     *  subsystems = ["video", "audio"]
      */
     template<std::weakly_incrementable name_writer>
     static tl::expected<system, std::string>
