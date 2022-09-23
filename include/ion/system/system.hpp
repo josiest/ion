@@ -27,8 +27,9 @@ class system {
 public:
     // delete unwanted implicit constructors
     system(system const &) = delete;
+
     // resource management
-    inline system(system && sys) { moved = true; }
+    system(system && sys);
     ~system();
 
     // static factories
@@ -90,9 +91,10 @@ private:
 
 template<std::weakly_incrementable name_writer>
 tl::expected<system, std::string>
-system::from_config(std::string const & path, name_writer invalid_names)
+system::from_config(std::string const & config_path, name_writer invalid_names)
 {
-    auto system_result = raisin::init_sdl_from_config(path, invalid_names);
+    auto system_result = raisin::init_sdl_from_config(
+        config_path, invalid_names);
     if (not system_result) {
         return tl::unexpected(system_result.error());
     }

@@ -118,7 +118,7 @@ public:
      */
     template<std::weakly_incrementable name_output>
     static tl::expected<window, std::string>
-    from_config(std::string const & path, name_output invalid_names);
+    from_config(std::string const & config_path, name_output invalid_names);
 
     inline operator SDL_Window * () const { return _window; }
 private:
@@ -132,12 +132,14 @@ private:
 
 template<std::weakly_incrementable name_output>
 tl::expected<window, std::string>
-window::from_config(std::string const & path, name_output invalid_names)
+window::from_config(std::string const & config_path, name_output invalid_names)
 {
-    auto window_result = raisin::make_window_from_config(path, invalid_names);
-    if (not window_result) {
-        return tl::unexpected(window_result.error());
+    auto sdl_window_result = raisin::make_window_from_config(
+        config_path, invalid_names);
+
+    if (not sdl_window_result) {
+        return tl::unexpected( sdl_window_result.error() );
     }
-    return window{std::move(window_result).value()};
+    return window{ sdl_window_result.value() };
 }
 }

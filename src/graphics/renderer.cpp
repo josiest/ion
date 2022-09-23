@@ -3,10 +3,12 @@
 namespace ion {
 
 renderer::renderer(SDL_Renderer * sdl_renderer)
-    : _renderer{sdl_renderer} {}
+    : _renderer{ sdl_renderer }
+{
+}
 
 renderer::renderer(renderer && temp)
-    : _renderer{temp._renderer}
+    : _renderer{ temp._renderer }
 {
     temp._renderer = nullptr;
 }
@@ -25,9 +27,9 @@ renderer::with_driver_at(SDL_Window * sdl_window, int index,
 {
     auto * sdl_renderer = SDL_CreateRenderer(sdl_window, index, flags);
     if (not sdl_renderer) {
-        return tl::unexpected{SDL_GetError()};
+        return tl::unexpected( SDL_GetError() );
     }
-    return renderer{sdl_renderer};
+    return renderer{ sdl_renderer };
 }
 
 tl::expected<renderer, std::string>

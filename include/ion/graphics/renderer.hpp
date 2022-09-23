@@ -96,7 +96,7 @@ public:
      */
     template<std::weakly_incrementable name_writer>
     static tl::expected<renderer, std::string>
-    from_config(SDL_Window * sdl_window, std::string const & path,
+    from_config(SDL_Window * sdl_window, std::string const & config_path,
                 name_writer invalid_names);
 
     inline operator SDL_Renderer * () const { return _renderer; }
@@ -111,14 +111,15 @@ private:
 
 template<std::weakly_incrementable name_writer>
 tl::expected<renderer, std::string>
-renderer::from_config(SDL_Window * window, std::string const & path,
+renderer::from_config(SDL_Window * window, std::string const & config_path,
                       name_writer invalid_names)
 {
-    auto renderer_result = raisin::make_renderer_from_config(
-            path, window, invalid_names);
-    if (not renderer_result) {
-        return tl::unexpected(renderer_result.error());
+    auto sdl_renderer_result = raisin::make_renderer_from_config(
+        config_path, window, invalid_names);
+
+    if (not sdl_renderer_result) {
+        return tl::unexpected(sdl_renderer_result.error());
     }
-    return renderer{std::move(renderer_result).value()};
+    return renderer{ sdl_renderer_result.value() };
 }
 }

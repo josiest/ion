@@ -2,6 +2,12 @@
 
 namespace ion {
 
+system::system(system && temp)
+    : moved{ temp.moved }
+{
+    temp.moved = true;
+}
+
 system::~system()
 {
     if (not moved) {
@@ -13,7 +19,7 @@ tl::expected<system, std::string>
 system::with_subsystems(std::uint32_t flags)
 {
     if (SDL_Init(flags) != 0) {
-        return tl::unexpected{SDL_GetError()};
+        return tl::unexpected( SDL_GetError() );
     }
     return system{};
 }

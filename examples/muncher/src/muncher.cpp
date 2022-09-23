@@ -9,6 +9,13 @@
 #include <iostream>
 #include <memory>
 
+void draw(SDL_Renderer * renderer)
+{
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
+}
+
 int main()
 {
     std::string const config_path = "../assets/muncher.toml";
@@ -20,10 +27,7 @@ int main()
     }
 
     auto game = std::move(game_result).value();
-
-    SDL_SetRenderDrawColor(game.renderer(), 255, 255, 255, 255);
-    SDL_RenderClear(game.renderer());
-    SDL_RenderPresent(game.renderer());
+    draw(game.renderer());
     SDL_Delay(2000);
 
     return EXIT_SUCCESS;

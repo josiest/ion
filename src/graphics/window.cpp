@@ -3,10 +3,12 @@
 namespace ion {
 
 window::window(SDL_Window * sdl_window)
-    : _window{sdl_window} {}
+    : _window{ sdl_window }
+{
+}
 
 window::window(window && temp)
-    : _window{temp._window}
+    : _window{ temp._window }
 {
     temp._window = nullptr;
 }
@@ -27,9 +29,9 @@ window::at_position(std::string const & title, int x, int y,
     auto * sdl_window = SDL_CreateWindow(
             title.c_str(), x, y, width, height, flags);
     if (not sdl_window) {
-        return tl::unexpected{SDL_GetError()};
+        return tl::unexpected( SDL_GetError() );
     }
-    return window{sdl_window};
+    return window{ sdl_window };
 }
 
 tl::expected<window, std::string>
