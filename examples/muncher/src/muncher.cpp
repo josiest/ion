@@ -1,5 +1,6 @@
 // game library
 #include "muncher.hpp"
+#include "entities/munchable.hpp"
 
 // data structures and algorithms
 #include <vector>
@@ -34,11 +35,12 @@ int main()
 }
 
 muncher::muncher(ion::system && system, ion::window && window,
-                 ion::renderer && renderer)
+                 ion::renderer && renderer, munchable_spawner && munchables)
 
     : _system{ std::move(system) },
       _window{ std::move(window) },
-      _renderer{ std::move(renderer) }
+      _renderer{ std::move(renderer) },
+      _munchables{ std::move(munchables) }
 {
 }
 
@@ -87,7 +89,18 @@ muncher::from_config(std::string const & config_path)
         return tl::unexpected(renderer_result.error());
     }
 
+    // TODO: parameterize entity path
+    std::string const entities_config = "../assets/spawn.toml";
+    auto munchable_result = munchable_spawner::from_config(
+            entities_config,
+            renderer_result.value());
+
+    if (not munchable_result) {
+        return tl::unexpected(munchable_result.error());
+    }
+
     return muncher{ std::move(system_result).value(),
                     std::move(window_result).value(),
-                    std::move(renderer_result).value() };
+                    std::move(renderer_result).value(),
+                    std::move(munchable_result).value() };
 }

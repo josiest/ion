@@ -1,5 +1,8 @@
 #pragma once
 
+// game framework
+#include "entities/munchable.hpp"
+
 // frameworks
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
@@ -33,9 +36,11 @@ public:
     inline SDL_Renderer * renderer() const { return _renderer; }
 private:
     muncher(ion::system && system, ion::window && window,
-            ion::renderer && renderer);
+            ion::renderer && renderer, munchable_spawner && munchables);
 
     ion::system _system;
     ion::window _window;
     ion::renderer _renderer;
+
+    munchable_spawner _munchables;
 };

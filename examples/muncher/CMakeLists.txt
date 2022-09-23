@@ -10,4 +10,8 @@ set_target_properties(muncher PROPERTIES
     CXX_STANDARD_REQUIRED TRUE)
 
 find_package(ion REQUIRED)
-target_link_libraries(muncher PRIVATE ion::ion)
+find_package(EnTT REQUIRED)
+find_package(tomlplusplus REQUIRED)
+target_link_libraries(muncher
+    PRIVATE ion::ion
+    INTERFACE EnTT::EnTT tomlplusplus::tomlplusplus)
