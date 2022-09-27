@@ -22,97 +22,17 @@
 #define TOML_EXCEPTIONS 0
 #include <toml++/toml.h>
 #include <filesystem>
-
-// algorithms
-#include <iterator>
-#include <ranges>
-#include <algorithm>
+#include "parsing.hpp"
 
 namespace fs = std::filesystem;
 using namespace std::string_literals;
-
-namespace spawn_munchables {
-
-template<std::weakly_incrementable color_writer>
-tl::expected<bool, std::string>
-load_color(auto const & color_node, color_writer into_colors)
-{
-    if (not color_node.is_array()) {
-        return tl::unexpected("color must be an array"s);
-    }
-    auto color_vals = *color_node.as_array();
-    if (not color_vals.is_homogeneous()) {
-        return tl::unexpected("color values must have uniform type"s);
-    }
-    if (color_vals.size() != 3) {
-        return tl::unexpected("colors must have three values"s);
-    }
-    auto red = color_vals.at(0).as_integer();
-    auto green = color_vals.at(1).as_integer();
-    auto blue = color_vals.at(2).as_integer();
-
-    if (not red) {
-        return tl::unexpected("color values must be integers"s);
-    }
-    component::color color {
-        static_cast<std::uint8_t>(red->get()),
-        static_cast<std::uint8_t>(green->get()),
-        static_cast<std::uint8_t>(blue->get())
-    };
-    *into_colors = color;
-    ++into_colors;
-
-    return true;
-}
-
-template<std::weakly_incrementable color_writer>
-tl::expected<bool, std::string>
-load_colors(toml::table const & munchable_config,
-            color_writer into_colors)
-{
-    if (not munchable_config["colors"]) {
-        return tl::unexpected("munchable settings must have colors"s);
-    }
-    if (not munchable_config["colors"].is_array()) {
-        return tl::unexpected("munchable.colors must be a list"s);
-    }
-    auto munchable_colors = *munchable_config["colors"].as_array();
-    std::vector<std::string> color_errors;
-    munchable_colors.for_each([&color_errors, into_colors](auto const & color) {
-        auto color_result = load_color(color, into_colors);
-        if (not color_result) {
-            color_errors.push_back(color_result.error());
-        }
-    });
-    if (not color_errors.empty()) {
-        return tl::unexpected(color_errors.at(0));
-    }
-    return true;
-}
-
-tl::expected<float, std::string>
-load_float(toml::table const & munchable_config,
-           std::string const & name)
-{
-    if (not munchable_config[name]) {
-        return tl::unexpected("munchable config must have a "s +
-                              name + " parameter"s);
-    }
-    if (not munchable_config[name].is_floating_point()) {
-        return tl::unexpected("munchable."s + name + " must be a floating "s +
-                              "point number"s);
-    }
-    return static_cast<float>(
-            munchable_config[name].as_floating_point()->get());
-}
-}
 
 tl::expected<munchable_spawner, std::string>
 munchable_spawner::from_config(
     std::string const & config_filename,
     SDL_Renderer * renderer)
 {
-    using namespace spawn_munchables;
+    using namespace parsing;
 
     // load the config file
     fs::path const config_path = config_filename;
