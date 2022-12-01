@@ -69,5 +69,4 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2/
 
 # allow exporting from build tree
 export(EXPORT ion-targets
-       FILE ${CMAKE_CURRENT_BINARY_DIR}/ion-targets.cmake
-       NAMESPACE ion::)
+       FILE ${CMAKE_CURRENT_BINARY_DIR}/ion-targets.cmake NAMESPACE ion::)
