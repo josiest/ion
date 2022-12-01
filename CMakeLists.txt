@@ -1,12 +1,71 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.18)
-project(ion VERSION 0.8.0)
+cmake_minimum_required(VERSION 3.23) # FILE_SETS available since 23
+project(ion VERSION 0.9.0)
 
-# add addnl modules
-list(APPEND CMAKE_MODULE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+add_library(ion STATIC
+    # opengl
+    src/glad.c
 
-add_subdirectory(src)
+    # imgui
+    src/imgui/backends/imgui_impl_opengl3.cpp
+    src/imgui/backends/imgui_impl_sdl.cpp
+    src/imgui/backends/imgui_impl_sdlrenderer.cpp
+    src/imgui/imgui_demo.cpp
+    src/imgui/imgui_draw.cpp
+    src/imgui/imgui_tables.cpp
+    src/imgui/imgui_widgets.cpp
+    src/imgui/imgui.cpp
+
+    # ion
+    src/ion/string.cpp
+    src/ion/system.cpp
+    src/ion/tag.cpp
+    src/ion/ui.cpp)
+
+target_sources(ion PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS include
+    FILES
+
+    # opengl
+    include/glad/glad.h
+    include/KHR/khrplatform.h
+    
+    # imgui
+    include/imgui/backends/imgui_impl_opengl3_loader.h
+    include/imgui/backends/imgui_impl_opengl3.h
+    include/imgui/backends/imgui_impl_sdl.h
+    include/imgui/backends/imgui_impl_sdlrenderer.h
+    include/imgui/imconfig.h
+    include/imgui/imgui_internal.h
+    include/imgui/imgui.h
+    include/imgui/imstb_rectpack.h
+    include/imgui/imstb_textedit.h
+    include/imgui/imstb_truetype.h
+    
+    # ion
+    include/ion/expected.hpp
+    include/ion/histogram.hpp
+    include/ion/string.hpp
+    include/ion/system.hpp
+    include/ion/tag.hpp
+    include/ion/timer.hpp
+    include/ion/try.hpp
+    include/ion/ui.hpp)
+
+set_target_properties(ion PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED TRUE)
+set(OpenGL_GL_PREFERENCE GLVND) 
+ 
+find_package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(EnTT REQUIRED)
+find_package(yaml-cpp REQUIRED PATHS lib/cmake)
+
+target_link_libraries(ion
+    PUBLIC yaml-cpp SDL2::SDL2 OpenGL::GL ${CMAKE_DL_LIBS}
+    INTERFACE EnTT::EnTT)
 
 #
 # Export and install the libary
@@ -17,24 +76,26 @@ include(GNUInstallDirs)
 # specify header file directories for building/installing
 target_include_directories(ion PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/imgui>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/backends>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+# install the include files
+install(TARGETS ion FILE_SET HEADERS
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # specify the library targets
 install(TARGETS ion
         EXPORT ion-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILE_SET HEADERS)
 
 # install the export details
 install(EXPORT ion-targets
         FILE ion-targets.cmake
         NAMESPACE ion::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
-
-# install the include files
-install(DIRECTORY include/ion
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        FILES_MATCHING PATTERN "*.hpp")
 
 add_library(ion::ion STATIC IMPORTED)
 set_target_properties(ion::ion PROPERTIES
@@ -55,17 +116,10 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/ion-config.cmake.in
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake
     COMPATIBILITY AnyNewerVersion)
-
-# install the generated files
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/ion-config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion)
-
-# install cmake sdl2 modules
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2/
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/Modules
-        FILES_MATCHING PATTERN *.cmake)
 
 # allow exporting from build tree
 export(EXPORT ion-targets

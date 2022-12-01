@@ -1,134 +1,66 @@
 ion
 ===
 
-:code:`ion` is a small-scoped library meant to make working with SDL easier.
-It serves two primary functions
+:code:`ion` is a small-scoped library meant to make working with SDL easier
+using modern C++ (23 and up!)
 
-1. it provides result-style resource handlers for various SDL and OpenGL components
-2. it provides a higher level event-handling interface than pure SDL
-
-:code:`ion` is still in the very early stages of development. Since this is
-currently a personal project, more features will be added as I need them.
+The library is development-driven, which means that utilities are added to the
+library as needed by yours truly, who makes games with it.
 
 Installation
 ------------
 
-The goal is to eventually add ion to different C++ package managers, but I'm
-just a mere student and I don't have the time to do that right now. For now
-you'll need to download the source code and build it with cmake, then install
-it in a place that other CMake projects can find it
+Not gonna lie, building and installing is a bit of a mess right now. A big
+reason for this is that it depends on my own custom fork of yaml-cpp (I know,
+yikes - but I *really* wanted support for :code:`std::expected`, and was
+impatient). So you'll need to download
+`that repository <https://github.com/josiest/yaml-cpp-expect>`_ and build and
+install it to your local copy of *this* repository. That might look like this
 
 .. code:: console
 
-    $ git clone https://github.com/josiest/ion.git && cd ion
-    $ mkdir build && cd build
+    $ git clone https://github.com/josiest/ion.git /home/<username>/ion
+    $ git clone https://github.com/josiest/yaml-cpp-expect /home/<username>/yaml-cpp-expect
+    $
+    $ cd /home/<username>/yaml-cpp-expect
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ cmake --build .
+    $ cmake --install . --prefix /home/<username>/ion
+    $
+    $ cd /home/<username>/ion
+    $ mkdir build
+    $ cd build
     $ cmake ..
     $ cmake --build .
 
-Then if you're on linux, run :code:`$ sudo cmake --install .`. This will install
-the ion into :code:`/usr/include`
+In addition to my own yaml fork, :code:`ion` also has the following dependencies
+
+* SDL2
+* OpenGL
+* EnTT
+
+Because ion is still in the very early stages of development, I'd recommended
+you install the library on a per-project basis. This might look something likes
+this
+
+.. code:: console
+
+    $ cmake --install . --prefix=/home/<username>/my-cool-game
 
 Finally, add the following to your :code:`CMakeLists.txt`
 
 .. code:: cmake
 
-    find_package(ion REQUIRED)
+    find_package(ion REQUIRED 0.9.0) # version is important b/c of unstableness!
     ...
-    include_directories(ion::ion)
     target_link_libraries(<project-name> PRIVATE ion::ion)
 
-Examples
---------
+Because ion uses opengl, when you build you may get a warning saying something
+about GLVND. If this happens, you can supress this by adding this line to your
+:code:`CmakeLists.txt`
 
-Here's a simple example of how you might use :code:`ion`. This example renders
-a fibonacci-like gradient pattern to the screen.
+.. code:: cmake
 
-.. code:: c++
-
-    #include <ion/ion.hpp>
-    #include <SDL.h>
-
-    #include <cmath>
-    #include <cstdint>
-
-    SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float t)
-    {
-        auto intlerp = [](std::uint8_t x, std::uint8_t y, float t) {
-            return static_cast<std::uint8_t>(std::lerp(x, y, t));
-        };
-        return SDL_Color{intlerp(a.r, b.r, t), intlerp(a.g, b.g, t),
-                         intlerp(a.b, b.b, t), 0xff};
-    }
-
-    void render(ion::hardware_renderable auto & window)
-    {
-        // the initial color
-        SDL_Color blue{48, 118, 217, 255};
-        // the final color
-        SDL_Color red{219, 0, 66, 255};
-    
-        // clear the screen
-        SDL_SetRenderDrawColor(window, red.r, red.g, red.b, red.a);
-        SDL_RenderClear(window);
-    
-        // the dimensions of the rect to draw
-        SDL_Rect rect{0, 0, 0, 0};
-        SDL_GetWindowSize(window, &rect.w, &rect.h);
-        rect.w /= 2;
-    
-        // draw the fibonacci-like patern
-        int n = 8;
-        for (int k = 0; k < n; k++) {
-    
-            // calculate the intermediate color
-            float const t = static_cast<float>(k)/n;
-            auto const c = lerp(blue, red, t);
-    
-            // draw the rect
-            SDL_SetRenderDrawColor(window, c.r, c.g, c.b, c.a); 
-            SDL_RenderFillRect(window, &rect);
-        
-            // split in half horizontally when k is even
-            if (k % 2 == 0) {
-                rect.x += rect.w;
-                rect.h /= 2;
-            }
-            // split in half vertically when k is odd
-            else {
-                rect.y += rect.h;
-                rect.w /= 2;
-            }
-        }
-        SDL_RenderPresent(window);
-    }
-
-    int main()
-    {
-        // create the sdl event-handler: quit when sdl's quit event is triggered
-        ion::event_system events;
-        events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
-    
-        // initialize sdl - initialize this before other sdl resources
-        ion::sdl_context sdl;
-    
-        // create a window, specifying the title and dimensions
-        auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
-        render(window); // render once at the beginning of the program
-    
-        // busy loop until the user quits
-        while (not ion::input::has_quit()) {
-            events.process_queue();
-        }
-    }
-
-To run this example from the ion project directory run the following code
-
-.. code:: console
-
-    $ mkdir examples/simple/build && cd examples/simple/build
-    $ cmake ..
-    $ cmake --build .
-    $ ./simple
-
-.. image:: images/simple-example.png
-   :alt: simple example window
+    set(OpenGL_GL_PREFERENCE GLVND) 
