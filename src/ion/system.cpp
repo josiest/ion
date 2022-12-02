@@ -29,8 +29,8 @@ system::system(SDL_Window * window, SDL_GLContext gl_context)
 
 system::system(system && temp)
     : subsystems{ std::move(temp.subsystems) },
-      on_render{ std::move(temp.on_render) },
-      on_keydown{ std::move(temp.on_keydown) },
+      render_event{ std::move(temp.render_event) },
+      keydown_event{ std::move(temp.keydown_event) },
 
       _window{ temp._window },
       _gl_context{ temp._gl_context }
@@ -86,9 +86,7 @@ void system::start()
                 break;
 
             case SDL_KEYDOWN:
-                for (auto && delegate : on_keydown) {
-                    delegate(event.key.keysym);
-                }
+                keydown_event.publish(event.key.keysym);
             }
         }
 
@@ -96,9 +94,7 @@ void system::start()
         ImGui_ImplSDL2_NewFrame(_window);
         ImGui::NewFrame();
 
-        for (auto && render : on_render) {
-            render();
-        }
+        render_event.publish(_window);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -93,8 +93,8 @@ public:
     //
     // Events
     //
-    std::vector<std::function<void()>> on_render;
-    std::vector<std::function<void(SDL_Keysym const&)>> on_keydown;
+    inline auto on_render() { return entt::sink{ render_event }; }
+    inline auto on_keydown() { return entt::sink{ keydown_event }; }
 
     //
     // Utility
@@ -114,6 +114,10 @@ public:
 private:
     system(SDL_Window * window, SDL_GLContext gl_context);
     bool moved = false;
+
+    // events
+    entt::sigh<void(SDL_Window *)> render_event;
+    entt::sigh<void(SDL_Keysym const &)> keydown_event;
 
     SDL_Window * _window;
     SDL_GLContext _gl_context;
