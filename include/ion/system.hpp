@@ -33,9 +33,11 @@ using flagmap = std::unordered_map<std::string, std::uint32_t>;
 class system {
 public:
     system() = delete;
-    system(const system&) = delete;
+    system(system const &) = delete;
+    system & operator=(system const &) = delete;
 
     system(system && temp);
+    system & operator=(system && temp);
     ~system();
 
     //

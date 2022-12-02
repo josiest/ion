@@ -40,6 +40,14 @@ system::system(system && temp)
     temp.moved = true;
 }
 
+system & system::operator=(system && temp)
+{
+    if (this != &temp) {
+        *this = std::move(temp);
+    }
+    return *this;
+}
+
 system::~system()
 {
     if (moved) return;
