@@ -14,8 +14,9 @@
 #include <string>
 #include <filesystem>
 
-// deserialization
+// serialization
 #include "yaml-cpp/yaml.h"
+#include "konbu/konbu.h"
 #include <sstream>
 #include <iterator>
 
@@ -215,6 +216,40 @@ subsystem const * system::try_get_subsystem() const
 }
 }
 
+namespace konbu {
+
+template<std::ranges::output_range<YAML::Exception> error_output>
+void read(YAML::Node const & config,
+          ion::init_params & params,
+          error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    if (not config.IsMap()) {
+        YAML::Exception const error{ config.Mark(), "expecting a map" };
+        ranges::copy(views::single(error),
+                     konbu::back_inserter_preference(errors));
+        return;
+    }
+    using param = ion::init_params;
+    if (auto const subsystem_config = config["subsystems"]) {
+        std::vector<YAML::Exception> subsystem_errors;
+        auto contextualize = [](YAML::Exception const & error) {
+            std::stringstream message;
+            message << "encountered error reading subsystem setting\n  "
+                    << error.msg;
+            return YAML::Exception{ error.mark, message.str() };
+        };
+
+        read_flags(subsystem_config, params.subsystems,
+                   param::subsystem_flags, subsystem_errors);
+        ranges::copy(subsystem_errors | views::transform(contextualize),
+                     konbu::back_inserter_preference(errors));
+    }
+}
+}
+
 namespace YAML {
 
 template<std::weakly_incrementable ErrorOutput>
@@ -268,7 +303,7 @@ std::string invalid_flagnames(NameRange && flagnames)
 {
     std::stringstream err;
     err << "invalid flags: [";
-    std::string sep = "";
+    std::string sep;
     for (std::string const & name : flagnames) {
         err << sep << name;
         sep = ", ";
@@ -529,11 +564,17 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     std::vector<YAML::Exception> yaml_errors;
 
     if (auto const system_config = config["system"]) {
-        system_config.expect(init_params, std::back_inserter(yaml_errors));
+        konbu::read(system_config, init_params, yaml_errors);
+
+        auto contextualize = [](YAML::Exception const & error) {
+            std::stringstream message;
+            message << "encountered error reading system config\n  "
+                    << error.msg;
+            return YAML::Exception{ error.mark, message.str() }.what();
+        };
+        ranges::copy(yaml_errors | views::transform(contextualize), errors);
+        yaml_errors.clear();
     }
-    ranges::copy(yaml_errors | views::transform(&YAML::Exception::what),
-                 errors);
-    yaml_errors.clear();
     TRY_VOID(detail::init_sdl(init_params));
 
     ion::window_params window_params;

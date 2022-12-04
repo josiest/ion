@@ -1,6 +1,6 @@
 # --- project setup ---
 cmake_minimum_required(VERSION 3.23) # FILE_SETS available since 23
-project(ion VERSION 0.11.0)
+project(ion VERSION 0.12.0)
 
 add_library(ion STATIC
     # opengl

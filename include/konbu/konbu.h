@@ -15,12 +15,21 @@
 
 namespace konbu {
 
+/**
+ * \brief a container that can `push_back`
+ * \tparam container an allocator-aware container
+ */
 template<typename container>
 concept can_push_back =
 requires(container & c, container::value_type const & v)
 {
     c.push_back(v);
 };
+
+/**
+ * \brief A container that can `push_front`
+ * \tparam container an allocator-aware container
+ */
 template<typename container>
 concept can_push_front =
 requires(container & c, container::value_type const & v)
@@ -28,17 +37,40 @@ requires(container & c, container::value_type const & v)
     c.push_front(v);
 };
 
+/**
+ * \brief An insert iterator following the back_inserter_preference
+ * \tparam container    an allocator-aware container
+ * \param c container to insert into
+ * \return an insert_iterator for the container, inserting from ranges::begin
+ */
 template<std::ranges::range container>
 auto back_inserter_preference(container & c)
 {
     return std::inserter(c, std::ranges::begin(c));
 }
+
+/**
+ * \brief An insert iterator following the back_inserter_preference
+ * \tparam container    an allocator-aware container that can `push_back`
+ * \param c container to insert into
+ * \return a back_insert_iterator for the container
+ */
 template<std::ranges::range container>
 requires can_push_back<container>
 auto back_inserter_preference(container & c)
 {
     return std::back_inserter(c);
 }
+
+/**
+ * \brief An insert iterator following the back_inserter_preference
+ * \tparam container    an allocator-aware container that can `push_front`,
+ *                      but not `push_back`
+ *
+ * \param c container to insert into
+ *
+ * \return a front_insert_iterator to the container
+ */
 template<std::ranges::range container>
 requires can_push_front<container> and (not can_push_back<container>)
 auto back_inserter_preference(container & c)
@@ -46,12 +78,18 @@ auto back_inserter_preference(container & c)
     return std::front_inserter(c);
 }
 
+/** The key type of map-container */
 template<typename container>
 using lookup_key_t = typename container::key_type;
 
+/** The mapped type of a map-container */
 template <typename container>
 using lookup_mapped_t = typename container::mapped_type;
 
+/**
+ * \brief A map container type
+ * \tparam container can find a key and return a pair iterator
+ */
 template<typename container>
 concept lookup_table =
 requires(container const & c, lookup_key_t<container> const & key)
@@ -61,8 +99,19 @@ requires(container const & c, lookup_key_t<container> const & key)
     { c.find(key)->second } -> std::convertible_to<lookup_mapped_t<container>>;
 };
 
-template<std::ranges::output_range<YAML::Exception> error_output,
-         lookup_table name_lookup>
+/**
+ * \brief parse an arbitrary type from a name-lookup
+ *
+ * \tparam name_lookup      maps strings to value types
+ * \tparam error_output     allocator-aware container of yaml-exceptions
+ *
+ * \param config    YAML string input
+ * \param value     write parsed value to
+ * \param lookup    maps names to their desired values
+ * \param errors    write any parsing errors to
+ */
+template<lookup_table name_lookup,
+         std::ranges::output_range<YAML::Exception> error_output>
 requires std::convertible_to<std::string, lookup_key_t<name_lookup>>
 
 void read_lookup(YAML::Node const & config,
@@ -96,6 +145,46 @@ void read_lookup(YAML::Node const & config,
                  back_inserter_preference(errors));
 }
 
+/**
+ * \brief Read a string value from config
+ *
+ * \tparam string_like      can be converted to a string
+ * \tparam error_output     an allocator-aware container of yaml-exceptions
+ *
+ * \param config    YAML string input
+ * \param value     write the parsed string to
+ * \param errors    write any parsing errors to
+ */
+template<typename string_like,
+         std::ranges::output_range<YAML::Exception> error_output>
+requires std::convertible_to<std::string, string_like>
+void read(YAML::Node const & config, string_like & value, error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    if (not config.IsScalar()) {
+        YAML::Exception const error{ config.Mark(), "expecting a string" };
+        ranges::copy(views::single(error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    value = config.Scalar();
+}
+
+/**
+ * \brief Read an integer point number from config
+ *
+ * \tparam number           integer type
+ * \tparam error_output     allocator-aware range of yaml-exceptions
+ *
+ * \param config    YAML integer input
+ * \param value     write parsed integer to
+ * \param errors    write any parsing errors to
+ *
+ * \note Reading a negative number from `config` for an unsigned `number` type
+ *       will result in an error written to `errors`.
+ */
 template<std::integral number,
          std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config, number & value, error_output & errors)
@@ -129,6 +218,16 @@ void read(YAML::Node const & config, number & value, error_output & errors)
     value = config.as<number>();
 }
 
+/**
+ * \brief Read a floating point number from config
+ *
+ * \tparam number           floating-point type
+ * \tparam error_output     allocator aware container of yaml-exceptions
+ *
+ * \param config    YAML floating point input
+ * \param value     write parsed number to
+ * \param errors    write any parsing errors to
+ */
 template<std::floating_point number,
          std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config, number & value, error_output & errors)
@@ -157,4 +256,151 @@ void read(YAML::Node const & config, number & value, error_output & errors)
     }
     value = config.as<number>();
 }
+
+/**
+ * \brief Models a type that can be read by the konbu read interface
+ * \tparam value the value-type to read
+ */
+template<typename value>
+concept readable =
+requires(YAML::Node const & node, value & v, std::vector<YAML::Exception> & errors)
+{
+    konbu::read(node, v, errors);
+};
+
+/**
+ * \brief Parse a sequence of values
+ *
+ * \tparam value_output     allocator-aware container of konbu-readable types
+ * \tparam error_output     allocator-aware container of yaml-exceptions
+ *
+ * \param sequence  YAML sequence input of desired values
+ * \param values    write parsed values to
+ * \param errors    write any parsing errors to
+ *
+ * All valid config values in the sequence will be parsed into `values`. Any
+ * config values that fail to parse won't be written to `values`, and the error
+ * will be written to `errors`
+ */
+template<std::ranges::range value_output,
+         std::ranges::output_range<YAML::Exception> error_output>
+requires readable<std::ranges::range_value_t<value_output>>
+
+void partition_expect(YAML::Node const & sequence,
+                      value_output & values,
+                      error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+    using value_t = ranges::range_value_t<value_output>;
+
+    if (not sequence.IsSequence()) {
+        YAML::Exception const error{ sequence.Mark(), "expecting a sequence" };
+        ranges::copy(views::single(error), back_inserter_preference(errors));
+        return;
+    }
+    std::vector<YAML::Exception> sequence_errors;
+    for (YAML::Node const & node : sequence) {
+        value_t value;
+        auto const num_errors = sequence_errors.size();
+        konbu::read(node, value, sequence_errors);
+
+        if (sequence_errors.size() != num_errors) {
+            continue;
+        }
+        ranges::copy(views::single(value),
+                     back_inserter_preference(values));
+    }
+    auto contextualize = [](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "couldn't read sequence value: " << error.msg;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+    ranges::copy(sequence_errors | views::transform(contextualize),
+                 back_inserter_preference(errors));
+}
+
+/**
+ * \brief Read flag values from a config node.
+ *
+ * \tparam flag_lookup          maps strings to flag-types
+ * \tparam error_output         allocator-aware container of yaml-exceptions
+ *
+ * \param flagname_sequence     YAML input sequence of desired values
+ * \param flags                 write parsed flags to
+ * \param lookup                mapping of flag names to their int-values
+ * \param errors                write any parsing errors to
+ *
+ * All valid flagnames from the `flagname_sequence` are parsed into a
+ * non-negative integer define by the mapping `lookup`, and unioned into flags.
+ * If no valid flags were parsed, the value existing in flags will be used.
+ * Any invalid flagnames or other parsing errors will be written to `errors`
+ */
+template<lookup_table flag_lookup,
+         std::ranges::output_range<YAML::Exception> error_output>
+requires std::convertible_to<std::string, lookup_key_t<flag_lookup>> and
+         std::unsigned_integral<lookup_mapped_t<flag_lookup>>
+
+void read_flags(YAML::Node const & flagname_sequence,
+                lookup_mapped_t<flag_lookup> & flags,
+                flag_lookup const & lookup,
+                error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    if (not flagname_sequence.IsSequence()) {
+        YAML::Exception const error{ flagname_sequence.Mark(),
+                                     "expecting a sequence" };
+        ranges::copy(views::single(error), back_inserter_preference(errors));
+        return;
+    }
+    lookup_mapped_t<flag_lookup> parsed_flags = 0u;
+    auto parse_valid = [&lookup, &parsed_flags](std::string const & name) {
+        auto const search = lookup.find(name);
+        if (search != lookup.end()) {
+            parsed_flags |= search->second;
+            return true;
+        }
+        return false;
+    };
+    // partition algorithm
+    std::vector<YAML::Exception> flagname_errors;
+    for (YAML::Node const & node : flagname_sequence) {
+
+        std::string name;
+        auto const num_errors = flagname_errors.size();
+        konbu::read(node, name, flagname_errors);
+
+        if (flagname_errors.size() != num_errors) {
+            continue;
+        }
+        if (parse_valid(name)) {
+            continue;
+        }
+        std::stringstream message;
+        message << "no flag named \"" << name << "\"\n  "
+                << "expecting name to be one of the following: [";
+        std::string sep;
+        for (const auto & flag : lookup | views::keys) {
+            message << sep << flag;
+            sep = ", ";
+        }
+        message << "]";
+        YAML::Exception const error{ node.Mark(), message.str() };
+        ranges::copy(views::single(error),
+                     back_inserter_preference(flagname_errors));
+    }
+    if (parsed_flags != 0u) {
+        flags = parsed_flags;
+    }
+    auto contextualize = [](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "couldn't parse flag: " << error.msg;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+    ranges::copy(flagname_errors | views::transform(contextualize),
+                 back_inserter_preference(errors));
+}
+
 }
