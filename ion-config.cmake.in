@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 include(${CMAKE_CURRENT_LIST_DIR}/ion-targets.cmake)
+message("source dir is ${CMAKE_CURRENT_SOURCE_DIR}")
 
 find_dependency(SDL2 REQUIRED)
 find_dependency(yaml-cpp REQUIRED)

@@ -1,0 +1,8 @@
+window:
+  name: A simple window
+  width: 960
+  height: 540
+
+opengl:
+  major-version: 4
+  minor-version: 2

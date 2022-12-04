@@ -61,7 +61,12 @@ tags
 # Persistent undo
 [._]*.un~
 
+#
 # Project
+#
+
 build/
 external/
 .vscode/
+.idea/
+cmake-build-debug/
