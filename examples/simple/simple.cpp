@@ -20,7 +20,7 @@ void print_error(std::string const & error)
 int main()
 {
     namespace views = std::views;
-    fs::path const system_config = "../system.yaml";
+    fs::path const system_config = "../examples/simple/system.yaml";
 
     std::vector<YAML::Exception> config_errors;
     auto system = ion::system::from_config(system_config, config_errors);

@@ -127,3 +127,14 @@ install(FILES
 # allow exporting from build tree
 export(EXPORT ion-targets
        FILE ${CMAKE_CURRENT_BINARY_DIR}/ion-targets.cmake NAMESPACE ion::)
+
+#
+# Examples
+#
+
+add_executable(simple examples/simple/simple.cpp)
+set_target_properties(simple PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED TRUE)
+
+target_link_libraries(simple PRIVATE ion)
