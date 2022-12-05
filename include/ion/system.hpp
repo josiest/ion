@@ -412,45 +412,6 @@ void read(YAML::Node const & config,
 
 namespace YAML {
 
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, Exception>
-
-ErrorOutput
-decode_flags(Node const & flagname_sequence,
-             std::uint32_t & flags,
-             ErrorOutput errors,
-             ion::flagmap const & as_flag)
-{
-    namespace ranges = std::ranges;
-    namespace views = std::views;
-    using namespace std::string_literals;
-
-    std::vector<std::string> flagnames;
-    partition_expect<std::string>(flagname_sequence,
-        std::back_inserter(flagnames), errors);
-
-    std::uint32_t parsed_flags = 0u;
-    auto is_valid = [&as_flag, &parsed_flags](std::string const & name) {
-        auto const search = as_flag.find(name);
-        if (search != as_flag.end()) {
-            parsed_flags |= search->second;
-            return true;
-        }
-        return false;
-    };
-    auto as_error = [&flagname_sequence](const std::string& name) {
-        return Exception{ flagname_sequence.Mark(),
-                          "No flag named "s + name  };
-    };
-    auto invalid_flagnames = ranges::partition(flagnames, is_valid);
-    if (parsed_flags != 0u) {
-        flags = parsed_flags;
-    }
-    auto [_, next_errors] = ranges::copy(
-        invalid_flagnames | views::transform(as_error), errors);
-    return next_errors;
-}
-
 void encode_flags(Node & sequence, std::string const & key,
                   std::uint32_t flags, ion::flagmap const & as_flag);
 
