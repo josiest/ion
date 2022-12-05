@@ -19,6 +19,7 @@
 #include "konbu/konbu.h"
 #include <sstream>
 #include <iterator>
+#include <regex>
 
 // events
 #include <vector>
@@ -171,7 +172,7 @@ struct opengl_params{
 
     std::uint32_t flags = 0;
     std::uint32_t major_version = 4;
-    std::uint32_t minor_version = 6;
+    std::uint32_t minor_version = 2;
 
     inline static flagmap const opengl_flags{
         { "debug",              SDL_GL_CONTEXT_DEBUG_FLAG },
@@ -312,6 +313,115 @@ void read(YAML::Node const & config,
         window_errors.clear();
     }
 }
+
+template<std::unsigned_integral number,
+         std::ranges::output_range<YAML::Exception> error_output>
+void read_version(YAML::Node const & input,
+                  number & major_version, number & minor_version,
+                  error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+    if (not input.IsScalar()) {
+        YAML::Exception const error{ input.Mark(),
+                                     "expecting a version string" };
+        ranges::copy(views::single(error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    YAML::Exception const format_error{
+        input.Mark(),
+        "version string must have the form \"<major>.<minor>\""
+    };
+    std::regex const version_pattern{ "([0-9]+)\\.([0-9]+)" };
+    std::smatch version_match;
+    if (not std::regex_search(input.Scalar(), version_match, version_pattern)) {
+        ranges::copy(views::single(format_error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    if (version_match.size() != 3) {
+        ranges::copy(views::single(format_error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    YAML::Node const major_config{ version_match[1].str() };
+    major_version = major_config.as<number>();
+
+    YAML::Node const minor_config{ version_match[2].str() };
+    minor_version = minor_config.as<number>();
+}
+
+template<std::ranges::output_range<YAML::Exception> error_output>
+void read(YAML::Node const & config,
+          ion::opengl_params & params,
+          error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    if (config.IsScalar()) {
+        std::vector<YAML::Exception> version_errors;
+        read_version(config, params.major_version, params.minor_version,
+                             version_errors);
+
+        std::stringstream version;
+        version << params.major_version << "." << params.minor_version;
+        ranges::transform(version_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("version", version.str()));
+        return;
+    }
+    if (not config.IsMap()) {
+        YAML::Exception const error{ config.Mark(), "expecting a map" };
+        ranges::copy(views::single(error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    if (auto const version_config = config["version"]) {
+        std::vector<YAML::Exception> version_errors;
+        read_version(config, params.major_version, params.minor_version,
+                             version_errors);
+
+        std::stringstream version;
+        version << params.major_version << "." << params.minor_version;
+        ranges::transform(version_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("version", version.str()));
+    }
+    if (auto const buffer_config = config["double-buffer"]) {
+        std::vector<YAML::Exception> buffer_errors;
+        konbu::read(buffer_config, params.double_buffer, buffer_errors);
+        ranges::transform(buffer_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("double-buffer",
+                                                     params.double_buffer));
+    }
+    if (auto const depth_config = config["depth-size"]) {
+        std::vector<YAML::Exception> depth_errors;
+        konbu::read(depth_config, params.depth_size, depth_errors);
+        ranges::transform(depth_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("depth-size",
+                                                     params.depth_size));
+    }
+    if (auto const stencil_config = config["stencil-size"]) {
+        std::vector<YAML::Exception> stencil_errors;
+        konbu::read(stencil_config, params.stencil_size, stencil_errors);
+        ranges::transform(stencil_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("stencil-size",
+                                                     params.stencil_size));
+    }
+    if (auto const flag_sequence = config["flags"]) {
+        std::vector<YAML::Exception> flag_errors;
+        konbu::read_flags(flag_sequence, params.flags,
+                          ion::opengl_params::opengl_flags, flag_errors);
+        ranges::transform(flag_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_param("flags", params.flags));
+    }
+}
 }
 
 namespace YAML {
@@ -387,42 +497,6 @@ struct convert<ion::init_params> {
         return node;
     }
 };
-
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, Exception>
-
-struct expect_default<ion::window_params, Exception, ErrorOutput> {
-    ErrorOutput operator()(const Node& node,
-                           ion::window_params& params,
-                           ErrorOutput errors) const noexcept
-    {
-        using namespace std::string_literals;
-        if (not node.IsMap()) {
-            *errors++ = Exception{ node.Mark(), ErrorMsg::NOT_A_MAP };
-            return errors;
-        }
-        if (auto const name = node["name"]) {
-            errors = name.expect(params.name, errors);
-        }
-        if (auto const x = node["x"]) {
-            errors = x.expect(params.x, errors);
-        }
-        if (auto const y = node["y"]) {
-            errors = y.expect(params.y, errors);
-        }
-        if (auto const width = node["width"]) {
-            errors = width.expect(params.width, errors);
-        }
-        if (auto const height = node["height"]) {
-            errors = height.expect(params.height, errors);
-        }
-        if (auto const flag_sequence = node["flags"]) {
-            errors = decode_flags(flag_sequence, params.flags, errors,
-                                  ion::window_params::window_flags);
-        }
-        return errors;
-    }
-};
 template<>
 struct convert<ion::window_params> {
     static Node encode(ion::window_params const & rhs)
@@ -438,53 +512,38 @@ struct convert<ion::window_params> {
         return node;
     }
 };
-
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, Exception>
-
-struct expect_default<ion::opengl_params, Exception, ErrorOutput> {
-    ErrorOutput operator()(const Node& node,
-                           ion::opengl_params& rhs,
-                           ErrorOutput errors) const noexcept
-    {
-        if (not node.IsMap()) {
-            *errors++ = Exception{ node.Mark(), ErrorMsg::NOT_A_MAP };
-            return errors;
-        }
-        if (auto const double_buffer = node["double-buffer"]) {
-            errors = double_buffer.expect(rhs.double_buffer, errors);
-        }
-        if (auto const depth_size = node["depth-size"]) {
-            errors = depth_size.expect(rhs.depth_size, errors);
-        }
-        if (auto const stencil_size = node["stencil-size"]) {
-            errors = stencil_size.expect(rhs.stencil_size, errors);
-        }
-        if (auto const major_version = node["major-version"]) {
-            errors = major_version.expect(rhs.major_version, errors);
-        }
-        if (auto const minor_version = node["minor-version"]) {
-            errors = minor_version.expect(rhs.minor_version, errors);
-        }
-        if (auto const flag_sequence = node["flags"]) {
-            errors = decode_flags(flag_sequence, rhs.flags, errors,
-                                  ion::opengl_params::opengl_flags);
-        }
-        return errors;
-    }
-};
 template<>
 struct convert<ion::opengl_params> {
     static Node encode(ion::opengl_params const & rhs)
     {
+        ion::opengl_params const default_params;
+
+        std::stringstream version;
+        version << rhs.major_version << "." << rhs.minor_version;
+
+        // input param uses all defaults, so write simplified config
+        if (rhs.double_buffer == default_params.double_buffer and
+            rhs.depth_size == default_params.depth_size and
+            rhs.stencil_size == default_params.stencil_size and
+            rhs.flags == default_params.flags) {
+
+            return YAML::Node{ version.str() };
+        }
         Node node;
-        node["double-buffer"] = rhs.double_buffer;
-        node["depth-size"] = rhs.depth_size;
-        node["stencil-size"] = rhs.stencil_size;
-        node["major-version"] = rhs.major_version;
-        node["minor-version"] = rhs.minor_version;
-        encode_flags(node, "flags", rhs.flags,
-                     ion::opengl_params::opengl_flags);
+        node["version"] = version.str();
+        if (rhs.double_buffer != default_params.double_buffer) {
+            node["double-buffer"] = rhs.double_buffer;
+        }
+        if (rhs.depth_size != default_params.depth_size) {
+            node["depth-size"] = rhs.depth_size;
+        }
+        if (rhs.stencil_size != default_params.stencil_size) {
+            node["stencil-size"] = rhs.stencil_size;
+        }
+        if (rhs.flags != default_params.flags) {
+            encode_flags(node, "flags", rhs.flags,
+                         ion::opengl_params::opengl_flags);
+        }
         return node;
     }
 };
@@ -613,7 +672,8 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     std::vector<YAML::Exception> yaml_errors;
 
     if (auto const system_config = config["system"]) {
-        konbu::read(system_config, init_params, yaml_errors);
+        std::vector<YAML::Exception> system_errors;
+        konbu::read(system_config, init_params, system_errors);
 
         auto contextualize = [](YAML::Exception const & error) {
             std::stringstream message;
@@ -621,33 +681,37 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
                     << error.msg;
             return YAML::Exception{ error.mark, message.str() }.what();
         };
-        ranges::copy(yaml_errors | views::transform(contextualize), errors);
-        yaml_errors.clear();
+        ranges::copy(system_errors | views::transform(contextualize), errors);
     }
     TRY_VOID(detail::init_sdl(init_params));
 
     ion::window_params window_params;
     if (auto const window_config = config["window"]) {
-        konbu::read(window_config, window_params, yaml_errors);
+        std::vector<YAML::Exception> window_errors;
+        konbu::read(window_config, window_params, window_errors);
         auto contextualize = [](YAML::Exception const & error) {
             std::stringstream message;
             message << "encountered error reading window config\n  "
                     << error.msg;
             return YAML::Exception{ error.mark, message.str() }.what();
         };
-        ranges::copy(yaml_errors | views::transform(contextualize), errors);
-        yaml_errors.clear();
+        ranges::copy(window_errors | views::transform(contextualize), errors);
     }
     window = TRY(detail::load_window(window_params),
                  detail::cleanup(nullptr, nullptr));
 
     ion::opengl_params gl_params;
     if (auto const opengl_config = config["opengl"]) {
-        opengl_config.expect(gl_params, std::back_inserter(yaml_errors));
+        std::vector<YAML::Exception> gl_errors;
+        konbu::read(opengl_config, gl_params, gl_errors);
+        auto contextualize = [](YAML::Exception const & error) {
+            std::stringstream message;
+            message << "encountered error reading opengl config\n  "
+                    << error.msg;
+            return YAML::Exception{ error.mark, message.str() }.what();
+        };
+        ranges::copy(gl_errors | views::transform(contextualize), errors);
     }
-    ranges::copy(yaml_errors | views::transform(&YAML::Exception::what),
-                 errors);
-    yaml_errors.clear();
     gl_context = TRY(detail::load_opengl(gl_params, window),
                      detail::cleanup(window, nullptr));
 
