@@ -314,44 +314,6 @@ void read(YAML::Node const & config,
     }
 }
 
-template<std::unsigned_integral number,
-         std::ranges::output_range<YAML::Exception> error_output>
-void read_version(YAML::Node const & input,
-                  number & major_version, number & minor_version,
-                  error_output & errors)
-{
-    namespace ranges = std::ranges;
-    namespace views = std::views;
-    if (not input.IsScalar()) {
-        YAML::Exception const error{ input.Mark(),
-                                     "expecting a version string" };
-        ranges::copy(views::single(error),
-                     back_inserter_preference(errors));
-        return;
-    }
-    YAML::Exception const format_error{
-        input.Mark(),
-        "version string must have the form \"<major>.<minor>\""
-    };
-    std::regex const version_pattern{ "([0-9]+)\\.([0-9]+)" };
-    std::smatch version_match;
-    if (not std::regex_search(input.Scalar(), version_match, version_pattern)) {
-        ranges::copy(views::single(format_error),
-                     back_inserter_preference(errors));
-        return;
-    }
-    if (version_match.size() != 3) {
-        ranges::copy(views::single(format_error),
-                     back_inserter_preference(errors));
-        return;
-    }
-    YAML::Node const major_config{ version_match[1].str() };
-    major_version = major_config.as<number>();
-
-    YAML::Node const minor_config{ version_match[2].str() };
-    minor_version = minor_config.as<number>();
-}
-
 template<std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config,
           ion::opengl_params & params,
@@ -362,8 +324,8 @@ void read(YAML::Node const & config,
 
     if (config.IsScalar()) {
         std::vector<YAML::Exception> version_errors;
-        read_version(config, params.major_version, params.minor_version,
-                             version_errors);
+        konbu::read_version(config, params.major_version, params.minor_version,
+                                    version_errors);
 
         std::stringstream version;
         version << params.major_version << "." << params.minor_version;
@@ -380,8 +342,8 @@ void read(YAML::Node const & config,
     }
     if (auto const version_config = config["version"]) {
         std::vector<YAML::Exception> version_errors;
-        read_version(config, params.major_version, params.minor_version,
-                             version_errors);
+        konbu::read_version(config, params.major_version, params.minor_version,
+                                    version_errors);
 
         std::stringstream version;
         version << params.major_version << "." << params.minor_version;

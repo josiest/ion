@@ -429,4 +429,53 @@ auto contextualize_param(std::string const & param_name, value const & v)
         return YAML::Exception{ error.mark, message.str() };
     };
 }
+
+/**
+ * \brief read a simple version string
+ *
+ * \tparam number           non-negative integer
+ * \tparam error_output     allocator-aware container of yaml-exceptions
+ *
+ * \param input             yaml input for version string
+ * \param major_version     write major version to
+ * \param minor_version     write minor version to
+ * \param errors            write any parsing errors to
+ */
+template<std::unsigned_integral number,
+    std::ranges::output_range<YAML::Exception> error_output>
+void read_version(YAML::Node const & input,
+                  number & major_version, number & minor_version,
+                  error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+    if (not input.IsScalar()) {
+        YAML::Exception const error{ input.Mark(),
+                                     "expecting a version string" };
+        ranges::copy(views::single(error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    YAML::Exception const format_error{
+        input.Mark(),
+        "version string must have the form \"<major>.<minor>\""
+    };
+    std::regex const version_pattern{ "([0-9]+)\\.([0-9]+)" };
+    std::smatch version_match;
+    if (not std::regex_search(input.Scalar(), version_match, version_pattern)) {
+        ranges::copy(views::single(format_error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    if (version_match.size() != 3) {
+        ranges::copy(views::single(format_error),
+                     back_inserter_preference(errors));
+        return;
+    }
+    YAML::Node const major_config{ version_match[1].str() };
+    major_version = major_config.as<number>();
+
+    YAML::Node const minor_config{ version_match[2].str() };
+    minor_version = minor_config.as<number>();
+}
 }
