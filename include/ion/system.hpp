@@ -47,24 +47,40 @@ public:
     //
 
     /**
-     * \brief Load SDL from a config table
-     * \param config    the SDL config settings
+     * \brief initialize an ion::system from yaml settings
+     * \tparam error_output allocator-aware container of yaml-exceptions
+     *
+     * \param config        input for the various system settings
+     * \param yaml_errors   write any parsing errors to
+     *
+     * \return a system if no SDL_Errors were encountered, otherwise the
+     *         relevant SDL_Error.
+     *
+     * "Various system settings" include settings for:
+     * - system -> ion::init_params     how to initialize SDL
+     * - window -> ion::window_params   how to create the window
+     * - opengl -> ion::opengl_params   how to initialize OpenGL
+     * - imgui -> ion::imgui_params     how to initialize ImGui
      */
-    template<std::weakly_incrementable ErrorOutput>
-    requires std::indirectly_writable<ErrorOutput, std::string>
-
+    template<std::ranges::output_range<YAML::Exception> error_output>
     static std::expected<system, std::string>
-    from_config(YAML::Node const & config, ErrorOutput errors);
+    from_config(YAML::Node const & config, error_output & yaml_errors);
 
     /**
-     * \brief Load SDL from a file
-     * \param config_path   the path to the SDL config
+     * \brief initialize an ion::system system from loading a config file
+     *
+     * \tparam error_output allocator-aware container of yaml-exceptions
+     *
+     * \param config_path   where to find the system config settings
+     * \param yaml_errors   write any parsing errors to
+     *
+     * \return the loaded system if no SDL_Errors were encountered, otherwise
+     *         the relevant SDL_Error
      */
-    template<std::weakly_incrementable ErrorOutput>
-    requires std::indirectly_writable<ErrorOutput, std::string>
-
+    template<std::ranges::output_range<YAML::Exception> error_output>
     static std::expected<system, std::string>
-    from_config(std::filesystem::path const & config_path, ErrorOutput errors);
+    from_config(std::filesystem::path const & config_path,
+                error_output & yaml_errors);
 
     //
     // Logic
@@ -240,7 +256,7 @@ void read(YAML::Node const & config,
         read_flags(subsystem_config, params.subsystems,
                    param::subsystem_flags, subsystem_errors);
         ranges::transform(subsystem_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_setting("subsystem"));
     }
 }
@@ -265,35 +281,35 @@ void read(YAML::Node const & config,
     if (auto const name_config = config["name"]) {
         konbu::read(name_config, params.name, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("name", params.name));
         window_errors.clear();
     }
     if (auto const x_config = config["x"]) {
         konbu::read(x_config, params.x, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors) ,
+                          konbu::back_inserter_preference(errors) ,
                           konbu::contextualize_param("x", params.x));
         window_errors.clear();
     }
     if (auto const y_config = config["y"]) {
         konbu::read(y_config, params.y, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("y", params.y));
         window_errors.clear();
     }
     if (auto const width_config = config["width"]) {
         konbu::read(width_config, params.width, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("width", params.width));
         window_errors.clear();
     }
     if (auto const height_config = config["height"]) {
         konbu::read(height_config, params.height, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("height", params.height));
         window_errors.clear();
     }
@@ -301,7 +317,7 @@ void read(YAML::Node const & config,
         konbu::read_flags(flag_sequence, params.flags,
                           ion::window_params::window_flags, window_errors);
         ranges::transform(window_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("flags", params.flags));
         window_errors.clear();
     }
@@ -323,14 +339,14 @@ void read(YAML::Node const & config,
         std::stringstream version;
         version << params.major_version << "." << params.minor_version;
         ranges::transform(version_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("version", version.str()));
         return;
     }
     if (not config.IsMap()) {
         YAML::Exception const error{ config.Mark(), "expecting a map" };
         ranges::copy(views::single(error),
-                     back_inserter_preference(errors));
+                     konbu::back_inserter_preference(errors));
         return;
     }
     if (auto const version_config = config["version"]) {
@@ -341,14 +357,14 @@ void read(YAML::Node const & config,
         std::stringstream version;
         version << params.major_version << "." << params.minor_version;
         ranges::transform(version_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("version", version.str()));
     }
     if (auto const buffer_config = config["double-buffer"]) {
         std::vector<YAML::Exception> buffer_errors;
         konbu::read(buffer_config, params.double_buffer, buffer_errors);
         ranges::transform(buffer_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("double-buffer",
                                                      params.double_buffer));
     }
@@ -356,7 +372,7 @@ void read(YAML::Node const & config,
         std::vector<YAML::Exception> depth_errors;
         konbu::read(depth_config, params.depth_size, depth_errors);
         ranges::transform(depth_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("depth-size",
                                                      params.depth_size));
     }
@@ -364,7 +380,7 @@ void read(YAML::Node const & config,
         std::vector<YAML::Exception> stencil_errors;
         konbu::read(stencil_config, params.stencil_size, stencil_errors);
         ranges::transform(stencil_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("stencil-size",
                                                      params.stencil_size));
     }
@@ -373,8 +389,24 @@ void read(YAML::Node const & config,
         konbu::read_flags(flag_sequence, params.flags,
                           ion::opengl_params::opengl_flags, flag_errors);
         ranges::transform(flag_errors,
-                          back_inserter_preference(errors),
+                          konbu::back_inserter_preference(errors),
                           konbu::contextualize_param("flags", params.flags));
+    }
+}
+
+template<std::ranges::output_range<YAML::Exception> error_output>
+void read(YAML::Node const & config,
+          ion::imgui_params & params,
+          error_output & errors)
+{
+    namespace ranges = std::ranges;
+    if (auto const glsl_config = config["glsl"]) {
+        std::vector<YAML::Exception> glsl_errors;
+        konbu::read(glsl_config, params.glsl_version, glsl_errors);
+        ranges::transform(glsl_errors,
+                          konbu::back_inserter_preference(errors),
+                          konbu::contextualize_param("glsl",
+                                                     params.glsl_version));
     }
 }
 }
@@ -503,20 +535,6 @@ struct convert<ion::opengl_params> {
     }
 };
 
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, Exception>
-
-struct expect_default<ion::imgui_params, Exception, ErrorOutput> {
-    ErrorOutput operator()(const Node& node,
-                           ion::imgui_params& rhs,
-                           ErrorOutput errors) const noexcept
-    {
-        if (auto const glsl_version = node["glsl-version"]) {
-            errors = glsl_version.expect(rhs.glsl_version, errors);
-        }
-        return errors;
-    }
-};
 template<>
 struct convert<ion::imgui_params> {
     static Node encode(ion::imgui_params const & rhs)
@@ -611,11 +629,9 @@ init_imgui(const imgui_params& params,
 }
 }
 
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, std::string>
-
-std::expected<ion::system, std::string>
-ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
+template<std::ranges::output_range<YAML::Exception> error_output>
+inline std::expected<ion::system, std::string>
+ion::system::from_config(const YAML::Node& config, error_output & yaml_errors)
 {
     namespace ranges = std::ranges;
     namespace views = std::views;
@@ -624,8 +640,6 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     SDL_GLContext gl_context;
 
     ion::init_params init_params;
-    std::vector<YAML::Exception> yaml_errors;
-
     if (auto const system_config = config["system"]) {
         std::vector<YAML::Exception> system_errors;
         konbu::read(system_config, init_params, system_errors);
@@ -659,23 +673,22 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
 
     ion::imgui_params imgui_params;
     if (auto const imgui_config = config["imgui"]) {
-        imgui_config.expect(imgui_params, std::back_inserter(yaml_errors));
+        std::vector<YAML::Exception> imgui_errors;
+        konbu::read(imgui_config, imgui_params, imgui_errors);
+        ranges::transform(imgui_errors,
+                          konbu::back_inserter_preference(yaml_errors),
+                          konbu::contextualize_setting("imgui"));
     }
-    ranges::copy(yaml_errors | views::transform(&YAML::Exception::what),
-                 errors);
-    yaml_errors.clear();
     TRY_VOID(detail::init_imgui(imgui_params, window, gl_context),
              detail::cleanup(window, gl_context));
 
     return system(window, gl_context);
 }
 
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, std::string>
-
+template<std::ranges::output_range<YAML::Exception> error_output>
 std::expected<ion::system, std::string>
 ion::system::from_config(std::filesystem::path const & config_path,
-                         ErrorOutput errors)
+                         error_output & yaml_errors)
 {
     using namespace std::string_literals;
     namespace fs = std::filesystem;
@@ -688,5 +701,5 @@ ion::system::from_config(std::filesystem::path const & config_path,
         return std::unexpected("Unable to load config at " +
                                config_path.string());
     }
-    return from_config(config, errors);
+    return from_config(config, yaml_errors);
 }
