@@ -62,7 +62,7 @@ public:
      * - imgui -> ion::imgui_params     how to initialize ImGui
      */
     template<std::ranges::output_range<YAML::Exception> error_output>
-    static std::expected<system, std::string>
+    [[nodiscard]] static std::expected<system, std::string>
     from_config(YAML::Node const & config, error_output & yaml_errors);
 
     /**
@@ -77,7 +77,7 @@ public:
      *         the relevant SDL_Error
      */
     template<std::ranges::output_range<YAML::Exception> error_output>
-    static std::expected<system, std::string>
+    [[nodiscard]] static std::expected<system, std::string>
     from_config(std::filesystem::path const & config_path,
                 error_output & yaml_errors);
 
@@ -98,20 +98,20 @@ public:
     subsystem & add_subsystem();
 
     template<class subsystem>
-    subsystem & get_subsystem();
+    [[nodiscard]] subsystem & get_subsystem();
     template<class subsystem>
-    subsystem const & get_subsystem() const;
+    [[nodiscard]] subsystem const & get_subsystem() const;
 
     template<class subsystem>
-    subsystem * try_get_subsystem();
+    [[nodiscard]] subsystem * try_get_subsystem();
     template<class subsystem>
-    subsystem const * try_get_subsystem() const;
+    [[nodiscard]] subsystem const * try_get_subsystem() const;
 
     //
     // Events
     //
-    inline auto on_render() { return entt::sink{ render_event }; }
-    inline auto on_keydown() { return entt::sink{ keydown_event }; }
+    [[nodiscard]] inline auto on_render() { return entt::sink{ render_event }; }
+    [[nodiscard]] inline auto on_keydown() { return entt::sink{ keydown_event }; }
 
     //
     // Utility
@@ -122,12 +122,12 @@ public:
     //
     //  Members
     //
-    inline SDL_Window * window() { return _window; }
-    inline SDL_Window const * window() const { return _window; }
+    [[nodiscard]] inline SDL_Window * window() { return _window; }
+    [[nodiscard]] inline SDL_Window const * window() const { return _window; }
 
-    inline void * gl_context() { return _gl_context; }
-    inline void const * gl_context() const { return _gl_context; }
-    inline entt::entity id() { return _id; }
+    [[nodiscard]] inline void * gl_context() { return _gl_context; }
+    [[nodiscard]] inline void const * gl_context() const { return _gl_context; }
+    [[nodiscard]] inline entt::entity id() const { return _id; }
 private:
     system(SDL_Window * window, SDL_GLContext gl_context);
     bool moved = false;
@@ -160,8 +160,8 @@ struct window_params {
     std::string name = "Window";
     int x = SDL_WINDOWPOS_UNDEFINED;
     int y = SDL_WINDOWPOS_UNDEFINED;
-    std::uint32_t width = 640u;
-    std::uint32_t height = 480u;
+    std::uint16_t width = 640u;
+    std::uint16_t height = 480u;
     std::uint32_t flags = 0u;
 
     inline static flagmap const window_flags{
@@ -181,13 +181,13 @@ struct window_params {
 };
 
 struct opengl_params{
-    std::uint32_t double_buffer = 1;
-    std::uint32_t depth_size = 24;
-    std::uint32_t stencil_size = 8;
+    std::uint16_t double_buffer = 1;
+    std::uint16_t depth_size = 24;
+    std::uint16_t stencil_size = 8;
 
     std::uint32_t flags = 0;
-    std::uint32_t major_version = 4;
-    std::uint32_t minor_version = 2;
+    std::uint16_t major_version = 4;
+    std::uint16_t minor_version = 2;
 
     inline static flagmap const opengl_flags{
         { "debug",              SDL_GL_CONTEXT_DEBUG_FLAG },
@@ -471,7 +471,7 @@ std::string invalid_flagnames(NameRange && flagnames)
     err << "]";
     return err.str();
 }
-};
+}
 
 template<>
 struct convert<ion::init_params> {
@@ -594,7 +594,7 @@ load_opengl(const opengl_params& gl, SDL_Window* window)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, gl.flags);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, static_cast<int>(gl.flags));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl.major_version);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl.minor_version);
 
