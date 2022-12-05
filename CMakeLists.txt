@@ -87,6 +87,9 @@ target_include_directories(ion PUBLIC
 install(TARGETS ion FILE_SET HEADERS
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+install(FILES src/imgui/imgui_demo.cpp
+        DESTINATION src)
+
 # specify the library targets
 install(TARGETS ion
         EXPORT ion-targets
