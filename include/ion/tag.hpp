@@ -1,8 +1,12 @@
 #pragma once
-#include "ion/try.hpp"
-#include "yaml-cpp/yaml.h"
-#include <string>
+
+// serializeation
+#include <yaml-cpp/yaml.h>
+#include "konbu/konbu.h"
 #include <iostream>
+
+// data types
+#include <string>
 
 namespace ion {
 
@@ -13,10 +17,10 @@ class tag {
 public:
     inline tag() = default;
 
-    inline tag(std::string const & str) : _str{ str } {}
-    inline tag(char const * str) : _str{ str } {}
-    inline std::string string() const { return _str; }
-    inline char const * c_str() const { return _str.c_str(); }
+    inline explicit tag(std::string str) : _str{ std::move(str) } {}
+    inline explicit tag(char const * str) : _str{ str } {}
+    [[nodiscard]] inline std::string string() const { return _str; }
+    [[nodiscard]] inline char const * c_str() const { return _str.c_str(); }
     auto operator<=>(tag const & rhs) const = default;
 private:
     std::string _str;
@@ -27,42 +31,38 @@ std::istream & operator>>(std::istream & is, ion::tag & tag);
 
 namespace std {
 template<>
-struct hash<ion::tag>
-{
-    size_t operator()(ion::tag const& tag) const
-    {
-        hash<string> strhash;
-        return strhash(tag.string());
-    }
+struct hash<ion::tag> {
+    size_t operator()(ion::tag const& tag) const;
 };
 }
-
-namespace YAML
-{
-template<>
-struct expect<ion::tag, Exception> {
-    inline Expected<ion::tag> operator()(Node const & node) const noexcept;
-};
+namespace konbu {
+template<std::ranges::output_range<YAML::Exception> error_output>
+void read(YAML::Node const & config, ion::tag & value, error_output & errors);
+}
+namespace YAML {
 template<>
 struct convert<ion::tag> {
-    static inline Node encode(ion::tag const & tag);
-    static inline bool decode(Node const & node, ion::tag & tag);
+    static Node encode(ion::tag const & tag);
 };
-inline Expected<ion::tag>
-expect<ion::tag, Exception>::operator()(Node const & node) const noexcept
-{
-    std::string const input = TRY(node.expect<std::string>());
-    return ion::tag{ input };
-}
-inline Node convert<ion::tag>::encode(ion::tag const & tag)
-{
-    return convert<std::string>::encode(tag.string());
 }
 
-inline bool convert<ion::tag>::decode(Node const & node, ion::tag & tag)
+inline std::size_t
+std::hash<ion::tag>::operator()(ion::tag const & tag) const
 {
-    auto result = node.expect<ion::tag>();
-    if (not result) { throw result.error(); }
-    return {};
+    std::hash<string> str_hash;
+    return str_hash(tag.string());
 }
+template<std::ranges::output_range<YAML::Exception> error_output>
+inline void konbu::read(YAML::Node const & config,
+                        ion::tag & value,
+                        error_output & errors)
+{
+    std::string input;
+    konbu::read(config, input, errors);
+    value = ion::tag{ input };
+}
+inline YAML::Node
+YAML::convert<ion::tag>::encode(ion::tag const & tag)
+{
+    return Node{ tag.string() };
 }

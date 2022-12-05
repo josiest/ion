@@ -64,7 +64,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(EnTT REQUIRED)
-find_package(yaml-cpp REQUIRED PATHS lib/cmake)
+find_package(yaml-cpp REQUIRED)
 
 target_link_libraries(ion
     PUBLIC yaml-cpp SDL2::SDL2 OpenGL::GL ${CMAKE_DL_LIBS}

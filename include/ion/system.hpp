@@ -15,7 +15,6 @@
 #include <filesystem>
 
 // serialization
-#include "yaml-cpp/yaml.h"
 #include "konbu/konbu.h"
 #include <sstream>
 #include <iterator>
