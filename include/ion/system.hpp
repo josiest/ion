@@ -227,7 +227,9 @@ void read(YAML::Node const & config,
     namespace views = std::views;
 
     if (not config.IsMap()) {
-        YAML::Exception const error{ config.Mark(), "expecting a map" };
+        YAML::Exception const error{
+            config.Mark(), "couldn't read system settings: expecting a map"
+        };
         ranges::copy(views::single(error),
                      konbu::back_inserter_preference(errors));
         return;
@@ -246,6 +248,80 @@ void read(YAML::Node const & config,
                    param::subsystem_flags, subsystem_errors);
         ranges::copy(subsystem_errors | views::transform(contextualize),
                      konbu::back_inserter_preference(errors));
+    }
+}
+
+// TODO: require streamable or to_string
+template<typename value>
+auto contextualize_param(std::string const & param_name, value const & v)
+{
+    return [&param_name, &v](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "couldn't parse \"" << param_name << "\" parameter: "
+                << error.msg << "\n  using default value of " << v;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+}
+
+template<std::ranges::output_range<YAML::Exception> error_output>
+void read(YAML::Node const & config,
+          ion::window_params & params,
+          error_output & errors)
+{
+    namespace ranges = std::ranges;
+    namespace views = std::views;
+
+    if (not config.IsMap()) {
+        YAML::Exception const error{
+            config.Mark(), "couldn't read window settings: expecting a map"
+        };
+        ranges::copy(views::single(error),
+                     konbu::back_inserter_preference(errors));
+        return;
+    }
+    std::vector<YAML::Exception> window_errors;
+    if (auto const name_config = config["name"]) {
+        konbu::read(name_config, params.name, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors),
+                          contextualize_param("name", params.name));
+        window_errors.clear();
+    }
+    if (auto const x_config = config["x"]) {
+        konbu::read(x_config, params.x, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors) ,
+                          contextualize_param("x", params.x));
+        window_errors.clear();
+    }
+    if (auto const y_config = config["y"]) {
+        konbu::read(y_config, params.y, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors),
+                          contextualize_param("y", params.y));
+        window_errors.clear();
+    }
+    if (auto const width_config = config["width"]) {
+        konbu::read(width_config, params.width, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors),
+                          contextualize_param("width", params.width));
+        window_errors.clear();
+    }
+    if (auto const height_config = config["height"]) {
+        konbu::read(height_config, params.height, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors),
+                          contextualize_param("height", params.height));
+        window_errors.clear();
+    }
+    if (auto const flag_sequence = config["flags"]) {
+        konbu::read_flags(flag_sequence, params.flags,
+                          ion::window_params::window_flags, window_errors);
+        ranges::transform(window_errors,
+                          back_inserter_preference(errors),
+                          contextualize_param("flags", params.flags));
+        window_errors.clear();
     }
 }
 }
@@ -313,21 +389,6 @@ std::string invalid_flagnames(NameRange && flagnames)
 }
 };
 
-template<std::weakly_incrementable ErrorOutput>
-requires std::indirectly_writable<ErrorOutput, Exception>
-struct expect_default<ion::init_params, Exception, ErrorOutput> {
-    
-    ErrorOutput operator()(const Node& node,
-                           ion::init_params & params,
-                           ErrorOutput errors) const noexcept
-    {
-        if (auto const subsystems = node["subsystems"]) {
-            errors = decode_flags(subsystems, params.subsystems, errors,
-                                  ion::init_params::subsystem_flags);
-        }
-        return errors;
-    }
-};
 template<>
 struct convert<ion::init_params> {
     static Node encode(const ion::init_params& rhs)
@@ -579,11 +640,16 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
 
     ion::window_params window_params;
     if (auto const window_config = config["window"]) {
-        window_config.expect(window_params, std::back_inserter(yaml_errors));
+        konbu::read(window_config, window_params, yaml_errors);
+        auto contextualize = [](YAML::Exception const & error) {
+            std::stringstream message;
+            message << "encountered error reading window config\n  "
+                    << error.msg;
+            return YAML::Exception{ error.mark, message.str() }.what();
+        };
+        ranges::copy(yaml_errors | views::transform(contextualize), errors);
+        yaml_errors.clear();
     }
-    ranges::copy(yaml_errors | views::transform(&YAML::Exception::what),
-                 errors);
-    yaml_errors.clear();
     window = TRY(detail::load_window(window_params),
                  detail::cleanup(nullptr, nullptr));
 
