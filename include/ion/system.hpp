@@ -219,6 +219,16 @@ subsystem const * system::try_get_subsystem() const
 
 namespace konbu {
 
+inline auto contextualize_setting(std::string const & setting_name)
+{
+    return [&setting_name](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "encountered error reading " << setting_name
+                << " setting\n  " << error.msg;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+}
+
 template<std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config,
           ion::init_params & params,
@@ -228,9 +238,7 @@ void read(YAML::Node const & config,
     namespace views = std::views;
 
     if (not config.IsMap()) {
-        YAML::Exception const error{
-            config.Mark(), "couldn't read system settings: expecting a map"
-        };
+        YAML::Exception const error{ config.Mark(), "expecting a map" };
         ranges::copy(views::single(error),
                      konbu::back_inserter_preference(errors));
         return;
@@ -238,17 +246,12 @@ void read(YAML::Node const & config,
     using param = ion::init_params;
     if (auto const subsystem_config = config["subsystems"]) {
         std::vector<YAML::Exception> subsystem_errors;
-        auto contextualize = [](YAML::Exception const & error) {
-            std::stringstream message;
-            message << "encountered error reading subsystem setting\n  "
-                    << error.msg;
-            return YAML::Exception{ error.mark, message.str() };
-        };
 
         read_flags(subsystem_config, params.subsystems,
                    param::subsystem_flags, subsystem_errors);
-        ranges::copy(subsystem_errors | views::transform(contextualize),
-                     konbu::back_inserter_preference(errors));
+        ranges::transform(subsystem_errors,
+                          back_inserter_preference(errors),
+                          konbu::contextualize_setting("subsystem"));
     }
 }
 
@@ -636,14 +639,9 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     if (auto const system_config = config["system"]) {
         std::vector<YAML::Exception> system_errors;
         konbu::read(system_config, init_params, system_errors);
-
-        auto contextualize = [](YAML::Exception const & error) {
-            std::stringstream message;
-            message << "encountered error reading system config\n  "
-                    << error.msg;
-            return YAML::Exception{ error.mark, message.str() }.what();
-        };
-        ranges::copy(system_errors | views::transform(contextualize), errors);
+        ranges::transform(system_errors,
+                          konbu::back_inserter_preference(yaml_errors),
+                          konbu::contextualize_setting("system"));
     }
     TRY_VOID(detail::init_sdl(init_params));
 
@@ -651,13 +649,9 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     if (auto const window_config = config["window"]) {
         std::vector<YAML::Exception> window_errors;
         konbu::read(window_config, window_params, window_errors);
-        auto contextualize = [](YAML::Exception const & error) {
-            std::stringstream message;
-            message << "encountered error reading window config\n  "
-                    << error.msg;
-            return YAML::Exception{ error.mark, message.str() }.what();
-        };
-        ranges::copy(window_errors | views::transform(contextualize), errors);
+        ranges::transform(window_errors,
+                          konbu::back_inserter_preference(yaml_errors),
+                          konbu::contextualize_setting("window"));
     }
     window = TRY(detail::load_window(window_params),
                  detail::cleanup(nullptr, nullptr));
@@ -666,13 +660,9 @@ ion::system::from_config(const YAML::Node& config, ErrorOutput errors)
     if (auto const opengl_config = config["opengl"]) {
         std::vector<YAML::Exception> gl_errors;
         konbu::read(opengl_config, gl_params, gl_errors);
-        auto contextualize = [](YAML::Exception const & error) {
-            std::stringstream message;
-            message << "encountered error reading opengl config\n  "
-                    << error.msg;
-            return YAML::Exception{ error.mark, message.str() }.what();
-        };
-        ranges::copy(gl_errors | views::transform(contextualize), errors);
+        ranges::transform(gl_errors,
+                          konbu::back_inserter_preference(yaml_errors),
+                          konbu::contextualize_setting("opengl"));
     }
     gl_context = TRY(detail::load_opengl(gl_params, window),
                      detail::cleanup(window, nullptr));
