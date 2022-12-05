@@ -403,4 +403,30 @@ void read_flags(YAML::Node const & flagname_sequence,
                  back_inserter_preference(errors));
 }
 
+template<typename value>
+concept string_streamable =
+requires(std::stringstream & stream, value const & v) {
+    stream << v;
+};
+
+/**
+ * \brief Re-contextualize a yaml-exception to include parameter info
+ *
+ * \tparam value        can be output to a string stream
+ *
+ * \param param_name    name of the yaml parameter
+ * \param v             default value being used
+ *
+ * \return a monadic function that adds a parameter context to a yaml exception
+ */
+template<string_streamable value>
+auto contextualize_param(std::string const & param_name, value const & v)
+{
+    return [&param_name, &v](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "couldn't parse \"" << param_name << "\" parameter: "
+                << error.msg << "\n  using default value of " << v;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+}
 }

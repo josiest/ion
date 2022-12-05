@@ -251,18 +251,6 @@ void read(YAML::Node const & config,
     }
 }
 
-// TODO: require streamable or to_string
-template<typename value>
-auto contextualize_param(std::string const & param_name, value const & v)
-{
-    return [&param_name, &v](YAML::Exception const & error) {
-        std::stringstream message;
-        message << "couldn't parse \"" << param_name << "\" parameter: "
-                << error.msg << "\n  using default value of " << v;
-        return YAML::Exception{ error.mark, message.str() };
-    };
-}
-
 template<std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config,
           ion::window_params & params,
@@ -284,35 +272,35 @@ void read(YAML::Node const & config,
         konbu::read(name_config, params.name, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors),
-                          contextualize_param("name", params.name));
+                          konbu::contextualize_param("name", params.name));
         window_errors.clear();
     }
     if (auto const x_config = config["x"]) {
         konbu::read(x_config, params.x, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors) ,
-                          contextualize_param("x", params.x));
+                          konbu::contextualize_param("x", params.x));
         window_errors.clear();
     }
     if (auto const y_config = config["y"]) {
         konbu::read(y_config, params.y, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors),
-                          contextualize_param("y", params.y));
+                          konbu::contextualize_param("y", params.y));
         window_errors.clear();
     }
     if (auto const width_config = config["width"]) {
         konbu::read(width_config, params.width, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors),
-                          contextualize_param("width", params.width));
+                          konbu::contextualize_param("width", params.width));
         window_errors.clear();
     }
     if (auto const height_config = config["height"]) {
         konbu::read(height_config, params.height, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors),
-                          contextualize_param("height", params.height));
+                          konbu::contextualize_param("height", params.height));
         window_errors.clear();
     }
     if (auto const flag_sequence = config["flags"]) {
@@ -320,7 +308,7 @@ void read(YAML::Node const & config,
                           ion::window_params::window_flags, window_errors);
         ranges::transform(window_errors,
                           back_inserter_preference(errors),
-                          contextualize_param("flags", params.flags));
+                          konbu::contextualize_param("flags", params.flags));
         window_errors.clear();
     }
 }
