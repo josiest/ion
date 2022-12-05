@@ -414,18 +414,34 @@ requires(std::stringstream & stream, value const & v) {
  *
  * \tparam value        can be output to a string stream
  *
- * \param param_name    name of the yaml parameter
- * \param v             default value being used
+ * \param param_name    the name of the yaml parameter
+ * \param default_value the default value being used
  *
  * \return a monadic function that adds a parameter context to a yaml exception
  */
 template<string_streamable value>
-auto contextualize_param(std::string const & param_name, value const & v)
+auto contextualize_param(std::string const & param_name,
+                         value const & default_value)
 {
-    return [&param_name, &v](YAML::Exception const & error) {
+    return [&param_name, &default_value](YAML::Exception const & error) {
         std::stringstream message;
         message << "couldn't parse \"" << param_name << "\" parameter: "
-                << error.msg << "\n  using default value of " << v;
+                << error.msg << "\n  using default value of " << default_value;
+        return YAML::Exception{ error.mark, message.str() };
+    };
+}
+
+/**
+ * \brief Re-contextualize a yaml error to include setting-name info
+ * \param setting_name  the name of the setting being parsed
+ * \return a monadic function that adds a setting context to a yaml exception
+ */
+inline auto contextualize_setting(std::string const & setting_name)
+{
+    return [&setting_name](YAML::Exception const & error) {
+        std::stringstream message;
+        message << "encountered error reading " << setting_name
+                << " setting\n  " << error.msg;
         return YAML::Exception{ error.mark, message.str() };
     };
 }

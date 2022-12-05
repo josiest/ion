@@ -219,16 +219,6 @@ subsystem const * system::try_get_subsystem() const
 
 namespace konbu {
 
-inline auto contextualize_setting(std::string const & setting_name)
-{
-    return [&setting_name](YAML::Exception const & error) {
-        std::stringstream message;
-        message << "encountered error reading " << setting_name
-                << " setting\n  " << error.msg;
-        return YAML::Exception{ error.mark, message.str() };
-    };
-}
-
 template<std::ranges::output_range<YAML::Exception> error_output>
 void read(YAML::Node const & config,
           ion::init_params & params,
