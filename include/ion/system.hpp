@@ -7,6 +7,7 @@
 #include "ion/try.hpp"
 
 // frameworks
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
 
