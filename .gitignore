@@ -69,5 +69,5 @@ build/
 external/
 .vscode/
 .idea/
-cmake-build-debug/
+cmake-build*/
 cmake/

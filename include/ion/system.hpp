@@ -111,6 +111,7 @@ public:
     //
     // Events
     //
+    [[nodiscard]] inline auto on_start() { return entt::sink{ start_event }; }
     [[nodiscard]] inline auto on_render() { return entt::sink{ render_event }; }
     [[nodiscard]] inline auto on_keydown() { return entt::sink{ keydown_event }; }
 
@@ -134,6 +135,7 @@ private:
     bool moved = false;
 
     // events
+    entt::sigh<void()> start_event;
     entt::sigh<void(SDL_Window *)> render_event;
     entt::sigh<void(SDL_Keysym const &)> keydown_event;
 
