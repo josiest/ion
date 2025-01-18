@@ -64,3 +64,5 @@ tags
 # Project
 build/
 external/
+cmake-build*/
+.idea/
