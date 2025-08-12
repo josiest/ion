@@ -1,0 +1,6 @@
+include(CMakeFindDependencyMacro)
+find_dependency(SDL2)
+find_dependency(SDL2_image)
+find_dependency(SDL2_ttf)
+include("${CMAKE_CURRENT_LIST_DIR}/ion-graphics-targets.cmake")
+add_library(ion::graphics ALIAS ion::ion-graphics)

@@ -1,6 +1,6 @@
 #include "ion/window/hardware_renderer.hpp"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <cstdint>
 #include <string>
 

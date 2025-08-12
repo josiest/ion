@@ -1,6 +1,6 @@
 #include "ion/input/axis.hpp"
 #include "ion/events.hpp"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <unordered_set>
 

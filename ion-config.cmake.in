@@ -1,9 +1,19 @@
 @PACKAGE_INIT@
-include(CMakeFindDependencyMacro)
-include(${CMAKE_CURRENT_LIST_DIR}/ionTargets.cmake)
+set(_ion_supported_components ion graphics input window)
+set(_ion_subdir_components graphics input window)
 
-find_dependency(SDL2 REQUIRED)
-find_dependency(SDL2_ttf REQUIRED)
-find_dependency(tl-expected REQUIRED)
+foreach (_comp ${_ion_subdir_components})
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/${_comp})
+endforeach()
 
-check_required_components(${PROJECT_NAME})
+foreach (_comp ${ion_FIND_COMPONENTS})
+    if (NOT _comp IN_LIST _ion_supported_components)
+        set(ion_FOUND False)
+        set(ion_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+
+    elseif (_comp STREQUAL "ion")
+        include("${CMAKE_CURRENT_LIST_DIR}/ion-core-config.cmake")
+    else()
+        include("${CMAKE_CURRENT_LIST_DIR}/${_comp}/ion-${_comp}-config.cmake")
+    endif()
+endforeach()

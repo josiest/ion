@@ -1,6 +1,6 @@
 // frameworks
 #include <ion/ion.hpp>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 // data types
 #include <cstdint>
@@ -102,7 +102,7 @@ void draw(SDL_Renderer * renderer)
     SDL_RenderPresent(renderer);
 }
 
-int main()
+int main(int argc, char * argv[])
 {
     // create the sdl event-handler: quit when sdl's quit event is triggered
     ion::event_system events;
@@ -119,4 +119,5 @@ int main()
     while (not ion::input::has_quit()) {
         events.process_queue();
     }
+    return EXIT_SUCCESS;
 }

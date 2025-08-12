@@ -1,7 +1,7 @@
 #include "ion/graphics/font.hpp"
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 // data types
 #include <string>
@@ -48,19 +48,19 @@ surface font::soft_render_text(std::string const & text,
     return rendered_text;
 }
 
-font font::from_file(fs::path const & path, uint size) noexcept
+font font::from_file(const std::string_view & path, std::uint16_t size) noexcept
 {
     std::string message;
     // make sure the font path exists
     if (not fs::exists(path)) {
-        message = "The path "s + path.c_str() + " doesn't exist";
+        message = "The path "s + path.begin() + " doesn't exist";
     }
     // try to open the font
-    auto ttf_font = TTF_OpenFont(path.c_str(), size);
+    auto * ttf_font = TTF_OpenFont(path.begin(), size);
     if (not ttf_font and message.empty()) {
         message = TTF_GetError();
     }
-    // create an isotope font and set any error message that occured
+    // create an isotope font and set any error message that occurred
     font loaded_font(ttf_font);
     if (not message.empty()) {
         loaded_font.set_error(message);

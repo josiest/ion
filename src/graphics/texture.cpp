@@ -1,5 +1,5 @@
 #include "ion/graphics/texture.hpp"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <string>
 #include <filesystem>

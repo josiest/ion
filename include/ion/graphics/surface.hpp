@@ -1,10 +1,10 @@
 #pragma once
 #include "ion/isotope.hpp"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <string>
-#include <filesystem>
+#include <string_view>
 
 namespace ion {
 
@@ -37,7 +37,7 @@ public:
      * Create a surface by loading a bitmap image
      * \param path the path of the bitmap image
      */
-    static surface load_bitmap(std::filesystem::path const & path) noexcept;
+    static surface load_bitmap(const std::string_view & path) noexcept;
 private:
     SDL_Surface * _surface;
 };

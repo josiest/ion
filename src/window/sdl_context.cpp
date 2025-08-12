@@ -1,7 +1,7 @@
 #include "ion/window/sdl_context.hpp"
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include <cstdint>
 #include <ranges>
@@ -28,7 +28,7 @@ sdl_context::~sdl_context()
 
 void sdl_context::init_ttf() noexcept
 {
-    // make sure sdl was properly initialed before intializing anything else
+    // make sure sdl was properly initialed before initializing anything else
     if (not *this) {
         return;
     }

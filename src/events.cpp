@@ -1,7 +1,7 @@
 #include "ion/events.hpp"
 
 // frameworks
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 // data types
 #include <cstdint> // std::uint32_t

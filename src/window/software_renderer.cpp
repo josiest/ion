@@ -1,5 +1,5 @@
 #include "ion/window/software_renderer.hpp"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 // datatypes
 #include <string>

@@ -1,11 +1,11 @@
 #include "ion/graphics/surface.hpp"
-#include "ion/isotope.hpp"
 
-#include <SDL.h>
-#include <string>
-#include <filesystem>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_rwops.h>
 
-namespace fs = std::filesystem;
+#include <string_view>
+
+#define SDL_CLOSE_FILESTREAM 1
 
 namespace ion {
 
@@ -36,14 +36,10 @@ surface::~surface()
     _surface = nullptr;
 }
 
-surface surface::load_bitmap(fs::path const & path) noexcept
+surface surface::load_bitmap(const std::string_view & path) noexcept
 {
-    surface image{SDL_LoadBMP(path.c_str())};
-
-    // use SDL's error message if LoadBMP failed
-    if (not image) {
-        image.set_error(SDL_GetError());
-    }
+    surface image{ SDL_LoadBMP(path.begin()) };
+    if (not image) { image.set_error(SDL_GetError()); }
 
     return image;
 }

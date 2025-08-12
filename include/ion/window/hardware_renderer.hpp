@@ -33,7 +33,7 @@ public:
      * \param height the height of the window
      * \param window_flags the flags used to initialize the window with
      *
-     * The resulting window will be in the position as implemeneted by
+     * The resulting window will be in the position as implemented by
      * SDL_WINDOWPOS_UNDEFINED. The renderer will be hardware accelerated
      * without vsync and use the first acceptable graphics driver.
      */

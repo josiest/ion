@@ -7,7 +7,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include <filesystem>
 #include <string>
 #include <cstdint>
 
@@ -73,8 +72,7 @@ public:
      * \param path the path to the font
      * \param size the font-size to render as
      */
-    static font from_file(std::filesystem::path const & path,
-                          std::uint32_t size) noexcept;
+    static font from_file(const std::string_view & path, std::uint16_t size) noexcept;
 private:
     TTF_Font * _font;
 };
