@@ -32,9 +32,8 @@ Finally, add the following to your :code:`CMakeLists.txt`
 
 .. code:: cmake
 
-    find_package(ion REQUIRED)
+    find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS ion)
     ...
-    include_directories(ion::ion)
     target_link_libraries(<project-name> PRIVATE ion::ion)
 
 Examples
