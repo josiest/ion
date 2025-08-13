@@ -1,9 +1,9 @@
 @PACKAGE_INIT@
-set(_ion_supported_components ion graphics input window)
-set(_ion_subdir_components graphics input window)
+set(_ion_supported_components ion graphics input window yaml-serialization)
+set(_ion_subdirs graphics input window serialization)
 
-foreach (_comp ${_ion_subdir_components})
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/${_comp})
+foreach (_subdir ${_ion_subdirs})
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/${_subdir})
 endforeach()
 
 foreach (_comp ${ion_FIND_COMPONENTS})

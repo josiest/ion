@@ -2,8 +2,13 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
 
+// serialization
+#include <yaml-cpp/yaml.h>
+#include <ion/serialization/yaml.hpp>
+
 // data types
 #include <cstdint>
+#include <filesystem>
 
 // algorithms
 #include <cmath>
@@ -12,6 +17,7 @@
 #include <algorithm>
 
 namespace views = std::views;
+const std::filesystem::path RESOURCE_DIR = "resources";
 
 constexpr int rounded_divide(int numerator, int denominator)
 {
@@ -46,6 +52,40 @@ public:
     SDL_Color initial_color{ 48, 118, 217, 255 };
     SDL_Color final_color{ 219, 0, 66, 255 };
     std::uint8_t num_frames = 8;
+
+    static fibonacci_spiral from_config(const YAML::Node & config)
+    {
+        fibonacci_spiral spiral;
+        try
+        {
+            if (config.IsScalar())
+            {
+                auto filepath = RESOURCE_DIR/config.as<std::string>();
+                filepath.replace_extension(".yaml");
+                spiral = from_config(YAML::LoadFile(filepath.string()));
+            }
+            else
+            {
+                if (const auto& initial_color_config = config["initial-color"])
+                {
+                    spiral.initial_color = initial_color_config.as<SDL_Color>();
+                }
+                if (const auto& final_color_config = config["final-color"])
+                {
+                    spiral.final_color = final_color_config.as<SDL_Color>();
+                }
+                if (const auto& num_frames_config = config["num-frames"])
+                {
+                    spiral.num_frames = num_frames_config.as<std::uint8_t>();
+                }
+            }
+        }
+        catch (const YAML::Exception & error)
+        {
+            SDL_Log("Unable to read spiral from config: %s\n", error.what());
+        }
+        return spiral;
+    }
 
     void draw_to(SDL_Renderer * renderer) const
     {
@@ -121,16 +161,28 @@ private:
 
 int main(int argc, char * argv[])
 {
+    namespace cereal = ion::cereal;
     // create the sdl event-handler: quit when sdl's quit event is triggered
     ion::event_system events;
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
+    YAML::Node settings;
+    try
+    {
+        settings = YAML::LoadFile("settings.yaml");
+    }
+    catch (YAML::Exception & error)
+    {
+        SDL_Log("failed to load program settings, using defaults: %s\n", error.what());
+    }
+
     // initialize sdl and create a window
     ion::sdl_context sdl;
-    auto window = ion::hardware_renderer::basic_window("Fibonacci Spiral", 800, 600);
+    auto window = cereal::read_renderer_from_config(settings["window"]);
+    // auto window = cereal::load_yaml<ion::hardware_renderer>(settings["window"]);
 
     // load the spiral settings and draw it to the whole window
-    constexpr fibonacci_spiral spiral;
+    const auto spiral = fibonacci_spiral::from_config(settings["spiral"]);
     spiral.draw_to(window);
     SDL_RenderPresent(window);
 

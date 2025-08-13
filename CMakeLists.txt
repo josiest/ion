@@ -18,6 +18,7 @@ add_subdirectory(src)
 add_subdirectory(src/window)
 add_subdirectory(src/input)
 add_subdirectory(src/graphics)
+add_subdirectory(src/serialization/yaml)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"
