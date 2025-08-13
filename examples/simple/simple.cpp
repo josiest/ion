@@ -13,94 +13,111 @@
 
 namespace views = std::views;
 
-// std::lerp two integers
-template<std::integral int_t, std::floating_point float_t>
-int_t lerp(int_t x, int_t y, float_t t)
+constexpr int rounded_divide(int numerator, int denominator)
 {
-    return static_cast<int_t>(std::lerp(static_cast<float_t>(x),
-                                        static_cast<float_t>(y), t));
+    return (numerator + denominator/2)/denominator;
 }
 
-// std::lerp two SDL_Colors
-template<std::floating_point float_t>
-SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, float_t t)
+template<std::integral Integer>
+constexpr Integer intlerp(int a, int b, int p, int q)
 {
-    return { lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t), 0xff };
+    // convert
+    return static_cast<Integer>(a + rounded_divide(p*(b-a), q));
 }
 
-// map each index in a finite range to a linear-interpolated color between a and b
-auto color_sequence(SDL_Color const & a, SDL_Color const & b, std::uint32_t N)
+constexpr SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, std::uint8_t p, std::uint8_t q)
 {
-    return [&a, &b, N](std::uint32_t k) {
-        float const t = static_cast<float>(k)/N;
-        return lerp(a, b, t);
-    };
+    return { intlerp<std::uint8_t>(a.r, b.r, p, q), intlerp<std::uint8_t>(a.g, b.g, p, q),
+             intlerp<std::uint8_t>(a.b, b.b, p, q), intlerp<std::uint8_t>(a.a, b.a, p, q) };
 }
 
-// map each index in a finite range to a rectangle such that the resulting
-// sequence of rectangles fills the screen in rotating halves toward the
-// bottom-right corner
-auto rect_sequence(SDL_Rect & guide)
+/** Divide an integer by a floating point number and round to nearest */
+template<std::integral Integer>
+constexpr Integer divide_by_phi(Integer numerator)
 {
-    guide.w /= 2;
-    return [&guide](std::uint32_t k) {
-        // copy the guide's current state to return later
-        SDL_Rect const rect = guide;
-
-        // split in half horizontally when k is even
-        if (k % 2 == 0) {
-            guide.x += guide.w;
-            guide.h /= 2;
-        }
-        // split in half vertically when k is odd
-        else {
-            guide.y += guide.h;
-            guide.w /= 2;
-        }
-        return rect;
-    };
+    // arbitrary rational approximation of phi: P/Q
+    constexpr Integer P = 233, Q = 144;
+    return rounded_divide(numerator*Q, P);
 }
 
-// map each index in a finite range to a rect-color pair
-auto colored_rect_sequence(std::regular_invocable<std::uint32_t> auto && to_rect,
-                           std::regular_invocable<std::uint32_t> auto && to_color)
+class fibonacci_spiral
 {
-    return [&to_rect, &to_color](std::uint32_t k){
-        return std::make_pair(to_rect(k), to_color(k));
-    };
-}
+public:
+    SDL_Color initial_color{ 48, 118, 217, 255 };
+    SDL_Color final_color{ 219, 0, 66, 255 };
+    std::uint8_t num_frames = 8;
 
-// Tell SDL how to draw the fibonacci-like pattern
-void draw(SDL_Renderer * renderer)
-{
-    // the initial color
-    SDL_Color const blue{48, 118, 217, 255};
-    // the final color
-    SDL_Color const red{219, 0, 66, 255};
-
-    // clear the screen
-    SDL_SetRenderDrawColor(renderer, red.r, red.g, red.b, red.a);
-    SDL_RenderClear(renderer);
-
-    // a dynamic guide that will determine the dimensions of each rect to draw
-    SDL_Rect guide_rect{ 0, 0, 0, 0 };
-    SDL_GetRendererOutputSize(renderer, &guide_rect.w, &guide_rect.h);
-
-    // draw the fibonacci-like patern
-    std::uint32_t const N = 8;
-    auto to_colored_rect = colored_rect_sequence(
-            rect_sequence(guide_rect),
-            color_sequence(blue, red, N));
-
-    auto colored_rects = views::iota(0u, N)
-                       | views::transform(to_colored_rect);
-
-    for (auto const & [rect, color] : colored_rects) {
-        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-        SDL_RenderFillRect(renderer, &rect);
+    void draw_to(SDL_Renderer * renderer) const
+    {
+        SDL_Rect render_frame{ 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT };
+        SDL_GetRendererOutputSize(renderer, &render_frame.w, &render_frame.h);
+        draw_to(renderer, render_frame);
     }
-    SDL_RenderPresent(renderer);
-}
+
+    void draw_to(SDL_Renderer * renderer, const SDL_Rect & render_frame) const
+    {
+        SDL_SetRenderDrawColor(renderer, initial_color.r, initial_color.g, initial_color.b, initial_color.a);
+        SDL_RenderFillRect(renderer, &render_frame);
+
+        guide = render_frame;
+
+        // MinGW compiler can't seem to deduce the return type of view_colored_rects(), but CLion can?
+        // maybe undefined behavior?? https://timsong-cpp.github.io/cppwp/n4140/dcl.spec.auto
+        // for (const auto [rect, color] : view_colored_rects()) {
+        for (std::uint8_t k = 0; k < num_frames; ++k)
+        {
+            const auto [rect, color] = next_colored_rect(k);
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+            SDL_RenderFillRect(renderer, &rect);
+        }
+        guide = render_frame;
+    }
+
+private:
+    static constexpr int DEFAULT_WIDTH = 640;
+    static constexpr int DEFAULT_HEIGHT = 480;
+
+    mutable SDL_Rect guide{ 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT };
+
+    std::ranges::view auto view_colored_rects() const
+    {
+        constexpr std::uint8_t zero = 0u;
+        return std::views::iota(zero, num_frames)
+             | views::transform([this](std::uint8_t k) { return next_colored_rect(k); });
+    }
+
+    std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k) const
+    {
+        return std::make_pair(next_subframe(k), lerp(initial_color, final_color, k, num_frames));
+    }
+
+    SDL_Rect next_subframe(std::uint32_t k) const
+    {
+        using namespace std::numbers;
+        const SDL_Rect subframe = guide;
+        const SDL_Point next_frame{ divide_by_phi(guide.w), divide_by_phi(guide.h) };
+        switch (k % 4) {
+            case 0:
+                // slide the left edge inward by the golden ratio
+                guide.x += next_frame.x; guide.w -= next_frame.x;
+                break;
+            case 1:
+                // slide the top edge down by the golden ratio
+                guide.y += next_frame.y; guide.h -= next_frame.y;
+                break;
+            case 2:
+                // slide the right edge inward by the golden ratio
+                guide.w -= next_frame.x;
+                break;
+            case 3:
+                // slide the bottom edge upward by the golden ratio
+                guide.h -= next_frame.y;
+                break;
+            default: break;
+        }
+        return subframe;
+    }
+};
 
 int main(int argc, char * argv[])
 {
@@ -108,12 +125,14 @@ int main(int argc, char * argv[])
     ion::event_system events;
     events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
 
-    // initialize sdl - initialize this before other sdl resources
+    // initialize sdl and create a window
     ion::sdl_context sdl;
+    auto window = ion::hardware_renderer::basic_window("Fibonacci Spiral", 800, 600);
 
-    // create a window, specifying the title and dimensions
-    auto window = ion::hardware_renderer::basic_window("A simple window", 800, 600);
-    draw(window); // render once at the beginning of the program
+    // load the spiral settings and draw it to the whole window
+    constexpr fibonacci_spiral spiral;
+    spiral.draw_to(window);
+    SDL_RenderPresent(window);
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
