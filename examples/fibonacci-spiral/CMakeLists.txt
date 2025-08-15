@@ -19,3 +19,6 @@ target_link_libraries(fibonacci PRIVATE ion::ion ion::window ion::graphics ion::
 
 find_package(yaml-cpp REQUIRED CONFIG)
 target_link_libraries(fibonacci PRIVATE yaml-cpp::yaml-cpp)
+
+find_package(EnTT REQUIRED CONFIG)
+target_link_libraries(fibonacci INTERFACE EnTT::EnTT)

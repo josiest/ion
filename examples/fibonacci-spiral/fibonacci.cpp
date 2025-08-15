@@ -1,6 +1,7 @@
 // frameworks
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
+#include <entt/signal/sigh.hpp>
 
 // serialization
 #define YAML_CPP_STATIC_DEFINE
@@ -159,12 +160,32 @@ private:
     }
 };
 
+class event_sink
+{
+public:
+    void poll()
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+                quit.publish();
+                break;
+            }
+        }
+    }
+
+    inline auto on_quit() { return entt::sink{ quit }; }
+protected:
+    entt::sigh<void()> quit;
+};
+
 int main(int argc, char * argv[])
 {
     namespace cereal = ion::cereal;
     // create the sdl event-handler: quit when sdl's quit event is triggered
-    ion::event_system events;
-    events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+    event_sink events;
+    events.on_quit().connect<&ion::input::quit>();
 
     YAML::Node settings;
     try
@@ -188,7 +209,7 @@ int main(int argc, char * argv[])
 
     // busy loop until the user quits
     while (not ion::input::has_quit()) {
-        events.process_queue();
+        events.poll();
     }
     return EXIT_SUCCESS;
 }
