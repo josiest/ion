@@ -22,7 +22,7 @@ muncher & get_game() noexcept
     return game;
 }
 
-int main()
+int main(int argc, char * argv[])
 {
     auto & game = get_game();
 

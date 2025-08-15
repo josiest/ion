@@ -9,8 +9,14 @@ set_target_properties(muncher PROPERTIES
 
 target_include_directories(muncher PRIVATE include)
 
-find_package(ion REQUIRED)
-target_link_libraries(muncher PRIVATE ion::ion)
+find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+if (TARGET SDL2::SDL2main)
+    target_link_libraries(muncher PRIVATE SDL2::SDL2main)
+endif ()
 
-find_package(EnTT REQUIRED)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS ion window graphics input)
+target_link_libraries(muncher PRIVATE ion::ion ion::window ion::graphics ion::input)
+
+find_package(EnTT REQUIRED CONFIG)
 target_link_libraries(muncher INTERFACE EnTT::EnTT)
+

@@ -15,7 +15,6 @@
 #include <cmath>
 #include <concepts>
 #include <ranges>
-#include <algorithm>
 
 namespace views = std::views;
 const std::filesystem::path RESOURCE_DIR = "resources";

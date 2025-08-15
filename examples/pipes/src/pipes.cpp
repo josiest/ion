@@ -15,7 +15,7 @@
 
 namespace ranges = std::ranges;
 
-int main()
+int main(int argc, char * argv[])
 {
     pipes game{800, 600};
 
