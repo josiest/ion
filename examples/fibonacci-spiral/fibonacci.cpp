@@ -2,6 +2,7 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
 #include <entt/signal/sigh.hpp>
+#include <entt/meta/factory.hpp>
 
 // serialization
 #define YAML_CPP_STATIC_DEFINE
@@ -19,6 +20,12 @@
 
 namespace views = std::views;
 const std::filesystem::path RESOURCE_DIR = "resources";
+
+template<typename T>
+auto reflect()
+{
+    return entt::meta_factory<T>();
+}
 
 constexpr int rounded_divide(int numerator, int denominator)
 {
@@ -47,16 +54,43 @@ constexpr Integer divide_by_phi(Integer numerator)
     return rounded_divide(numerator*Q, P);
 }
 
-class fibonacci_spiral
+class spiral_data
 {
 public:
     SDL_Color initial_color{ 48, 118, 217, 255 };
     SDL_Color final_color{ 219, 0, 66, 255 };
-    std::uint8_t num_frames = 8;
+    std::uint8_t num_frames;
+};
 
-    static fibonacci_spiral from_config(const YAML::Node & config)
+template<>
+auto reflect<spiral_data>()
+{
+    using namespace entt::literals;
+    return entt::meta_factory<spiral_data>()
+        .type("spiral_data"_hs)
+        .data<&spiral_data::initial_color>("initial-color"_hs)
+        .data<&spiral_data::final_color>("final-color"_hs)
+        .data<&spiral_data::num_frames>("num-frames"_hs);
+}
+
+class fibonacci_spiral
+{
+public:
+    spiral_data spiral;
+
+    fibonacci_spiral() = delete;
+    fibonacci_spiral(const spiral_data& spiral)
+        : spiral{ spiral }
     {
-        fibonacci_spiral spiral;
+    }
+    fibonacci_spiral(spiral_data && spiral)
+        : spiral{ std::move(spiral) }
+    {
+    }
+
+    static spiral_data from_config(const YAML::Node & config)
+    {
+        spiral_data spiral;
         try
         {
             if (config.IsScalar())
@@ -88,16 +122,17 @@ public:
         return spiral;
     }
 
-    void draw_to(SDL_Renderer * renderer) const
+    void draw_to(SDL_Renderer * renderer)
     {
         SDL_Rect render_frame{ 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT };
         SDL_GetRendererOutputSize(renderer, &render_frame.w, &render_frame.h);
         draw_to(renderer, render_frame);
     }
 
-    void draw_to(SDL_Renderer * renderer, const SDL_Rect & render_frame) const
+    void draw_to(SDL_Renderer * renderer, const SDL_Rect & render_frame)
     {
-        SDL_SetRenderDrawColor(renderer, initial_color.r, initial_color.g, initial_color.b, initial_color.a);
+        SDL_SetRenderDrawColor(renderer, spiral.initial_color.r, spiral.initial_color.g,
+                                         spiral.initial_color.b, spiral.initial_color.a);
         SDL_RenderFillRect(renderer, &render_frame);
 
         guide = render_frame;
@@ -105,7 +140,7 @@ public:
         // MinGW compiler can't seem to deduce the return type of view_colored_rects(), but CLion can?
         // maybe undefined behavior?? https://timsong-cpp.github.io/cppwp/n4140/dcl.spec.auto
         // for (const auto [rect, color] : view_colored_rects()) {
-        for (std::uint8_t k = 0; k < num_frames; ++k)
+        for (std::uint8_t k = 0; k < spiral.num_frames; ++k)
         {
             const auto [rect, color] = next_colored_rect(k);
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
@@ -118,21 +153,21 @@ private:
     static constexpr int DEFAULT_WIDTH = 640;
     static constexpr int DEFAULT_HEIGHT = 480;
 
-    mutable SDL_Rect guide{ 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT };
+    SDL_Rect guide{ 0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT };
 
-    std::ranges::view auto view_colored_rects() const
+    std::ranges::view auto view_colored_rects()
     {
         constexpr std::uint8_t zero = 0u;
-        return std::views::iota(zero, num_frames)
+        return std::views::iota(zero, spiral.num_frames)
              | views::transform([this](std::uint8_t k) { return next_colored_rect(k); });
     }
 
-    std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k) const
+    std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k)
     {
-        return std::make_pair(next_subframe(k), lerp(initial_color, final_color, k, num_frames));
+        return std::make_pair(next_subframe(k), lerp(spiral.initial_color, spiral.final_color, k, spiral.num_frames));
     }
 
-    SDL_Rect next_subframe(std::uint32_t k) const
+    SDL_Rect next_subframe(std::uint32_t k)
     {
         using namespace std::numbers;
         const SDL_Rect subframe = guide;
@@ -203,7 +238,7 @@ int main(int argc, char * argv[])
     // auto window = cereal::load_yaml<ion::hardware_renderer>(settings["window"]);
 
     // load the spiral settings and draw it to the whole window
-    const auto spiral = fibonacci_spiral::from_config(settings["spiral"]);
+    auto spiral = fibonacci_spiral{ fibonacci_spiral::from_config(settings["spiral"]) };
     spiral.draw_to(window);
     SDL_RenderPresent(window);
 
