@@ -1,6 +1,10 @@
 #pragma once
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_rect.h>
+
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
