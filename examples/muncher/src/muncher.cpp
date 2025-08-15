@@ -87,8 +87,6 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
         set_error(_window.get_error()); return;
     }
     _events.on_quit().connect<&ion::input::quit>();
-    _events.on_key_down().connect<&ion::input::set_key>();
-    _events.on_key_up().connect<&ion::input::release_key>();
     _events.on_key_up().connect<&reset_game>();
 }
 

@@ -12,12 +12,6 @@ public:
     virtual float y() const = 0;
 };
 
-void set_key(SDL_Keycode key);
-void release_key(SDL_Keycode key);
-
-void set_key_from_event(const SDL_Event& event);
-void release_key_from_event(const SDL_Event& event);
-
 /**
  * A 2d axis that sets the value when keys are pressed
  */
