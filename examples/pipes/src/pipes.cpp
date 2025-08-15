@@ -22,62 +22,32 @@ int main(int argc, char * argv[])
     // crash if the game failed to initialize
     if (not game) {
         std::cout << game.get_error() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
     // otherwise run the game
     game.run();
+    return EXIT_SUCCESS;
 }
 
-void pipes::run()
-{
-    // create a random tile associated with the mouse
-    auto const mouse_tile = _tile_prefab.random_dynamic(
-        _entities, _rng, ion::input::mouse_position()
-    );
-
-    // rotate the tile associated with the mouse when scrolled
-    _events.subscribe_functor(SDL_MOUSEWHEEL,
-        [this, mouse_tile](SDL_Event const & event) {
-            systems::rotate_tile(_entities, mouse_tile, event.wheel.y);
-        });
-
-    // place the tile associated with the mouse when clicked
-    _events.subscribe_functor(SDL_MOUSEBUTTONUP,
-        [this, mouse_tile](SDL_Event const & event) {
-            _tile_prefab.static_copy(_entities, _placed_tiles, mouse_tile, _rng);
-        });
-
-    // create the window and run the game
-    while (not ion::input::has_quit()) {
-
-        // bind the mouse-tile entity to the mouse position
-        systems::bind_to_mouse(_entities, mouse_tile, _world_space);
-
-        // process any events then render the window
-        _events.process_queue();
-        systems::render(_window, _world_space, _entities,
-                        _tile_prefab, _placed_tiles, mouse_tile);
-    }
-}
 
 pipes::pipes(std::uint32_t width, std::uint32_t height)
     : _window{ion::software_renderer::basic_window("Pipes", width, height)},
 
-      // interface between grid-space and pixel-space
-      //   100 seems like a decent unit-size for now
+    // interface between grid-space and pixel-space
+    //   100 seems like a decent unit-size for now
       _world_space{width, height, 100},
 
-      // intialize the random engine with a random seed
+    // initialize the random engine with a random seed
       _rng{std::random_device{}()},
 
-      // tell the tile prefab where to find the tile images
-      // and what colors should be used
+    // tell the tile prefab where to find the tile images
+    // and what colors should be used
       _tile_prefab{"../resources", {0x42, 0x87, 0xf5, 0xff},    // static color
-                                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
-                                   {0xd3, 0xd3, 0xd3, 0xff}}    // distant
+                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
+                   {0xd3, 0xd3, 0xd3, 0xff}}    // distant
 {
     // quit when SDL quit event is triggered
-    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
+    _events.on_quit().connect<&ion::input::quit>();
 
     // make sure SDL resources initialized properly
     if (not _sdl) {
@@ -97,4 +67,39 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     // create a random initial tile in the middle of the screen
     auto init_point = _world_space.nearest_point(width/2, height/2);
     _tile_prefab.random_static(_entities, _placed_tiles, init_point, _rng);
+}
+
+void pipes::run()
+{
+    // create a random tile associated with the mouse
+    _current_tile = _tile_prefab.random_dynamic(
+        _entities, _rng, ion::input::mouse_position()
+    );
+
+    // rotate the tile associated with the mouse when scrolled
+    _events.on_mouse_scroll().connect<&pipes::rotate_tile>(this);
+    // place the tile associated with the mouse when clicked
+    _events.on_mouse_up().connect<&pipes::place_tile>(this);
+
+    // create the window and run the game
+    while (not ion::input::has_quit()) {
+
+        // bind the mouse-tile entity to the mouse position
+        systems::bind_to_mouse(_entities, *_current_tile, _world_space);
+
+        // process any events then render the window
+        _events.poll();
+        systems::render(_window, _world_space, _entities,
+                        _tile_prefab, _placed_tiles, *_current_tile);
+    }
+}
+
+void pipes::rotate_tile(int dy)
+{
+    systems::rotate_tile(_entities, *_current_tile, dy);
+}
+
+void pipes::place_tile()
+{
+    _tile_prefab.static_copy(_entities, _placed_tiles, *_current_tile, _rng);
 }
