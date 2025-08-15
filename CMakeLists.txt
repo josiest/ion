@@ -14,11 +14,15 @@ include(CMakePackageConfigHelpers)
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 
+# static components
 add_subdirectory(src)
 add_subdirectory(src/window)
 add_subdirectory(src/input)
 add_subdirectory(src/graphics)
 add_subdirectory(src/serialization/yaml)
+
+# interface components
+add_subdirectory(include/ion/mylar)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"

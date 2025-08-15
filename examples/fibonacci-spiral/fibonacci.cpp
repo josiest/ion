@@ -1,5 +1,6 @@
 // frameworks
 #include <ion/ion.hpp>
+#include <ion/mylar.hpp>
 #include <SDL2/SDL.h>
 #include <entt/signal/sigh.hpp>
 #include <entt/meta/factory.hpp>
@@ -20,12 +21,6 @@
 
 namespace views = std::views;
 const std::filesystem::path RESOURCE_DIR = "resources";
-
-template<typename T>
-auto reflect()
-{
-    return entt::meta_factory<T>();
-}
 
 constexpr int rounded_divide(int numerator, int denominator)
 {
@@ -62,15 +57,18 @@ public:
     std::uint8_t num_frames;
 };
 
+namespace ion {
 template<>
 auto reflect<spiral_data>()
 {
     using namespace entt::literals;
+    ion::reflect<SDL_Color>();
     return entt::meta_factory<spiral_data>()
         .type("spiral_data"_hs)
         .data<&spiral_data::initial_color>("initial-color"_hs)
         .data<&spiral_data::final_color>("final-color"_hs)
         .data<&spiral_data::num_frames>("num-frames"_hs);
+}
 }
 
 class fibonacci_spiral
@@ -81,10 +79,6 @@ public:
     fibonacci_spiral() = delete;
     fibonacci_spiral(const spiral_data& spiral)
         : spiral{ spiral }
-    {
-    }
-    fibonacci_spiral(spiral_data && spiral)
-        : spiral{ std::move(spiral) }
     {
     }
 
@@ -239,6 +233,7 @@ int main(int argc, char * argv[])
 
     // load the spiral settings and draw it to the whole window
     auto spiral = fibonacci_spiral{ fibonacci_spiral::from_config(settings["spiral"]) };
+    // auto spiral = fibonacci_spiral{ konbu::read<spiral_data>(settings["spiral"]) };
     spiral.draw_to(window);
     SDL_RenderPresent(window);
 
