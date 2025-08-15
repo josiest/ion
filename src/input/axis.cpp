@@ -1,5 +1,4 @@
 #include "ion/input/axis.hpp"
-#include "ion/events.hpp"
 #include <SDL2/SDL.h>
 
 #include <unordered_set>
@@ -10,23 +9,28 @@ namespace _g {
 std::unordered_set<SDL_Keycode> KEYS_PRESSED;
 }
 
-void set_key(SDL_Event const & event)
+void set_key_from_event(SDL_Event const & event)
 {
     _g::KEYS_PRESSED.insert(event.key.keysym.sym);
 }
-void release_key(SDL_Event const & event)
+void release_key_from_event(SDL_Event const & event)
 {
     _g::KEYS_PRESSED.erase(event.key.keysym.sym);
 }
 
-keyboard_axis::keyboard_axis(event_system & events,
-                             SDL_Keycode right, SDL_Keycode left,
-                             SDL_Keycode up, SDL_Keycode down)
+void set_key(SDL_Keycode key)
+{
+    _g::KEYS_PRESSED.insert(key);
+}
 
+void release_key(SDL_Keycode key)
+{
+    _g::KEYS_PRESSED.erase(key);
+}
+
+keyboard_axis::keyboard_axis(SDL_Keycode right, SDL_Keycode left, SDL_Keycode up, SDL_Keycode down)
     : _right(right), _left(left), _up(up), _down(down)
 {
-    events.subscribe(SDL_KEYDOWN, &set_key);
-    events.subscribe(SDL_KEYUP, &release_key);
 }
 
 float keyboard_axis::x() const noexcept

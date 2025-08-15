@@ -6,10 +6,25 @@
 #include <ion/ion.hpp>
 #include <SDL2/SDL_events.h>
 #include <entt/entity/registry.hpp>
+#include <entt/signal/sigh.hpp>
 
 #include <string>
 #include <cstdint>
 #include <random>
+
+class event_sink
+{
+public:
+    void poll();
+
+    inline auto on_quit() { return entt::sink{ quit }; }
+    inline auto on_key_down() { return entt::sink{ key_down }; }
+    inline auto on_key_up() { return entt::sink{ key_up }; }
+protected:
+    entt::sigh<void()> quit;
+    entt::sigh<void(SDL_Keycode)> key_down;
+    entt::sigh<void(SDL_Keycode)> key_up;
+};
 
 /**
  * A manager class for game resources
@@ -50,7 +65,7 @@ private:
     ion::hardware_renderer _window;
 
     // events and input
-    ion::event_system _events;
+    event_sink _events;
     ion::input::keyboard_axis _input;
 
     // entt setup
@@ -66,4 +81,4 @@ private:
 };
 
 muncher & get_game() noexcept;
-void reset_game(SDL_Event const & event);
+void reset_game(SDL_Keycode keycode);

@@ -14,8 +14,8 @@ if (TARGET SDL2::SDL2main)
     target_link_libraries(fibonacci PRIVATE SDL2::SDL2main)
 endif ()
 
-find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS ion window graphics input yaml-serialization)
-target_link_libraries(fibonacci PRIVATE ion::ion ion::window ion::graphics ion::input ion::yaml-serialization)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS window graphics input yaml-serialization)
+target_link_libraries(fibonacci PRIVATE ion::window ion::graphics ion::input ion::yaml-serialization)
 
 find_package(yaml-cpp REQUIRED CONFIG)
 target_link_libraries(fibonacci PRIVATE yaml-cpp::yaml-cpp)

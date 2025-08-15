@@ -1,7 +1,5 @@
 #pragma once
-
-#include "ion/events.hpp"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 namespace ion::input {
 
@@ -17,11 +15,15 @@ public:
 void set_key(SDL_Keycode key);
 void release_key(SDL_Keycode key);
 
+void set_key_from_event(const SDL_Event& event);
+void release_key_from_event(const SDL_Event& event);
+
 /**
  * A 2d axis that sets the value when keys are pressed
  */
 class keyboard_axis : public axis2d {
 public:
+    keyboard_axis() = delete;
     /**
      * Subscribe a custom keyboard axis to an event system
      *
@@ -32,8 +34,7 @@ public:
      * \param up to bind to the positive y-axis
      * \param down to bind to the negative y-axis
      */
-    keyboard_axis(event_system & events, SDL_Keycode right, SDL_Keycode left,
-                                         SDL_Keycode up, SDL_Keycode down);
+    keyboard_axis(SDL_Keycode right, SDL_Keycode left, SDL_Keycode up, SDL_Keycode down);
 
     float x() const noexcept;
     float y() const noexcept;

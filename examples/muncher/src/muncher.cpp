@@ -29,10 +29,33 @@ int main(int argc, char * argv[])
     // crash if the game failed to initialize properly
     if (not game) {
         std::cout << game.get_error() << std::endl;
+        return EXIT_FAILURE;
     }
     // otherwise run the game
     else {
         game.run();
+    }
+    return EXIT_SUCCESS;
+}
+
+void event_sink::poll()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type) {
+        case SDL_QUIT:
+            quit.publish();
+            break;
+        case SDL_KEYDOWN:
+            key_down.publish(event.key.keysym.sym);
+            break;
+        case SDL_KEYUP:
+            key_up.publish(event.key.keysym.sym);
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -44,7 +67,7 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
       )},
 
       // create a wasd keyboard input axis
-      _input(_events, SDLK_d, SDLK_a, SDLK_w, SDLK_s),
+      _input(SDLK_d, SDLK_a, SDLK_w, SDLK_s),
 
       // initialize the random engine with a pseudo-random seed
       _rng{std::random_device{}()}, 
@@ -63,12 +86,10 @@ muncher::muncher(std::uint32_t width, std::uint32_t height) noexcept
     if (not _window) {
         set_error(_window.get_error()); return;
     }
-
-    // quit when the user exits the window
-    _events.subscribe(SDL_QUIT, &ion::input::quit_on_event);
-
-    // reset the game when the user presses the reset key
-    _events.subscribe(SDL_KEYUP, &reset_game);
+    _events.on_quit().connect<&ion::input::quit>();
+    _events.on_key_down().connect<&ion::input::set_key>();
+    _events.on_key_up().connect<&ion::input::release_key>();
+    _events.on_key_up().connect<&reset_game>();
 }
 
 void muncher::run() noexcept
@@ -79,7 +100,7 @@ void muncher::run() noexcept
     // run the program
     while (not ion::input::has_quit()) {
         // handle events
-        _events.process_queue();
+        _events.poll();
 
         // apply systems
         float const dt = clock.tick();
@@ -117,11 +138,10 @@ void muncher::reset() noexcept
     _player = _player_settings.create(_entities);
 }
 
-void reset_game(SDL_Event const & event)
+void reset_game(SDL_Keycode keycode)
 {
     // do nothing if not the right event or not the right key
-    if (event.type != SDL_KEYUP || event.key.keysym.sym != SDLK_r) {
-        return;
+    if (keycode == SDLK_r) {
+        get_game().reset();
     }
-    get_game().reset();
 }
