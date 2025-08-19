@@ -50,39 +50,7 @@ public:
     SDL_Color final_color{ 219, 0, 66, 255 };
     std::uint8_t num_frames = 8u;
 
-    static spiral_data from_config(const YAML::Node & config)
-    {
-        spiral_data spiral;
-        try
-        {
-            if (config.IsScalar())
-            {
-                auto filepath = RESOURCE_DIR/config.as<std::string>();
-                filepath.replace_extension(".yaml");
-                spiral = from_config(YAML::LoadFile(filepath.string()));
-            }
-            else
-            {
-                if (const auto& initial_color_config = config["initial-color"])
-                {
-                    spiral.initial_color = initial_color_config.as<SDL_Color>();
-                }
-                if (const auto& final_color_config = config["final-color"])
-                {
-                    spiral.final_color = final_color_config.as<SDL_Color>();
-                }
-                if (const auto& num_frames_config = config["num-frames"])
-                {
-                    spiral.num_frames = num_frames_config.as<std::uint8_t>();
-                }
-            }
-        }
-        catch (const YAML::Exception & error)
-        {
-            SDL_Log("Unable to read spiral from config: %s\n", error.what());
-        }
-        return spiral;
-    }
+    static spiral_data from_config(const YAML::Node & config);
 
 };
 
@@ -99,6 +67,52 @@ auto reflect<spiral_data>()
         .data<&spiral_data::num_frames>("num-frames"_hs);
 }
 }
+
+spiral_data spiral_data::from_config(const YAML::Node &config)
+{
+    ion::reflect<spiral_data>();
+    try
+    {
+        if (config.IsScalar())
+        {
+            auto filepath = RESOURCE_DIR/config.as<std::string>();
+            filepath.replace_extension(".yaml");
+            return from_config(YAML::LoadFile(filepath.string()));
+        }
+        if (not config.IsMap()) { return spiral_data{}; }
+
+        auto reflection = entt::forward_as_meta(spiral_data{});
+        const auto type = reflection.type();
+
+        for (const auto member_pair : config)
+        {
+            const entt::hashed_string member_name{ member_pair.first.Scalar().c_str() };
+            const YAML::Node member_config = member_pair.second;
+
+            const auto member_data = type.data(member_name);
+            const auto member_type = member_data.type();
+
+            if (member_type.is_integral() and not member_type.is_signed())
+            {
+                if (member_type.size_of() == sizeof(std::uint8_t))
+                {
+                    member_data.set(reflection, member_config.as<std::uint8_t>());
+                }
+            }
+            else if (member_type == entt::resolve<SDL_Color>())
+            {
+                member_data.set(reflection, member_config.as<SDL_Color>());
+            }
+        }
+        return reflection.cast<spiral_data>();
+    }
+    catch (const YAML::Exception & error)
+    {
+        SDL_Log("Unable to read spiral from config: %s\n", error.what());
+    }
+    return spiral_data{};
+}
+
 
 class fibonacci_spiral
 {
