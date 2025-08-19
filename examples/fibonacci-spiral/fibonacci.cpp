@@ -1,6 +1,5 @@
 // frameworks
 #include <ion/ion.hpp>
-#include <ion/mylar.hpp>
 #include <SDL2/SDL.h>
 #include <entt/signal/sigh.hpp>
 #include <entt/meta/factory.hpp>
@@ -54,33 +53,7 @@ class spiral_data
 public:
     SDL_Color initial_color{ 48, 118, 217, 255 };
     SDL_Color final_color{ 219, 0, 66, 255 };
-    std::uint8_t num_frames;
-};
-
-namespace ion {
-template<>
-auto reflect<spiral_data>()
-{
-    using namespace entt::literals;
-    ion::reflect<SDL_Color>();
-    return entt::meta_factory<spiral_data>()
-        .type("spiral_data"_hs)
-        .data<&spiral_data::initial_color>("initial-color"_hs)
-        .data<&spiral_data::final_color>("final-color"_hs)
-        .data<&spiral_data::num_frames>("num-frames"_hs);
-}
-}
-
-class fibonacci_spiral
-{
-public:
-    spiral_data spiral;
-
-    fibonacci_spiral() = delete;
-    fibonacci_spiral(const spiral_data& spiral)
-        : spiral{ spiral }
-    {
-    }
+    std::uint8_t num_frames = 8u;
 
     static spiral_data from_config(const YAML::Node & config)
     {
@@ -114,6 +87,33 @@ public:
             SDL_Log("Unable to read spiral from config: %s\n", error.what());
         }
         return spiral;
+    }
+
+};
+
+namespace ion {
+template<>
+auto reflect<spiral_data>()
+{
+    using namespace entt::literals;
+    ion::reflect<SDL_Color>();
+    return entt::meta_factory<spiral_data>()
+        .type("spiral_data"_hs)
+        .data<&spiral_data::initial_color>("initial-color"_hs)
+        .data<&spiral_data::final_color>("final-color"_hs)
+        .data<&spiral_data::num_frames>("num-frames"_hs);
+}
+}
+
+class fibonacci_spiral
+{
+public:
+    spiral_data spiral;
+
+    fibonacci_spiral() = delete;
+    explicit fibonacci_spiral(const spiral_data& spiral)
+        : spiral{ spiral }
+    {
     }
 
     void draw_to(SDL_Renderer * renderer)
@@ -158,7 +158,8 @@ private:
 
     std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k)
     {
-        return std::make_pair(next_subframe(k), lerp(spiral.initial_color, spiral.final_color, k, spiral.num_frames));
+        return std::make_pair(next_subframe(k),
+                              lerp(spiral.initial_color, spiral.final_color, k, spiral.num_frames));
     }
 
     SDL_Rect next_subframe(std::uint32_t k)
@@ -200,6 +201,8 @@ public:
             case SDL_QUIT:
                 quit.publish();
                 break;
+            default:
+                break;
             }
         }
     }
@@ -232,7 +235,7 @@ int main(int argc, char * argv[])
     // auto window = cereal::load_yaml<ion::hardware_renderer>(settings["window"]);
 
     // load the spiral settings and draw it to the whole window
-    auto spiral = fibonacci_spiral{ fibonacci_spiral::from_config(settings["spiral"]) };
+    auto spiral = fibonacci_spiral{ spiral_data::from_config(settings["spiral"]) };
     // auto spiral = fibonacci_spiral{ konbu::read<spiral_data>(settings["spiral"]) };
     spiral.draw_to(window);
     SDL_RenderPresent(window);
