@@ -17,35 +17,30 @@
 #include <cmath>
 #include <concepts>
 #include <ranges>
+#include <numbers>
 
 namespace views = std::views;
 const std::filesystem::path RESOURCE_DIR = "resources";
 
-constexpr int rounded_divide(int numerator, int denominator)
+namespace ion
 {
-    return (numerator + denominator/2)/denominator;
+template<std::integral Integer, std::floating_point Real>
+constexpr Integer lerp(Integer a, Integer b, Real t)
+{
+    return static_cast<Integer>(std::round(std::lerp(static_cast<Real>(a), static_cast<Real>(b), t)));
+}
+
+template<std::floating_point Real>
+constexpr SDL_Color lerp(const SDL_Color& a, const SDL_Color& b, Real t)
+{
+    return { lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t), lerp(a.a, b.a, t) };
+}
 }
 
 template<std::integral Integer>
-constexpr Integer intlerp(int a, int b, int p, int q)
+constexpr Integer divide_by_phi(Integer x)
 {
-    // convert
-    return static_cast<Integer>(a + rounded_divide(p*(b-a), q));
-}
-
-constexpr SDL_Color lerp(SDL_Color const & a, SDL_Color const & b, std::uint8_t p, std::uint8_t q)
-{
-    return { intlerp<std::uint8_t>(a.r, b.r, p, q), intlerp<std::uint8_t>(a.g, b.g, p, q),
-             intlerp<std::uint8_t>(a.b, b.b, p, q), intlerp<std::uint8_t>(a.a, b.a, p, q) };
-}
-
-/** Divide an integer by a floating point number and round to nearest */
-template<std::integral Integer>
-constexpr Integer divide_by_phi(Integer numerator)
-{
-    // arbitrary rational approximation of phi: P/Q
-    constexpr Integer P = 233, Q = 144;
-    return rounded_divide(numerator*Q, P);
+    return static_cast<Integer>(std::round(static_cast<float>(x)/std::numbers::phi_v<float>));
 }
 
 class spiral_data
@@ -158,8 +153,8 @@ private:
 
     std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k)
     {
-        return std::make_pair(next_subframe(k),
-                              lerp(spiral.initial_color, spiral.final_color, k, spiral.num_frames));
+        const float t = static_cast<float>(k)/static_cast<float>(spiral.num_frames);
+        return std::make_pair(next_subframe(k), ion::lerp(spiral.initial_color, spiral.final_color, t));
     }
 
     SDL_Rect next_subframe(std::uint32_t k)
