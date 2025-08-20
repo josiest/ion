@@ -6,3 +6,4 @@
 #include "ion/input.hpp"
 #include "ion/time.hpp"
 #include "ion/mylar.hpp"
+#include "ion/math.hpp"

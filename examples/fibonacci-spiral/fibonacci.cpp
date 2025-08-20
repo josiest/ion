@@ -15,33 +15,11 @@
 
 // algorithms
 #include <cmath>
-#include <concepts>
 #include <ranges>
 #include <numbers>
 
 namespace views = std::views;
 const std::filesystem::path RESOURCE_DIR = "resources";
-
-namespace ion
-{
-template<std::integral Integer, std::floating_point Real>
-constexpr Integer lerp(Integer a, Integer b, Real t)
-{
-    return static_cast<Integer>(std::round(std::lerp(static_cast<Real>(a), static_cast<Real>(b), t)));
-}
-
-template<std::floating_point Real>
-constexpr SDL_Color lerp(const SDL_Color& a, const SDL_Color& b, Real t)
-{
-    return { lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t), lerp(a.a, b.a, t) };
-}
-}
-
-template<std::integral Integer>
-constexpr Integer divide_by_phi(Integer x)
-{
-    return static_cast<Integer>(std::round(static_cast<float>(x)/std::numbers::phi_v<float>));
-}
 
 class spiral_data
 {
@@ -181,7 +159,8 @@ private:
     {
         using namespace std::numbers;
         const SDL_Rect subframe = guide;
-        const SDL_Point next_frame{ divide_by_phi(guide.w), divide_by_phi(guide.h) };
+        const SDL_Point next_frame{ ion::rounded_divide(guide.w, phi_v<float>),
+                                    ion::rounded_divide(guide.h, phi_v<float>) };
         switch (k % 4) {
             case 0:
                 // slide the left edge inward by the golden ratio
