@@ -6,13 +6,13 @@
 namespace ion {
 
 template<typename T>
-auto reflect()
+inline auto reflect()
 {
     return entt::meta_factory<T>{};
 }
 
 template<>
-auto reflect<SDL_Point>()
+inline auto reflect<SDL_Point>()
 {
     using namespace entt::literals;
     return entt::meta_factory<SDL_Point>{}
@@ -22,7 +22,7 @@ auto reflect<SDL_Point>()
 }
 
 template<>
-auto reflect<SDL_Rect>()
+inline auto reflect<SDL_Rect>()
 {
     using namespace entt::literals;
     return entt::meta_factory<SDL_Rect>{}
@@ -34,7 +34,7 @@ auto reflect<SDL_Rect>()
 }
 
 template<>
-auto reflect<SDL_Color>()
+inline auto reflect<SDL_Color>()
 {
     using namespace entt::literals;
     return entt::meta_factory<SDL_Color>{}

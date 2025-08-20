@@ -1,13 +1,10 @@
 #include "pipes.hpp"
 
 #include "systems.hpp"
-#include "entities.hpp"
 
 #include <ion/ion.hpp>
-#include <entt/entt.hpp>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
-#include <memory>
 #include <random>
 #include <iostream>
 
