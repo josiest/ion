@@ -10,7 +10,6 @@
 #include <filesystem>
 #include <sstream>
 
-#include <algorithm>
 #include <ranges>
 
 // namespace aliases
@@ -63,25 +62,8 @@ namespace prefab {
 
 tile::tile(std::string_view images_path)
 
-    : loaded_tiles{ Pipes::TileMap::load_all(ion::asset_loader{}, images_path) },
-      _images_path_DEPRECATED{images_path}
+    : loaded_tiles{ Pipes::TileMap::load_all(ion::asset_loader{}, images_path) }
 {
-
-    // full cartesian product of tile names and rotations
-    std::unordered_set<cmpt::tile> pairs;
-    for (auto name : tileinfo::names)
-    {
-        for (auto rotation : tileinfo::rotations)
-        {
-            pairs.emplace(name, rotation);
-        }
-    }
-
-    // populate the tiles using the path constructor for an ion surface
-    ranges::for_each(pairs, [this](auto const & pair)
-    {
-        _tiles_DEPRECATED.try_emplace(pair, _load_image_DEPRECATED(pair));
-    });
 }
 
 entt::entity tile::create(entt::registry & entities,
@@ -93,13 +75,4 @@ entt::entity tile::create(entt::registry & entities,
     entities.emplace<cmpt::position>(tile, x, y);
     return tile;
 }
-
-ion::surface tile::_load_image_DEPRECATED(cmpt::tile const & tile)
-{
-    std::stringstream path;
-    path << _images_path_DEPRECATED.string() << "/"
-         << tile.name << "-" << tile.rotation << ".bmp";
-    return ion::surface::load_bitmap(path.str());
-}
-
 }

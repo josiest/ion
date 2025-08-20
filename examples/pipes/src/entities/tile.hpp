@@ -113,12 +113,6 @@ public:
                                tileinfo::name name, tileinfo::rotation rotation,
                                int x, int y);
 
-    /** Get the surface associated with the given tile */
-    inline ion::surface & at_DEPRECATED(component::tile const & tile)
-    {
-        return _tiles_DEPRECATED.at(tile);
-    }
-
     /** The background color for static tiles */
     inline SDL_Color const & static_color() const { return settings.static_color; }
     /** The background color for placeable tiles */
@@ -129,13 +123,5 @@ public:
     Pipes::TileMap loaded_tiles;
 private:
     Pipes::TileSettings settings;
-
-    std::filesystem::path _images_path_DEPRECATED;
-
-    // the loaded tile surfaces
-    std::unordered_map<component::tile, ion::surface> _tiles_DEPRECATED;
-
-    /** Get the filepath for a tile bitmap image */
-    ion::surface _load_image_DEPRECATED(component::tile const & tile);
 };
 }
