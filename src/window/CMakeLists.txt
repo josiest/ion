@@ -2,7 +2,7 @@
 # Define the library
 #
 
-add_library(ion-window STATIC hardware_renderer.cpp software_renderer.cpp sdl_context.cpp)
+add_library(ion-window STATIC hardware_renderer.cpp software_renderer.cpp sdl_context.cpp events.cpp)
 add_library(ion::window ALIAS ion-window)
 
 # specify the include directories for ion-window
@@ -30,6 +30,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/include/ion/window/hardware_renderer.hpp
               ${CMAKE_SOURCE_DIR}/include/ion/window/software_renderer.hpp
               ${CMAKE_SOURCE_DIR}/include/ion/window/sdl_context.hpp
               ${CMAKE_SOURCE_DIR}/include/ion/window/resource.hpp
+              ${CMAKE_SOURCE_DIR}/include/ion/window/events.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/window)
 
 # create and install the target files

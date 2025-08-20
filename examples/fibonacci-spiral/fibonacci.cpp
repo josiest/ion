@@ -1,7 +1,6 @@
 // frameworks
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
-#include <entt/signal/sigh.hpp>
 #include <entt/meta/factory.hpp>
 
 // serialization
@@ -126,33 +125,11 @@ private:
     }
 };
 
-class event_sink
-{
-public:
-    void poll()
-    {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_QUIT:
-                quit.publish();
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    inline auto on_quit() { return entt::sink{ quit }; }
-protected:
-    entt::sigh<void()> quit;
-};
-
 int main(int argc, char * argv[])
 {
     namespace cereal = ion::cereal;
     // create the sdl event-handler: quit when sdl's quit event is triggered
-    event_sink events;
+    ion::event_sink events;
     events.on_quit().connect<&ion::input::quit>();
 
     YAML::Node settings;
