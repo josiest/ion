@@ -8,8 +8,6 @@
 #include <random>
 #include <iostream>
 
-#include <algorithm>
-
 namespace ranges = std::ranges;
 
 int main(int argc, char * argv[])
@@ -40,8 +38,8 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     // tell the tile prefab where to find the tile images
     // and what colors should be used
       _tile_prefab{"../resources", {0x42, 0x87, 0xf5, 0xff},    // static color
-                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
-                   {0xd3, 0xd3, 0xd3, 0xff}}    // distant
+                                   {0x9d, 0xbe, 0xf5, 0xff},    // placeable
+                                   {0xd3, 0xd3, 0xd3, 0xff}}    // distant
 {
     // quit when SDL quit event is triggered
     _events.on_quit().connect<&ion::input::quit>();

@@ -9,6 +9,15 @@ void ion::event_sink::poll()
         case SDL_QUIT:
             quit.publish();
             break;
+
+        case SDL_MOUSEWHEEL:
+            mouse_scroll.publish(event.wheel.y);
+            break;
+
+        case SDL_MOUSEBUTTONUP:
+            mouse_up.publish();
+            break;
+
         default:
             break;
         }
