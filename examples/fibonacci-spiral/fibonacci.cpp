@@ -27,9 +27,6 @@ public:
     SDL_Color initial_color{ 48, 118, 217, 255 };
     SDL_Color final_color{ 219, 0, 66, 255 };
     std::uint8_t num_frames = 8u;
-
-    static spiral_data from_config(const YAML::Node & config);
-
 };
 namespace ion {
 template<>
@@ -43,6 +40,21 @@ auto reflect<spiral_data>()
         .data<&spiral_data::final_color>("final-color"_hs)
         .data<&spiral_data::num_frames>("num-frames"_hs);
 }
+
+template<typename T>
+constexpr bool is_yaml_encodable = requires(T value)
+{
+    { YAML::convert<T>::encode(value) } -> std::same_as<YAML::Node>;
+};
+
+template<typename T>
+constexpr bool is_yaml_decodable = requires(YAML::Node node, T value)
+{
+    { YAML::convert<T>::decode(node, value) } -> std::same_as<bool>;
+};
+
+template<typename T>
+concept yaml_convertible = is_yaml_encodable<T> and is_yaml_decodable<T>;
 
 template<typename T>
 bool decode(const YAML::Node& config, T& value)
@@ -74,29 +86,58 @@ bool decode(const YAML::Node& config, T& value)
     value = reflection.cast<T>();
     return true;
 }
-}
 
-spiral_data spiral_data::from_config(const YAML::Node &config)
+class asset_loader
 {
-    try
+public:
+    asset_loader() = default;
+    explicit asset_loader(std::string_view root_path)
+        : asset_root_path{ root_path }
+    {
+    }
+
+    template<std::default_initializable T>
+    T from_file(std::string_view asset_path)
+    {
+        auto filepath = RESOURCE_DIR/asset_path;
+        filepath.replace_extension(".yaml");
+        try
+        {
+            return from_config<T>(YAML::LoadFile(filepath.string()));
+        }
+        catch (const YAML::Exception& error)
+        {
+            SDL_Log("Couldn't read asset: %s\n", error.what());
+            return T{};
+        }
+    }
+
+    template<std::default_initializable T>
+    T from_config(const YAML::Node& config)
     {
         if (config.IsScalar())
         {
-            auto filepath = RESOURCE_DIR/config.as<std::string>();
-            filepath.replace_extension(".yaml");
-            return from_config(YAML::LoadFile(filepath.string()));
+            return from_file<T>(config.Scalar());
         }
-        spiral_data spiral;
-        if (config.IsMap()) { ion::decode(config, spiral); }
-        return spiral;
-    }
-    catch (const YAML::Exception & error)
-    {
-        SDL_Log("Unable to read spiral from config: %s\n", error.what());
-    }
-    return spiral_data{};
-}
 
+        T value;
+        if (config.IsMap())
+        {
+            decode(config, value);
+        }
+
+        return value;
+    }
+
+    template<yaml_convertible T>
+    T from_config(const YAML::Node& config)
+    {
+        return config.as<T>();
+    }
+
+    std::filesystem::path asset_root_path = RESOURCE_DIR;
+};
+}
 
 class fibonacci_spiral
 {
@@ -162,23 +203,23 @@ private:
         const SDL_Point next_frame{ ion::rounded_divide(guide.w, phi_v<float>),
                                     ion::rounded_divide(guide.h, phi_v<float>) };
         switch (k % 4) {
-            case 0:
-                // slide the left edge inward by the golden ratio
-                guide.x += next_frame.x; guide.w -= next_frame.x;
-                break;
-            case 1:
-                // slide the top edge down by the golden ratio
-                guide.y += next_frame.y; guide.h -= next_frame.y;
-                break;
-            case 2:
-                // slide the right edge inward by the golden ratio
-                guide.w -= next_frame.x;
-                break;
-            case 3:
-                // slide the bottom edge upward by the golden ratio
-                guide.h -= next_frame.y;
-                break;
-            default: break;
+        case 0:
+            // slide the left edge inward by the golden ratio
+            guide.x += next_frame.x; guide.w -= next_frame.x;
+            break;
+        case 1:
+            // slide the top edge down by the golden ratio
+            guide.y += next_frame.y; guide.h -= next_frame.y;
+            break;
+        case 2:
+            // slide the right edge inward by the golden ratio
+            guide.w -= next_frame.x;
+            break;
+        case 3:
+            // slide the bottom edge upward by the golden ratio
+            guide.h -= next_frame.y;
+            break;
+        default: break;
         }
         return subframe;
     }
@@ -218,7 +259,7 @@ int main(int argc, char * argv[])
     {
         settings = YAML::LoadFile("settings.yaml");
     }
-    catch (YAML::Exception & error)
+    catch (const YAML::Exception& error)
     {
         SDL_Log("failed to load program settings, using defaults: %s\n", error.what());
     }
@@ -229,8 +270,10 @@ int main(int argc, char * argv[])
     // auto window = cereal::load_yaml<ion::hardware_renderer>(settings["window"]);
 
     // load the spiral settings and draw it to the whole window
-    auto spiral = fibonacci_spiral{ spiral_data::from_config(settings["spiral"]) };
-    // auto spiral = fibonacci_spiral{ konbu::read<spiral_data>(settings["spiral"]) };
+    ion::asset_loader asset_loader{};
+    const auto spiral_settings = asset_loader.from_config<spiral_data>(settings["spiral"]);
+    auto spiral = fibonacci_spiral{ spiral_settings };
+
     spiral.draw_to(window);
     SDL_RenderPresent(window);
 
