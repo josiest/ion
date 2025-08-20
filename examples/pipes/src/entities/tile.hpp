@@ -34,6 +34,19 @@ inline auto reflect<Pipes::TileSettings>()
 }
 }
 
+namespace Pipes
+{
+class TileMap
+{
+public:
+    static TileMap load_all(const ion::asset_loader& asset_loader, std::string_view images_path);
+    SDL_Surface * image_for(const component::tile& tile);
+private:
+    TileMap() = default;
+    std::unordered_map<component::tile, ion::surface> tiles;
+};
+}
+
 namespace prefab {
 
 namespace tileinfo = component::tileinfo;
@@ -101,9 +114,9 @@ public:
                                int x, int y);
 
     /** Get the surface associated with the given tile */
-    inline ion::surface & at(component::tile const & tile)
+    inline ion::surface & at_DEPRECATED(component::tile const & tile)
     {
-        return _tiles.at(tile);
+        return _tiles_DEPRECATED.at(tile);
     }
 
     /** The background color for static tiles */
@@ -112,14 +125,17 @@ public:
     inline SDL_Color const & placeable_color() const { return settings.placeable_color; }
     /** The background color for distant tiles */
     inline SDL_Color const & distant_color() const { return settings.distant_color; }
+
+    Pipes::TileMap loaded_tiles;
 private:
     Pipes::TileSettings settings;
-    std::filesystem::path _images_path;
+
+    std::filesystem::path _images_path_DEPRECATED;
 
     // the loaded tile surfaces
-    std::unordered_map<component::tile, ion::surface> _tiles;
+    std::unordered_map<component::tile, ion::surface> _tiles_DEPRECATED;
 
     /** Get the filepath for a tile bitmap image */
-    ion::surface _load_image(component::tile const & tile);
+    ion::surface _load_image_DEPRECATED(component::tile const & tile);
 };
 }

@@ -3,7 +3,6 @@
 
 #include "systems/point.hpp"
 #include "systems/grid.hpp"
-#include "systems/tile.hpp"
 
 #include "entities/tile.hpp"
 
@@ -38,15 +37,15 @@ void render_static_tiles(ion::window_resource auto & window,
     auto static_tiles = entities.view<component::tile, component::position,
                                       component::static_tile>();
 
-    // get the background color as a uint to pass to FillRect
+    // get the background color as uint to pass to FillRect
     auto const & color = tile_prefab.static_color();
     auto const bg_color = SDL_MapRGB(screen->format, color.r, color.g, color.b);
 
     static_tiles.each([&tile_prefab, &world_space, screen, bg_color]
             (auto const & tile, auto const & p) {
 
-        // get the sdl surface to render from and the grid sqaure to render to
-        auto & tile_surface = tile_prefab.at(tile);
+        // get the sdl surface to render from and the grid square to render to
+        SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
         SDL_Rect grid_square = world_space.unit_square(p.x, p.y);
 
         // color the background
@@ -70,11 +69,12 @@ void render_mouse_tile(ion::window_resource auto & window,
 
     // then the bitmap surface
     auto const & tile = entities.get<component::tile>(mouse_tile);
-    auto & tile_surface = tile_prefab.at(tile);
+    SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
 
     // get the appropriate color: is the mouse next to an already placed tile?
     auto color = tile_prefab.placeable_color();
-    if (not systems::is_adjacent(placed_tiles, p)) {
+    if (not systems::is_adjacent(placed_tiles, p))
+    {
         color = tile_prefab.distant_color();
     }
     // finally, render

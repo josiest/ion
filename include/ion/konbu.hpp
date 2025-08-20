@@ -2,6 +2,7 @@
 
 // reflection and serialization
 #include <entt/meta/factory.hpp>
+#include "ion/mylar/reflect.hpp"
 #ifndef YAML_CPP_STATIC_DEFINE
 #define YAML_CPP_STATIC_DEFINE
 #endif
@@ -80,7 +81,7 @@ public:
     }
 
     template<std::default_initializable T>
-    T from_file(std::string_view asset_path)
+    T from_file(std::string_view asset_path) const
     {
         auto filepath = asset_root_path/asset_path;
         filepath.replace_extension(".yaml");
@@ -96,7 +97,7 @@ public:
     }
 
     template<std::default_initializable T>
-    T from_config(const YAML::Node& config)
+    T from_config(const YAML::Node& config) const
     {
         if (config.IsScalar())
         {
@@ -113,7 +114,7 @@ public:
     }
 
     template<yaml_convertible T>
-    T from_config(const YAML::Node& config)
+    T from_config(const YAML::Node& config) const
     {
         return config.as<T>();
     }

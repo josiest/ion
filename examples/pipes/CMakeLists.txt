@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(pipes-example)
 
 file(GLOB_RECURSE sources src/*.cpp)
+file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 add_executable(pipes ${sources})
 set_target_properties(pipes PROPERTIES
     CXX_STANDARD 23
