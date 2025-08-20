@@ -5,7 +5,6 @@
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
-#include <SDL.h>
 
 #include <string>
 #include <filesystem>
@@ -21,21 +20,23 @@ namespace views = std::views;
 
 namespace prefab {
 
-tile::tile(std::filesystem::path const & images_path,
-           SDL_Color const & static_color, SDL_Color const & placeable_color,
-           SDL_Color const & distant_color)
+tile::tile(std::string_view images_path)
 
-    : _static_color{static_color}, _placeable_color{placeable_color},
-      _distant_color{distant_color}, _images_path{images_path}
+    : _images_path{images_path}
 {
     // full cartesian product of tile names and rotations
     std::unordered_set<cmpt::tile> pairs;
-    for (auto name : tileinfo::names) { for (auto rotation : tileinfo::rotations) {
-        pairs.emplace(name, rotation);
-    }}
+    for (auto name : tileinfo::names)
+    {
+        for (auto rotation : tileinfo::rotations)
+        {
+            pairs.emplace(name, rotation);
+        }
+    }
 
     // populate the tiles using the path constructor for an ion surface
-    ranges::for_each(pairs, [this](auto const & pair) {
+    ranges::for_each(pairs, [this](auto const & pair)
+    {
         _tiles.try_emplace(pair, _load_image(pair));
     });
 }
