@@ -11,7 +11,6 @@
 
 // data types
 #include <cstdint>
-#include <filesystem>
 
 // algorithms
 #include <cmath>
@@ -19,7 +18,6 @@
 #include <numbers>
 
 namespace views = std::views;
-const std::filesystem::path RESOURCE_DIR = "resources";
 
 class spiral_data
 {
@@ -40,113 +38,16 @@ auto reflect<spiral_data>()
         .data<&spiral_data::final_color>("final-color"_hs)
         .data<&spiral_data::num_frames>("num-frames"_hs);
 }
-
-template<typename T>
-constexpr bool is_yaml_encodable = requires(T value)
-{
-    { YAML::convert<T>::encode(value) } -> std::same_as<YAML::Node>;
-};
-
-template<typename T>
-constexpr bool is_yaml_decodable = requires(YAML::Node node, T value)
-{
-    { YAML::convert<T>::decode(node, value) } -> std::same_as<bool>;
-};
-
-template<typename T>
-concept yaml_convertible = is_yaml_encodable<T> and is_yaml_decodable<T>;
-
-template<typename T>
-bool decode(const YAML::Node& config, T& value)
-{
-    reflect<T>();
-    auto reflection = entt::forward_as_meta(spiral_data{});
-    const auto type = reflection.type();
-
-    for (const auto member_pair : config)
-    {
-        const entt::hashed_string member_name{ member_pair.first.Scalar().c_str() };
-        const YAML::Node member_config = member_pair.second;
-
-        const auto member_data = type.data(member_name);
-        const auto member_type = member_data.type();
-
-        if (member_type.is_integral() and not member_type.is_signed())
-        {
-            if (member_type.size_of() == sizeof(std::uint8_t))
-            {
-                member_data.set(reflection, member_config.as<std::uint8_t>());
-            }
-        }
-        else if (member_type == entt::resolve<SDL_Color>())
-        {
-            member_data.set(reflection, member_config.as<SDL_Color>());
-        }
-    }
-    value = reflection.cast<T>();
-    return true;
-}
-
-class asset_loader
-{
-public:
-    asset_loader() = default;
-    explicit asset_loader(std::string_view root_path)
-        : asset_root_path{ root_path }
-    {
-    }
-
-    template<std::default_initializable T>
-    T from_file(std::string_view asset_path)
-    {
-        auto filepath = RESOURCE_DIR/asset_path;
-        filepath.replace_extension(".yaml");
-        try
-        {
-            return from_config<T>(YAML::LoadFile(filepath.string()));
-        }
-        catch (const YAML::Exception& error)
-        {
-            SDL_Log("Couldn't read asset: %s\n", error.what());
-            return T{};
-        }
-    }
-
-    template<std::default_initializable T>
-    T from_config(const YAML::Node& config)
-    {
-        if (config.IsScalar())
-        {
-            return from_file<T>(config.Scalar());
-        }
-
-        T value;
-        if (config.IsMap())
-        {
-            decode(config, value);
-        }
-
-        return value;
-    }
-
-    template<yaml_convertible T>
-    T from_config(const YAML::Node& config)
-    {
-        return config.as<T>();
-    }
-
-    std::filesystem::path asset_root_path = RESOURCE_DIR;
-};
 }
 
 class fibonacci_spiral
 {
 public:
-    spiral_data spiral;
+    spiral_data settings;
 
     fibonacci_spiral() = delete;
     explicit fibonacci_spiral(const spiral_data& spiral)
-        : spiral{ spiral }
+        : settings{ spiral }
     {
     }
 
@@ -159,8 +60,8 @@ public:
 
     void draw_to(SDL_Renderer * renderer, const SDL_Rect & render_frame)
     {
-        SDL_SetRenderDrawColor(renderer, spiral.initial_color.r, spiral.initial_color.g,
-                                         spiral.initial_color.b, spiral.initial_color.a);
+        SDL_SetRenderDrawColor(renderer, settings.initial_color.r, settings.initial_color.g,
+                               settings.initial_color.b, settings.initial_color.a);
         SDL_RenderFillRect(renderer, &render_frame);
 
         guide = render_frame;
@@ -168,7 +69,7 @@ public:
         // MinGW compiler can't seem to deduce the return type of view_colored_rects(), but CLion can?
         // maybe undefined behavior?? https://timsong-cpp.github.io/cppwp/n4140/dcl.spec.auto
         // for (const auto [rect, color] : view_colored_rects()) {
-        for (std::uint8_t k = 0; k < spiral.num_frames; ++k)
+        for (std::uint8_t k = 0; k < settings.num_frames; ++k)
         {
             const auto [rect, color] = next_colored_rect(k);
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
@@ -186,14 +87,14 @@ private:
     std::ranges::view auto view_colored_rects()
     {
         constexpr std::uint8_t zero = 0u;
-        return std::views::iota(zero, spiral.num_frames)
+        return std::views::iota(zero, settings.num_frames)
              | views::transform([this](std::uint8_t k) { return next_colored_rect(k); });
     }
 
     std::pair<SDL_Rect, SDL_Color> next_colored_rect(std::uint8_t k)
     {
-        const float t = static_cast<float>(k)/static_cast<float>(spiral.num_frames);
-        return std::make_pair(next_subframe(k), ion::lerp(spiral.initial_color, spiral.final_color, t));
+        const float t = static_cast<float>(k)/static_cast<float>(settings.num_frames);
+        return std::make_pair(next_subframe(k), ion::lerp(settings.initial_color, settings.final_color, t));
     }
 
     SDL_Rect next_subframe(std::uint32_t k)
@@ -267,7 +168,8 @@ int main(int argc, char * argv[])
     // initialize sdl and create a window
     ion::sdl_context sdl;
     auto window = cereal::read_renderer_from_config(settings["window"]);
-    // auto window = cereal::load_yaml<ion::hardware_renderer>(settings["window"]);
+    // const auto window_settings = asset_loader.from_config<ion::window_settings>(settings["window"]);
+    // auto window = window_settings.hardware_renderer();
 
     // load the spiral settings and draw it to the whole window
     ion::asset_loader asset_loader{};
