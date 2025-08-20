@@ -53,7 +53,6 @@ public:
     static spiral_data from_config(const YAML::Node & config);
 
 };
-
 namespace ion {
 template<>
 auto reflect<spiral_data>()
@@ -66,11 +65,41 @@ auto reflect<spiral_data>()
         .data<&spiral_data::final_color>("final-color"_hs)
         .data<&spiral_data::num_frames>("num-frames"_hs);
 }
+
+template<typename T>
+bool decode(const YAML::Node& config, T& value)
+{
+    reflect<T>();
+    auto reflection = entt::forward_as_meta(spiral_data{});
+    const auto type = reflection.type();
+
+    for (const auto member_pair : config)
+    {
+        const entt::hashed_string member_name{ member_pair.first.Scalar().c_str() };
+        const YAML::Node member_config = member_pair.second;
+
+        const auto member_data = type.data(member_name);
+        const auto member_type = member_data.type();
+
+        if (member_type.is_integral() and not member_type.is_signed())
+        {
+            if (member_type.size_of() == sizeof(std::uint8_t))
+            {
+                member_data.set(reflection, member_config.as<std::uint8_t>());
+            }
+        }
+        else if (member_type == entt::resolve<SDL_Color>())
+        {
+            member_data.set(reflection, member_config.as<SDL_Color>());
+        }
+    }
+    value = reflection.cast<T>();
+    return true;
+}
 }
 
 spiral_data spiral_data::from_config(const YAML::Node &config)
 {
-    ion::reflect<spiral_data>();
     try
     {
         if (config.IsScalar())
@@ -79,32 +108,9 @@ spiral_data spiral_data::from_config(const YAML::Node &config)
             filepath.replace_extension(".yaml");
             return from_config(YAML::LoadFile(filepath.string()));
         }
-        if (not config.IsMap()) { return spiral_data{}; }
-
-        auto reflection = entt::forward_as_meta(spiral_data{});
-        const auto type = reflection.type();
-
-        for (const auto member_pair : config)
-        {
-            const entt::hashed_string member_name{ member_pair.first.Scalar().c_str() };
-            const YAML::Node member_config = member_pair.second;
-
-            const auto member_data = type.data(member_name);
-            const auto member_type = member_data.type();
-
-            if (member_type.is_integral() and not member_type.is_signed())
-            {
-                if (member_type.size_of() == sizeof(std::uint8_t))
-                {
-                    member_data.set(reflection, member_config.as<std::uint8_t>());
-                }
-            }
-            else if (member_type == entt::resolve<SDL_Color>())
-            {
-                member_data.set(reflection, member_config.as<SDL_Color>());
-            }
-        }
-        return reflection.cast<spiral_data>();
+        spiral_data spiral;
+        if (config.IsMap()) { ion::decode(config, spiral); }
+        return spiral;
     }
     catch (const YAML::Exception & error)
     {
