@@ -11,7 +11,6 @@
 #include <filesystem>
 
 #include <algorithm>
-#include <numeric>
 #include <ranges>
 
 // namespace aliases
@@ -36,7 +35,6 @@ tile::tile(std::filesystem::path const & images_path,
     }}
 
     // populate the tiles using the path constructor for an ion surface
-    auto into_tiles = std::inserter(_tiles, _tiles.end());
     ranges::for_each(pairs, [this](auto const & pair) {
         _tiles.try_emplace(pair, _load_image(pair));
     });
@@ -44,7 +42,7 @@ tile::tile(std::filesystem::path const & images_path,
 
 entt::entity tile::create(entt::registry & entities,
                           tileinfo::name name, tileinfo::rotation rotation,
-                          int x, int y) const
+                          int x, int y)
 {
     auto const tile = entities.create();
     entities.emplace<cmpt::tile>(tile, name, rotation);

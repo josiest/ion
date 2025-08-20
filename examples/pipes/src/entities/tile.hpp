@@ -6,8 +6,8 @@
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
-#include <SDL.h>
 
+#include <SDL2/SDL_pixels.h>
 #include <filesystem>
 
 namespace prefab {
@@ -19,7 +19,8 @@ class tile : public ion::isotope {
 public:
     /** Create a tile prefab with the specified colors */
     tile(std::filesystem::path const & images_path,
-         SDL_Color const & static_color, SDL_Color const & placable_color,
+         SDL_Color const & static_color,
+         SDL_Color const & placeable_color,
          SDL_Color const & distant_color);
 
     /** Create a dynamic random tile object */
@@ -74,9 +75,9 @@ public:
     }
 
     /** Create a tile entity */
-    entt::entity create(entt::registry & entities,
-                        tileinfo::name name, tileinfo::rotation rotation,
-                        int x, int y) const;
+    static entt::entity create(entt::registry & entities,
+                               tileinfo::name name, tileinfo::rotation rotation,
+                               int x, int y);
 
     /** Get the surface associated with the given tile */
     inline ion::surface & at(component::tile const & tile)
