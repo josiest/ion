@@ -29,35 +29,31 @@ void render(ion::window_resource auto & window,
 }
 
 void render_static_tiles(ion::window_resource auto & window,
-                         systems::grid const & world_space,
+                         const grid & world_space,
                          entt::registry & entities,
                          prefab::tile & tile_prefab)
 {
-    auto screen = SDL_GetWindowSurface(window);
-    auto static_tiles = entities.view<component::tile, component::position,
-                                      component::static_tile>();
+    SDL_Surface * screen = SDL_GetWindowSurface(window);
 
     // get the background color as uint to pass to FillRect
-    auto const & color = tile_prefab.static_color();
-    auto const bg_color = SDL_MapRGB(screen->format, color.r, color.g, color.b);
+    const SDL_Color & rgb = tile_prefab.static_color();
+    const std::uint32_t color = SDL_MapRGB(screen->format, rgb.r, rgb.g, rgb.b);
 
-    static_tiles.each([&tile_prefab, &world_space, screen, bg_color]
-            (auto const & tile, auto const & p) {
-
+    entities.view<component::tile, component::position, component::static_tile>()
+            .each([&](const auto & tile, const auto & position)
+    {
         // get the sdl surface to render from and the grid square to render to
         SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
-        SDL_Rect grid_square = world_space.unit_square(p.x, p.y);
+        SDL_Rect grid_square = world_space.unit_square(position);
 
-        // color the background
-        SDL_FillRect(screen, &grid_square, bg_color);
-
-        // draw the tile
+        // color the background and draw the tile
+        SDL_FillRect(screen, &grid_square, color);
         SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
     });
 }
 
 void render_mouse_tile(ion::window_resource auto & window,
-                       systems::grid const & world_space,
+                       grid const & world_space,
                        entt::registry & entities, prefab::tile & tile_prefab,
                        pointset const & placed_tiles, entt::entity mouse_tile)
 {
@@ -72,20 +68,14 @@ void render_mouse_tile(ion::window_resource auto & window,
     SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
 
     // get the appropriate color: is the mouse next to an already placed tile?
-    auto color = tile_prefab.placeable_color();
-    if (not systems::is_adjacent(placed_tiles, p))
-    {
-        color = tile_prefab.distant_color();
-    }
+    SDL_Surface * screen = SDL_GetWindowSurface(window);
+    const SDL_Color rgb = is_adjacent(placed_tiles, p) ? tile_prefab.placeable_color()
+                                                       : tile_prefab.distant_color();
+    const std::uint32_t color = SDL_MapRGB(screen->format, rgb.r, rgb.g, rgb.b);
+
     // finally, render
-    auto screen = SDL_GetWindowSurface(window);
-    auto const bg_color = SDL_MapRGB(screen->format, color.r, color.g, color.b);
-
-    // color the background
-    SDL_FillRect(screen, &grid_square, bg_color);
-
-    // draw the tile
-    SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
+    SDL_FillRect(screen, &grid_square, color);                      // color the background
+    SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);    // draw the tile
 }
 
 }

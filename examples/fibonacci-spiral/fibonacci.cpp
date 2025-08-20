@@ -60,7 +60,7 @@ public:
     void draw_to(SDL_Renderer * renderer, const SDL_Rect & render_frame)
     {
         SDL_SetRenderDrawColor(renderer, settings.initial_color.r, settings.initial_color.g,
-                               settings.initial_color.b, settings.initial_color.a);
+                                         settings.initial_color.b, settings.initial_color.a);
         SDL_RenderFillRect(renderer, &render_frame);
 
         guide = render_frame;
