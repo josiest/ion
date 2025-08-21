@@ -31,9 +31,9 @@ Pipes::TileMap Pipes::TileMap::load_all(const ion::asset_loader& asset_loader,
                 root_dir.string().c_str());
     }
 
-    for (const auto name : component::tileinfo::names)
+    for (const auto name : TileInfo::names)
     {
-        for (const auto rotation : component::tileinfo::rotations)
+        for (const auto rotation : TileInfo::rotations)
         {
             filename << name << "-" << rotation << ".bmp";
             const auto filepath = root_dir/filename.str();
@@ -48,7 +48,7 @@ Pipes::TileMap Pipes::TileMap::load_all(const ion::asset_loader& asset_loader,
     return tilemap;
 }
 
-SDL_Surface * Pipes::TileMap::image_for(component::tileinfo::name name, component::tileinfo::rotation rotation)
+SDL_Surface * Pipes::TileMap::image_for(TileInfo::Name name, TileInfo::Rotation rotation)
 {
     if (const auto search = tiles.find(TileID{ name, rotation }); search != tiles.end())
     {
@@ -66,7 +66,8 @@ tile::tile(std::string_view images_path)
 }
 
 entt::entity tile::create(entt::registry & entities,
-                          tileinfo::name name, tileinfo::rotation rotation,
+                          Pipes::TileInfo::Name name,
+                          Pipes::TileInfo::Rotation rotation,
                           int x, int y)
 {
     auto const tile = entities.create();

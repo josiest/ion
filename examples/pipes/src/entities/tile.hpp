@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Pipes/Tile/TileInfo.hpp"
 #include "components.hpp"
 #include "systems/point.hpp"
 #include "systems/tile.hpp"
@@ -21,8 +22,8 @@ struct TileSettings
 
 struct TileID
 {
-    component::tileinfo::name name;
-    component::tileinfo::rotation rotation;
+    TileInfo::Name name;
+    TileInfo::Rotation rotation;
 };
 
 constexpr bool operator==(const TileID & lhs, const TileID & rhs)
@@ -35,8 +36,8 @@ template<> struct std::hash<Pipes::TileID>
 {
     constexpr size_t operator()(const Pipes::TileID & tile) const noexcept
     {
-        constexpr hash<component::tileinfo::name> hash_name;
-        constexpr hash<component::tileinfo::rotation> hash_rotation;
+        constexpr hash<Pipes::TileInfo::Name> hash_name;
+        constexpr hash<Pipes::TileInfo::Rotation> hash_rotation;
         return hash_name(tile.name) ^ hash_rotation(tile.rotation);
     }
 };
@@ -61,7 +62,7 @@ class TileMap
 {
 public:
     static TileMap load_all(const ion::asset_loader& asset_loader, std::string_view images_path);
-    SDL_Surface * image_for(component::tileinfo::name name, component::tileinfo::rotation rotation);
+    SDL_Surface * image_for(TileInfo::Name name, TileInfo::Rotation rotation);
 private:
     TileMap() = default;
     std::unordered_map<TileID, ion::surface> tiles;
@@ -69,8 +70,6 @@ private:
 }
 
 namespace prefab {
-
-namespace tileinfo = component::tileinfo;
 
 /** A resource manager for tile surfaces */
 class tile : public ion::isotope {
@@ -83,8 +82,9 @@ public:
     entt::entity random_dynamic(entt::registry & entities, engine_t & rng,
                                 point auto const & p) const
     {
-        return create(entities, systems::random_name(rng),
-                                systems::random_rotation(rng), p.x, p.y);
+        return create(entities, Pipes::TileInfo::random_name(rng),
+                                Pipes::TileInfo::random_rotation(rng),
+                                p.x, p.y);
     }
 
     /** Create a static random tile object */
@@ -105,8 +105,7 @@ public:
                              entt::entity mouse_tile, engine_t & rng) const
     {
         // get the required components
-        auto const & [info, p] = entities.get<component::tile,
-                                              component::position>(mouse_tile);
+        auto const & [info, p] = entities.get<component::tile, component::position>(mouse_tile);
 
         // return the existing entity if it already has been placed
         auto const search = placed_tiles.find(p);
@@ -131,7 +130,8 @@ public:
 
     /** Create a tile entity */
     static entt::entity create(entt::registry & entities,
-                               tileinfo::name name, tileinfo::rotation rotation,
+                               Pipes::TileInfo::Name name,
+                               Pipes::TileInfo::Rotation rotation,
                                int x, int y);
 
     /** The background color for static tiles */

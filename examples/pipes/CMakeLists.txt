@@ -5,12 +5,10 @@ file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(pipes
     src/pipes.cpp
-    src/components.cpp
-
     src/entities/tile.cpp
-
     src/systems/input.cpp
-    src/systems/tile.cpp)
+
+    src/private/Tile/TileInfo.cpp)
 
 target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/pipes.hpp
@@ -30,7 +28,7 @@ set_target_properties(pipes PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED TRUE)
 
-target_include_directories(pipes PRIVATE src)
+target_include_directories(pipes PRIVATE src src/public)
 
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 if (TARGET SDL2::SDL2main)

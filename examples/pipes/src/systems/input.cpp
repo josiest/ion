@@ -1,12 +1,9 @@
+#include "Pipes/Tile/TileInfo.hpp"
 #include "components.hpp"
-
 #include "systems/grid.hpp"
-#include "systems/tile.hpp"
-
-#include "entities/tile.hpp"
 
 #include <entt/entt.hpp>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 namespace cmpt = component;
 
@@ -27,9 +24,9 @@ void bind_to_mouse(entt::registry & entities, entt::entity tile,
 void rotate_tile(entt::registry & entities, entt::entity mouse_tile, int dy)
 {
     // get a reference to the tile and change its rotation
-    auto & tile = entities.get<cmpt::tile>(mouse_tile);
-    if (dy > 0) { increment_rotation(tile.rotation); }
-    else if (dy < 0) { decrement_rotation(tile.rotation); }
+    auto & [_, rotation] = entities.get<cmpt::tile>(mouse_tile);
+    if (dy > 0) { ++rotation; }
+    else if (dy < 0) { --rotation; }
 }
 
 }
