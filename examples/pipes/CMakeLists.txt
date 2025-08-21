@@ -1,10 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 project(pipes-example)
 
-file(GLOB_RECURSE sources src/*.cpp)
 file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(pipes ${sources})
+add_executable(pipes
+    src/pipes.cpp
+    src/components.cpp
+
+    src/entities/tile.cpp
+
+    src/systems/input.cpp
+    src/systems/tile.cpp)
+
+target_sources(pipes PUBLIC FILE_SET HEADERS FILES
+    src/pipes.hpp
+    src/entities.hpp
+    src/components.hpp
+    src/systems.hpp
+
+    src/entities/tile.hpp
+
+    src/systems/grid.hpp
+    src/systems/input.hpp
+    src/systems/point.hpp
+    src/systems/render.hpp
+    src/systems/tile.hpp)
+
 set_target_properties(pipes PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED TRUE)
