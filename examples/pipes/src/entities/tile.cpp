@@ -41,17 +41,16 @@ Pipes::TileMap Pipes::TileMap::load_all(const ion::asset_loader& asset_loader,
             {
                 SDL_Log("Expecting tile image at path %s but it doesn't exist!\n", filepath.string().c_str());
             }
-            tilemap.tiles.try_emplace(component::tile{ name, rotation },
-                                      ion::surface::load_bitmap(filepath));
+            tilemap.tiles.try_emplace(TileID{ name, rotation }, ion::surface::load_bitmap(filepath));
             filename.str("");
         }
     }
     return tilemap;
 }
 
-SDL_Surface * Pipes::TileMap::image_for(const component::tile& tile)
+SDL_Surface * Pipes::TileMap::image_for(component::tileinfo::name name, component::tileinfo::rotation rotation)
 {
-    if (const auto search = tiles.find(tile); search != tiles.end())
+    if (const auto search = tiles.find(TileID{ name, rotation }); search != tiles.end())
     {
         return search->second;
     }

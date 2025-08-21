@@ -43,7 +43,7 @@ void render_static_tiles(ion::window_resource auto & window,
             .each([&](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to
-        SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
+        SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile.name, tile.rotation);
         SDL_Rect grid_square = world_space.unit_square(position);
 
         // color the background and draw the tile
@@ -65,7 +65,7 @@ void render_mouse_tile(ion::window_resource auto & window,
 
     // then the bitmap surface
     auto const & tile = entities.get<component::tile>(mouse_tile);
-    SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile);
+    SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile.name, tile.rotation);
 
     // get the appropriate color: is the mouse next to an already placed tile?
     SDL_Surface * screen = SDL_GetWindowSurface(window);

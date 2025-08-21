@@ -18,7 +18,28 @@ struct TileSettings
     SDL_Color placeable_color{ 0x9d, 0xbe, 0xf5, 0xff };
     SDL_Color distant_color{ 0xd3, 0xd3, 0xd3, 0xff };
 };
+
+struct TileID
+{
+    component::tileinfo::name name;
+    component::tileinfo::rotation rotation;
+};
+
+constexpr bool operator==(const TileID & lhs, const TileID & rhs)
+{
+    return lhs.name == rhs.name and lhs.rotation == rhs.rotation;
 }
+}
+
+template<> struct std::hash<Pipes::TileID>
+{
+    constexpr size_t operator()(const Pipes::TileID & tile) const noexcept
+    {
+        constexpr hash<component::tileinfo::name> hash_name;
+        constexpr hash<component::tileinfo::rotation> hash_rotation;
+        return hash_name(tile.name) ^ hash_rotation(tile.rotation);
+    }
+};
 
 namespace ion
 {
@@ -40,10 +61,10 @@ class TileMap
 {
 public:
     static TileMap load_all(const ion::asset_loader& asset_loader, std::string_view images_path);
-    SDL_Surface * image_for(const component::tile& tile);
+    SDL_Surface * image_for(component::tileinfo::name name, component::tileinfo::rotation rotation);
 private:
     TileMap() = default;
-    std::unordered_map<component::tile, ion::surface> tiles;
+    std::unordered_map<TileID, ion::surface> tiles;
 };
 }
 
