@@ -26,10 +26,11 @@ tile::tile(std::string_view images_path)
 entt::entity tile::create(entt::registry & entities,
                           Pipes::TileInfo::Name name,
                           Pipes::TileInfo::Rotation rotation,
-                          int x, int y)
+                          int x, int y,
+                          const SDL_Color& color)
 {
     auto const tile = entities.create();
-    entities.emplace<cmpt::tile>(tile, name, rotation);
+    entities.emplace<Pipes::Component::Tile>(tile, name, rotation, color);
     entities.emplace<cmpt::position>(tile, x, y);
     return tile;
 }

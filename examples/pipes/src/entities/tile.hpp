@@ -13,6 +13,8 @@
 #include <SDL2/SDL_pixels.h>
 #include <filesystem>
 
+#include "Pipes/Tile/Tile.hpp"
+
 namespace Pipes
 {
 struct TileSettings
@@ -52,7 +54,8 @@ public:
     {
         return create(entities, Pipes::TileInfo::random_name(rng),
                                 Pipes::TileInfo::random_rotation(rng),
-                                p.x, p.y);
+                                p.x, p.y,
+                                distant_color());
     }
 
     /** Create a static random tile object */
@@ -63,6 +66,8 @@ public:
     {
         auto const entity = random_dynamic(entities, rng, p);
         entities.emplace<component::static_tile>(entity);
+        auto & tile = entities.get<Pipes::Component::Tile>(entity);
+        tile.color = static_color();
         placed_tiles.try_emplace(p, entity);
         return entity;
     }
@@ -73,7 +78,7 @@ public:
                              entt::entity mouse_tile, engine_t & rng) const
     {
         // get the required components
-        auto const & [info, p] = entities.get<component::tile, component::position>(mouse_tile);
+        auto const & [info, p] = entities.get<Pipes::Component::Tile, component::position>(mouse_tile);
 
         // return the existing entity if it already has been placed
         auto const search = placed_tiles.find(p);
@@ -81,11 +86,11 @@ public:
             return search->second;
         }
         // return mouse entity if mouse is too far
-        else if (not systems::is_adjacent(placed_tiles, p)) {
+        if (not systems::is_adjacent(placed_tiles, p)) {
             return mouse_tile;
         }
         // otherwise create a copy of the tile
-        auto const entity = create(entities, info.name, info.rotation, p.x, p.y);
+        auto const entity = create(entities, info.name, info.rotation, p.x, p.y, static_color());
         entities.emplace<component::static_tile>(entity);
 
         // and mark it as placed
@@ -100,7 +105,8 @@ public:
     static entt::entity create(entt::registry & entities,
                                Pipes::TileInfo::Name name,
                                Pipes::TileInfo::Rotation rotation,
-                               int x, int y);
+                               int x, int y,
+                               const SDL_Color& color);
 
     /** The background color for static tiles */
     inline SDL_Color const & static_color() const { return settings.static_color; }

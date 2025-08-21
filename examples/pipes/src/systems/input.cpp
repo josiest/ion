@@ -5,6 +5,8 @@
 #include <entt/entt.hpp>
 #include <SDL2/SDL.h>
 
+#include "Pipes/Tile/Tile.hpp"
+
 namespace cmpt = component;
 
 namespace systems {
@@ -24,9 +26,9 @@ void bind_to_mouse(entt::registry & entities, entt::entity tile,
 void rotate_tile(entt::registry & entities, entt::entity mouse_tile, int dy)
 {
     // get a reference to the tile and change its rotation
-    auto & [_, rotation] = entities.get<cmpt::tile>(mouse_tile);
-    if (dy > 0) { ++rotation; }
-    else if (dy < 0) { --rotation; }
+    auto & tile = entities.get<Pipes::Component::Tile>(mouse_tile);
+    if (dy > 0) { ++tile.rotation; }
+    else if (dy < 0) { --tile.rotation; }
 }
 
 }

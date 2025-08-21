@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <concepts>
 
-/** A polymporhic point concept */
+/** A polymorphic point concept */
 template<class point_t>
 concept point = requires(point_t p) {
     { p.x } -> std::convertible_to<int>;
@@ -15,15 +15,15 @@ concept point = requires(point_t p) {
 };
 
 /** Define how to hash a point-like object */
-namespace std {
-template<point point_t> struct hash<point_t> {
+template<point point_t>
+struct std::hash<point_t>
+{
     size_t operator()(point_t const & p) const noexcept
     {
-        hash<int> hashint;
-        return hashint(p.x) ^ hashint(p.y);
+        constexpr hash<int> hash_int;
+        return hash_int(p.x) ^ hash_int(p.y);
     }
 };
-}
 
 /** Define how to compare two point-like objects for equality */
 constexpr bool operator==(point auto const & p,

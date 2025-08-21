@@ -8,7 +8,7 @@
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 namespace systems {
 
@@ -35,11 +35,7 @@ void render_static_tiles(ion::window_resource auto & window,
 {
     SDL_Surface * screen = SDL_GetWindowSurface(window);
 
-    // get the background color as uint to pass to FillRect
-    const SDL_Color & rgb = tile_prefab.static_color();
-    const std::uint32_t color = SDL_MapRGB(screen->format, rgb.r, rgb.g, rgb.b);
-
-    entities.view<component::tile, component::position, component::static_tile>()
+    entities.view<Pipes::Component::Tile, component::position, component::static_tile>()
             .each([&](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to
@@ -47,7 +43,7 @@ void render_static_tiles(ion::window_resource auto & window,
         SDL_Rect grid_square = world_space.unit_square(position);
 
         // color the background and draw the tile
-        SDL_FillRect(screen, &grid_square, color);
+        SDL_FillRect(screen, &grid_square, SDL_MapRGB(screen->format, tile.color.r, tile.color.g, tile.color.b));
         SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
     });
 }
@@ -64,7 +60,7 @@ void render_mouse_tile(ion::window_resource auto & window,
     auto grid_square = world_space.unit_square(p.x, p.y);
 
     // then the bitmap surface
-    auto const & tile = entities.get<component::tile>(mouse_tile);
+    auto const & tile = entities.get<Pipes::Component::Tile>(mouse_tile);
     SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile.name, tile.rotation);
 
     // get the appropriate color: is the mouse next to an already placed tile?

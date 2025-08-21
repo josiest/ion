@@ -1,7 +1,8 @@
 #pragma once
 #include "Pipes/Tile/TileInfo.hpp"
-#include "components.hpp"
+#include "Pipes/Tile/Tile.hpp"
 #include <entt/entt.hpp>
+
 
 namespace systems
 {
@@ -10,8 +11,8 @@ namespace systems
 template<class engine_t>
 void randomize_tile(entt::registry & entities, entt::entity entity, engine_t & rng)
 {
-    auto & [name, rotation] = entities.get<component::tile>(entity);
-    name = Pipes::TileInfo::random_name(rng);
-    rotation = Pipes::TileInfo::random_rotation(rng);
+    auto & tile = entities.get<Pipes::Component::Tile>(entity);
+    tile.name = Pipes::TileInfo::random_name(rng);
+    tile.rotation = Pipes::TileInfo::random_rotation(rng);
 }
 }
