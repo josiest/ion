@@ -8,7 +8,8 @@ add_executable(pipes
     src/entities/tile.cpp
     src/systems/input.cpp
 
-    src/private/Tile/TileInfo.cpp)
+    src/private/Tile/TileInfo.cpp
+    src/private/Tile/TileMap.cpp)
 
 target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/pipes.hpp
@@ -22,7 +23,10 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/systems/input.hpp
     src/systems/point.hpp
     src/systems/render.hpp
-    src/systems/tile.hpp)
+    src/systems/tile.hpp
+
+    src/public/Pipes/Tile/TileInfo.hpp
+    src/public/Pipes/Tile/TileMap.hpp)
 
 set_target_properties(pipes PROPERTIES
     CXX_STANDARD 23
