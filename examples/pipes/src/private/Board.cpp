@@ -1,13 +1,14 @@
 #include "Pipes/Board.hpp"
 #include "Pipes/Tile/Tile.hpp"
+#include "Pipes/Deck.hpp"
 
 #include <SDL2/SDL_rect.h>
 #include <vector>
 #include <algorithm>
 
-Pipes::Board::Board(systems::grid world_space, const TileMap & loaded_tiles)
+Pipes::Board::Board(systems::grid world_space, TileMap && loaded_tiles)
 
-    : world_space(world_space), loaded_tiles(&loaded_tiles)
+    : world_space(world_space), loaded_tiles(std::move(loaded_tiles))
 {
 }
 
@@ -28,6 +29,20 @@ bool Pipes::Board::has_adjacent_tile(int x, int y) const
     });
 }
 
+entt::entity Pipes::Board::draw_from_deck(Pipes::Deck & deck, const SDL_Point & position)
+{
+    const entt::entity next_tile = entities.create();
+    entities.emplace<component::position>(next_tile, position.x, position.y);
+
+    const auto [name, rotation] = deck.next_tile();
+    const SDL_Color color = has_adjacent_tile(position.x, position.y)
+                          ? tile_settings.placeable_color
+                          : tile_settings.distant_color;
+
+    entities.emplace<Pipes::Component::Tile>(next_tile, name, rotation, color);
+    return next_tile;
+}
+
 void Pipes::Board::place_tile(entt::entity tile_id)
 {
     const SDL_Point position = entities.get<component::position>(tile_id);
@@ -43,10 +58,10 @@ void Pipes::Board::render(SDL_Window * window) const
 
     // draw the tiles and update the window
     entities.view<Pipes::Component::Tile, component::position>()
-            .each([&](const auto & tile, const auto & position)
+            .each([this, screen](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to
-        SDL_Surface * tile_surface = loaded_tiles->image_for(tile.name, tile.rotation);
+        SDL_Surface * tile_surface = loaded_tiles.image_for(tile.name, tile.rotation);
         SDL_Rect grid_square = world_space.unit_square(position);
 
         // color the background and draw the tile

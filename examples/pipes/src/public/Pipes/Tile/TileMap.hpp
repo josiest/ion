@@ -1,5 +1,6 @@
 #pragma once
 #include "Pipes/Tile/TileInfo.hpp"
+#include <ion/graphics/surface.hpp>
 #include <string_view>
 
 namespace ion
@@ -28,9 +29,8 @@ template<> struct std::hash<Pipes::TileID>
 {
     constexpr size_t operator()(const Pipes::TileID & tile) const noexcept
     {
-        constexpr hash<Pipes::TileInfo::Name> hash_name;
-        constexpr hash<Pipes::TileInfo::Rotation> hash_rotation;
-        return hash_name(tile.name) ^ hash_rotation(tile.rotation);
+        // name and rotation each take up two bits, so we can hash them together as a 4-bit number
+        return (static_cast<size_t>(tile.name) << 2) | static_cast<size_t>(tile.rotation);
     }
 };
 

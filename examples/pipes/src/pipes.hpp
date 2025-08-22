@@ -23,7 +23,6 @@ public:
     void run();
 private:
     void on_mouse_clicked();
-    entt::entity next_tile_from_deck(const SDL_Point& position);
 
     // events
     ion::event_sink _events;
@@ -36,8 +35,6 @@ private:
     engine_t _rng;
 
     // tile
-    Pipes::TileMap loaded_tiles;
-
     Pipes::Board board;
     Pipes::Deck deck;
     Pipes::Hand hand;

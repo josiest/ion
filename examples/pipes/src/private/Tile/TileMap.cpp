@@ -1,8 +1,6 @@
 #include "Pipes/Tile/TileMap.hpp"
 
 #include <ion/konbu.hpp>
-#include <ion/graphics.hpp>
-
 #include <SDL2/SDL_surface.h>
 
 #include <sstream>

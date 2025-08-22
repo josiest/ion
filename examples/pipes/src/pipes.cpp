@@ -1,8 +1,5 @@
 #include "pipes.hpp"
-
 #include "systems.hpp"
-#include "systems/point.hpp"
-#include "Pipes/Tile/Tile.hpp"
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>
@@ -33,10 +30,10 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     // initialize the random engine with a random seed
       _rng{std::random_device{}()},
 
-      loaded_tiles(ion::asset_loader{}, "tiles"),
     // interface between grid-space and pixel-space
     //   100 seems like a decent unit-size for now
-      board(systems::grid{width, height, 100}, loaded_tiles),
+      board(systems::grid{width, height, 100},
+            Pipes::TileMap(ion::asset_loader{}, "tiles")),
       deck(_rng, 11u),
       hand(board)
 {
@@ -54,12 +51,13 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     }
 
     // create a random initial tile in the middle of the screen
-    board.place_tile(next_tile_from_deck(board.world_space.center()));
+    board.place_tile(board.draw_from_deck(deck, board.world_space.center()));
 }
 
 void pipes::run()
 {
-    hand.current_tile = next_tile_from_deck(board.world_space.nearest_point(ion::input::mouse_position()));
+    const SDL_Point mouse = board.world_space.nearest_point(ion::input::mouse_position());
+    hand.current_tile = board.draw_from_deck(deck, mouse);
 
     // bind the mouse to the tile hand
     _events.on_mouse_scroll().connect<&Pipes::Hand::on_cursor_scrolled>(hand);
@@ -94,20 +92,5 @@ void pipes::on_mouse_clicked()
         hand.current_tile = std::nullopt;
         return;
     }
-    hand.current_tile = next_tile_from_deck(position);
-}
-
-entt::entity pipes::next_tile_from_deck(const SDL_Point & position)
-{
-    const entt::entity next_tile = board.entities.create();
-    board.entities.emplace<component::position>(next_tile, position.x, position.y);
-
-    const auto [name, rotation] = deck.next_tile();
-    const SDL_Color color = board.has_adjacent_tile(position.x, position.y)
-                          ? board.tile_settings.placeable_color
-                          : board.tile_settings.distant_color;
-
-    board.entities.emplace<Pipes::Component::Tile>(next_tile, name, rotation, color);
-
-    return next_tile;
+    hand.current_tile = board.draw_from_deck(deck, position);
 }
