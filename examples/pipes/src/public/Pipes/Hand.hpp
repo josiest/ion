@@ -3,8 +3,7 @@
 #include <entt/entity/registry.hpp>
 #include "systems/grid.hpp"
 
-#include "Pipes/Tile/TileMap.hpp"
-#include "Pipes/TileSettings.hpp"
+#include "Pipes/Board.hpp"
 
 namespace Pipes
 {
@@ -12,20 +11,14 @@ class Hand
 {
 public:
     Hand() = delete;
-    Hand(entt::registry & entities, const systems::grid & world_space,
-         const TileSettings & tile_settings, const PointSet & placed_tiles);
+    Hand(Board & board);
 
     void on_cursor_moved(int x, int y);
     void on_cursor_scrolled(int dy);
 
     std::optional<entt::entity> current_tile = std::nullopt;
-protected:
-    entt::registry * entities;
-    const systems::grid * world_space;
 private:
-    const TileSettings * tile_settings;
-    const PointSet * placed_tiles;
-
+    Board * board;
     std::optional<TileID> cached_tile = std::nullopt;
 };
 }

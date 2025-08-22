@@ -3,6 +3,7 @@
 #include "systems.hpp"
 
 #include "Pipes/PointSet.hpp"
+#include "Pipes/Board.hpp"
 #include "Pipes/Deck.hpp"
 #include "Pipes/Hand.hpp"
 #include "Pipes/TileSettings.hpp"
@@ -22,9 +23,7 @@ public:
     void run();
 private:
     void on_mouse_clicked();
-
     entt::entity next_tile_from_deck(const SDL_Point& position);
-    void place_tile(entt::entity tile_id);
 
     // events
     ion::event_sink _events;
@@ -32,17 +31,14 @@ private:
     // initialize sdl before other sdl resources
     ion::sdl_context _sdl;
     ion::software_renderer _window;
-    systems::grid _world_space;
 
     // ecs
     engine_t _rng;
-    entt::registry _entities;
-    Pipes::PointSet _placed_tiles;
 
     // tile
-    Pipes::TileSettings tile_settings;
     Pipes::TileMap loaded_tiles;
 
+    Pipes::Board board;
     Pipes::Deck deck;
     Pipes::Hand hand;
 };
