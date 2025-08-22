@@ -2,6 +2,7 @@
 
 #include "systems.hpp"
 #include "systems/point.hpp"
+#include "Pipes/Tile/Tile.hpp"
 
 #include <ion/ion.hpp>
 #include <SDL2/SDL.h>

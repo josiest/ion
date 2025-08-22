@@ -13,7 +13,7 @@ class TileHand
 public:
     TileHand() = delete;
     TileHand(entt::registry & entities, const systems::grid & world_space,
-             const TileSettings & tile_settings, const pointset & placed_tiles);
+             const TileSettings & tile_settings, const PointSet & placed_tiles);
 
     void on_cursor_moved(int x, int y);
     void on_cursor_scrolled(int dy);
@@ -24,7 +24,7 @@ protected:
     const systems::grid * world_space;
 private:
     const TileSettings * tile_settings;
-    const pointset * placed_tiles;
+    const PointSet * placed_tiles;
 
     std::optional<TileID> cached_tile = std::nullopt;
 };

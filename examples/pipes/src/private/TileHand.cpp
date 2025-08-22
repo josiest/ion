@@ -2,7 +2,7 @@
 #include "Pipes/Tile/Tile.hpp"
 
 Pipes::TileHand::TileHand(entt::registry & entities, const systems::grid & world_space,
-                          const TileSettings & tile_settings, const pointset & placed_tiles)
+                          const TileSettings & tile_settings, const PointSet & placed_tiles)
     : entities{ &entities },
       world_space{ &world_space },
       tile_settings{ &tile_settings },

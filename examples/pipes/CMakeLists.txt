@@ -14,13 +14,13 @@ add_executable(pipes
 target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/pipes.hpp
     src/components.hpp
-    src/systems.hpp
 
+    src/systems.hpp
     src/systems/grid.hpp
     src/systems/point.hpp
     src/systems/render.hpp
-    src/systems/tile.hpp
 
+    src/public/Pipes/PointSet.hpp
     src/public/Pipes/TileSettings.hpp
     src/public/Pipes/TileDeck.hpp
     src/public/Pipes/TileHand.hpp

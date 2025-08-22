@@ -2,6 +2,7 @@
 
 #include "systems.hpp"
 
+#include "Pipes/PointSet.hpp"
 #include "Pipes/TileDeck.hpp"
 #include "Pipes/TileHand.hpp"
 #include "Pipes/TileSettings.hpp"
@@ -36,7 +37,7 @@ private:
     // ecs
     engine_t _rng;
     entt::registry _entities;
-    pointset _placed_tiles;
+    Pipes::PointSet _placed_tiles;
 
     // tile
     Pipes::TileSettings tile_settings;
