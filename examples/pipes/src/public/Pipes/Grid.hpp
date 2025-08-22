@@ -1,14 +1,20 @@
 #pragma once
 
 #include "components.hpp"
-#include "systems/point.hpp"
 
 #include <cstdint>
-#include <SDL.h>
+#include <SDL2/SDL_rect.h>
 
-namespace systems {
+namespace Pipes {
 
-class grid {
+template<typename T>
+concept Point = requires(T p)
+{
+    { p.x } -> std::convertible_to<int>;
+    { p.y } -> std::convertible_to<int>;
+};
+
+class Grid {
 public:
     /**
      * Create a grid at (x, y) in pixel space
@@ -18,7 +24,7 @@ public:
      *
      * \param unit_size the amount of pixels-per-unit
      */
-    constexpr grid(std::uint32_t width, std::uint32_t height,
+    constexpr Grid(std::uint32_t width, std::uint32_t height,
                    std::uint32_t unit_size)
 
         : _width{width}, _height{height}, _unit_size{unit_size}
@@ -40,7 +46,7 @@ public:
      * Convert a grid point to pixels
      * \param p the grid-point to convert
      */
-    inline SDL_Point pixels(point auto const & p) const
+    inline SDL_Point pixels(Point auto const & p) const
     {
         return pixels(p.x, p.y);
     }
@@ -62,7 +68,7 @@ public:
      * Get the rect of the grid square in pixel-space at p in grid-space
      * \param p the grid pint
      */
-    inline SDL_Rect unit_square(point auto const & p) const
+    inline SDL_Rect unit_square(Point auto const & p) const
     {
         return unit_square(p.x, p.y);
     }
@@ -78,7 +84,7 @@ public:
      * \param x the x-coordinate of the pixel-point to convert
      * \param y the y-coordinate of the pixel-point to convert
      */
-    inline component::position nearest_point(int x, int y) const
+    inline SDL_Point nearest_point(int x, int y) const
     {
         int const height = static_cast<int>(_height);
         return { x/unit_size(), (height-y)/unit_size() };
@@ -88,7 +94,7 @@ public:
      * Calculate the nearest grid point from pixels
      * \param p the pixel-point to convert
      */
-    inline component::position nearest_point(point auto const & p) const
+    inline SDL_Point nearest_point(Point auto const & p) const
     {
         return nearest_point(p.x, p.y);
     }

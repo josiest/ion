@@ -1,8 +1,6 @@
 #pragma once
 #include <optional>
 #include <entt/entity/registry.hpp>
-#include "systems/grid.hpp"
-
 #include "Pipes/Board.hpp"
 
 namespace Pipes

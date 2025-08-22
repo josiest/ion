@@ -16,16 +16,13 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/pipes.hpp
     src/components.hpp
 
-    src/systems.hpp
-    src/systems/grid.hpp
-    src/systems/point.hpp
-    src/systems/render.hpp
-
+    src/public/Pipes/Grid.hpp
     src/public/Pipes/Board.hpp
     src/public/Pipes/PointSet.hpp
     src/public/Pipes/TileSettings.hpp
     src/public/Pipes/Deck.hpp
     src/public/Pipes/Hand.hpp
+    src/public/Pipes/Tile/Tile.hpp
     src/public/Pipes/Tile/TileInfo.hpp
     src/public/Pipes/Tile/TileMap.hpp)
 

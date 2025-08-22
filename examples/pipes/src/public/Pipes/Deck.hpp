@@ -23,6 +23,6 @@ Pipes::Deck::Deck(RandomEngine & rng, Natural num_tiles)
 {
     for (Natural k = 0; k < num_tiles; ++k)
     {
-        tile_stack.emplace_back(Pipes::TileInfo::random_name(rng), Pipes::TileInfo::random_rotation(rng));
+        tile_stack.emplace_back(TileInfo::random_name(rng), TileInfo::random_rotation(rng));
     }
 }

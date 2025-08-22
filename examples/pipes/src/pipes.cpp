@@ -1,10 +1,4 @@
 #include "pipes.hpp"
-#include "systems.hpp"
-
-#include <ion/ion.hpp>
-#include <SDL2/SDL.h>
-
-#include <random>
 #include <iostream>
 
 namespace ranges = std::ranges;
@@ -32,7 +26,7 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 
     // interface between grid-space and pixel-space
     //   100 seems like a decent unit-size for now
-      board(systems::grid{width, height, 100},
+      board(Pipes::Grid{width, height, 100},
             Pipes::TileMap(ion::asset_loader{}, "tiles")),
       deck(_rng, 11u),
       hand(board)
@@ -81,7 +75,7 @@ void pipes::on_mouse_clicked()
     {
         return;
     }
-    const SDL_Point position = board.entities.get<component::position>(*hand.current_tile);
+    const SDL_Point position = static_cast<SDL_Point>(board.entities.get<component::position>(*hand.current_tile));
     if (board.has_tile(position.x, position.y) or not board.has_adjacent_tile(position.x, position.y))
     {
         return;

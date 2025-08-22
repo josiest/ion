@@ -4,6 +4,6 @@
 namespace component {
 struct position {
     int x, y;
-    inline operator SDL_Point() const { return {x, y}; }
+    inline explicit operator SDL_Point() const { return {x, y}; }
 };
 }
