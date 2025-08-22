@@ -3,13 +3,13 @@
 
 namespace Pipes
 {
-class TileDeck
+class Deck
 {
 public:
-    TileDeck() = delete;
+    Deck() = delete;
     template<typename RandomEngine, std::unsigned_integral Natural>
     // requires RandomNumberEngine<RandomEngine>
-    TileDeck(RandomEngine & rng, Natural num_tiles);
+    Deck(RandomEngine & rng, Natural num_tiles);
 
     bool is_empty() const;
     Pipes::TileID next_tile();
@@ -19,7 +19,7 @@ private:
 }
 
 template<typename RandomEngine, std::unsigned_integral Natural>
-Pipes::TileDeck::TileDeck(RandomEngine & rng, Natural num_tiles)
+Pipes::Deck::Deck(RandomEngine & rng, Natural num_tiles)
 {
     for (Natural k = 0; k < num_tiles; ++k)
     {

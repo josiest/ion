@@ -63,8 +63,8 @@ void pipes::run()
     hand.current_tile = next_tile_from_deck(_world_space.nearest_point(ion::input::mouse_position()));
 
     // bind the mouse to the tile hand
-    _events.on_mouse_scroll().connect<&Pipes::TileHand::on_cursor_scrolled>(hand);
-    _events.on_mouse_moved().connect<&Pipes::TileHand::on_cursor_moved>(hand);
+    _events.on_mouse_scroll().connect<&Pipes::Hand::on_cursor_scrolled>(hand);
+    _events.on_mouse_moved().connect<&Pipes::Hand::on_cursor_moved>(hand);
 
     // place the tile associated with the mouse when clicked
     _events.on_mouse_up().connect<&pipes::on_mouse_clicked>(this);

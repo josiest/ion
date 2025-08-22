@@ -3,8 +3,8 @@
 #include "systems.hpp"
 
 #include "Pipes/PointSet.hpp"
-#include "Pipes/TileDeck.hpp"
-#include "Pipes/TileHand.hpp"
+#include "Pipes/Deck.hpp"
+#include "Pipes/Hand.hpp"
 #include "Pipes/TileSettings.hpp"
 
 #include <ion/ion.hpp>
@@ -43,6 +43,6 @@ private:
     Pipes::TileSettings tile_settings;
     Pipes::TileMap loaded_tiles;
 
-    Pipes::TileDeck deck;
-    Pipes::TileHand hand;
+    Pipes::Deck deck;
+    Pipes::Hand hand;
 };

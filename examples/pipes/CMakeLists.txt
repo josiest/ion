@@ -6,8 +6,8 @@ file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_executable(pipes
     src/pipes.cpp
 
-    src/private/TileDeck.cpp
-    src/private/TileHand.cpp
+    src/private/Deck.cpp
+    src/private/Hand.cpp
     src/private/Tile/TileInfo.cpp
     src/private/Tile/TileMap.cpp)
 
@@ -22,8 +22,8 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
 
     src/public/Pipes/PointSet.hpp
     src/public/Pipes/TileSettings.hpp
-    src/public/Pipes/TileDeck.hpp
-    src/public/Pipes/TileHand.hpp
+    src/public/Pipes/Deck.hpp
+    src/public/Pipes/Hand.hpp
     src/public/Pipes/Tile/TileInfo.hpp
     src/public/Pipes/Tile/TileMap.hpp)
 

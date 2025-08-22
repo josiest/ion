@@ -1,11 +1,11 @@
-#include "Pipes/TileDeck.hpp"
+#include "Pipes/Deck.hpp"
 
-bool Pipes::TileDeck::is_empty() const
+bool Pipes::Deck::is_empty() const
 {
     return tile_stack.empty();
 }
 
-Pipes::TileID Pipes::TileDeck::next_tile()
+Pipes::TileID Pipes::Deck::next_tile()
 {
     TileID tile = tile_stack.back();
     tile_stack.pop_back();

@@ -8,12 +8,12 @@
 
 namespace Pipes
 {
-class TileHand
+class Hand
 {
 public:
-    TileHand() = delete;
-    TileHand(entt::registry & entities, const systems::grid & world_space,
-             const TileSettings & tile_settings, const PointSet & placed_tiles);
+    Hand() = delete;
+    Hand(entt::registry & entities, const systems::grid & world_space,
+         const TileSettings & tile_settings, const PointSet & placed_tiles);
 
     void on_cursor_moved(int x, int y);
     void on_cursor_scrolled(int dy);

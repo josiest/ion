@@ -1,8 +1,8 @@
-#include "Pipes/TileHand.hpp"
+#include "Pipes/Hand.hpp"
 #include "Pipes/Tile/Tile.hpp"
 
-Pipes::TileHand::TileHand(entt::registry & entities, const systems::grid & world_space,
-                          const TileSettings & tile_settings, const PointSet & placed_tiles)
+Pipes::Hand::Hand(entt::registry & entities, const systems::grid & world_space,
+                  const TileSettings & tile_settings, const PointSet & placed_tiles)
     : entities{ &entities },
       world_space{ &world_space },
       tile_settings{ &tile_settings },
@@ -10,7 +10,7 @@ Pipes::TileHand::TileHand(entt::registry & entities, const systems::grid & world
 {
 }
 
-void Pipes::TileHand::on_cursor_moved(int x, int y)
+void Pipes::Hand::on_cursor_moved(int x, int y)
 {
     const SDL_Point mouse = world_space->nearest_point(x, y);
     const SDL_Color color = systems::is_adjacent(*placed_tiles, mouse.x, mouse.y)
@@ -42,7 +42,7 @@ void Pipes::TileHand::on_cursor_moved(int x, int y)
     }
 }
 
-void Pipes::TileHand::on_cursor_scrolled(int dy)
+void Pipes::Hand::on_cursor_scrolled(int dy)
 {
     if (current_tile)
     {
