@@ -2,6 +2,8 @@
 
 #include "systems.hpp"
 #include "entities.hpp"
+
+#include "Pipes/TileDeck.hpp"
 #include "Pipes/TileHand.hpp"
 
 #include <ion/ion.hpp>
@@ -18,7 +20,10 @@ public:
     pipes(std::uint32_t width, std::uint32_t height);
     void run();
 private:
-    void place_tile();
+    void on_mouse_clicked();
+
+    entt::entity next_tile_from_deck(const SDL_Point& position);
+    void place_tile(entt::entity tile_id);
 
     // events
     ion::event_sink _events;
@@ -35,5 +40,6 @@ private:
     pointset _placed_tiles;
 
     // tile
+    Pipes::TileDeck deck;
     Pipes::TileHand hand;
 };

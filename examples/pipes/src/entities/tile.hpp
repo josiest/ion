@@ -47,67 +47,6 @@ public:
     /** Create a tile prefab with the specified colors */
     explicit tile(std::string_view images_path);
 
-    /** Create a dynamic random tile object */
-    template<class engine_t>
-    entt::entity random_dynamic(entt::registry & entities, engine_t & rng,
-                                point auto const & p) const
-    {
-        return create(entities, Pipes::TileInfo::random_name(rng),
-                                Pipes::TileInfo::random_rotation(rng),
-                                p.x, p.y,
-                                distant_color());
-    }
-
-    /** Create a static random tile object */
-    template<class engine_t, point point_t>
-    entt::entity random_static(entt::registry & entities,
-                               pointset & placed_tiles,
-                               point_t const & p, engine_t & rng) const
-    {
-        auto const entity = random_dynamic(entities, rng, p);
-        entities.emplace<component::static_tile>(entity);
-        auto & tile = entities.get<Pipes::Component::Tile>(entity);
-        tile.color = static_color();
-        placed_tiles.try_emplace(p, entity);
-        return entity;
-    }
-
-    /** Create a static copy of a tile entity */
-    template<class engine_t>
-    entt::entity static_copy(entt::registry & entities, pointset & placed_tiles,
-                             entt::entity mouse_tile, engine_t & rng) const
-    {
-        // get the required components
-        auto const & [info, p] = entities.get<Pipes::Component::Tile, component::position>(mouse_tile);
-
-        // return the existing entity if it already has been placed
-        auto const search = placed_tiles.find(p);
-        if (search != placed_tiles.end()) {
-            return search->second;
-        }
-        // return mouse entity if mouse is too far
-        if (not systems::is_adjacent(placed_tiles, p)) {
-            return mouse_tile;
-        }
-        // otherwise create a copy of the tile
-        auto const entity = create(entities, info.name, info.rotation, p.x, p.y, static_color());
-        entities.emplace<component::static_tile>(entity);
-
-        // and mark it as placed
-        placed_tiles.try_emplace(search, p, entity);
-
-        // then randomize the mouse tile
-        systems::randomize_tile(entities, mouse_tile, rng);
-        return entity;
-    }
-
-    /** Create a tile entity */
-    static entt::entity create(entt::registry & entities,
-                               Pipes::TileInfo::Name name,
-                               Pipes::TileInfo::Rotation rotation,
-                               int x, int y,
-                               const SDL_Color& color);
-
     /** The background color for static tiles */
     inline SDL_Color const & static_color() const { return settings.static_color; }
     /** The background color for placeable tiles */

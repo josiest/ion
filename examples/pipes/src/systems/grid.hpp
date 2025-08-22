@@ -67,6 +67,11 @@ public:
         return unit_square(p.x, p.y);
     }
 
+    inline SDL_Point center() const
+    {
+        return nearest_point(_width/2, _height/2);
+    }
+
     /**
      * Calculate the nearest grid point from pixels
      *
@@ -76,8 +81,7 @@ public:
     inline component::position nearest_point(int x, int y) const
     {
         int const height = static_cast<int>(_height);
-        int const unit_size = static_cast<int>(_unit_size);
-        return { x/unit_size, (height-y)/unit_size };
+        return { x/unit_size(), (height-y)/unit_size() };
     }
 
     /**

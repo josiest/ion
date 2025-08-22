@@ -7,6 +7,7 @@ add_executable(pipes
     src/pipes.cpp
     src/entities/tile.cpp
 
+    src/private/TileDeck.cpp
     src/private/TileHand.cpp
     src/private/Tile/TileInfo.cpp
     src/private/Tile/TileMap.cpp)
@@ -24,6 +25,7 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/systems/render.hpp
     src/systems/tile.hpp
 
+    src/public/Pipes/TileDeck.hpp
     src/public/Pipes/TileHand.hpp
     src/public/Pipes/Tile/TileInfo.hpp
     src/public/Pipes/Tile/TileMap.hpp)

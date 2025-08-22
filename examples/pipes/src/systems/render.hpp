@@ -23,8 +23,11 @@ void render(ion::window_resource auto & window,
 
     // draw the tiles and update the window
     render_static_tiles(window, world_space, entities, tile_prefab);
-    render_mouse_tile(window, world_space, entities, tile_prefab,
-                      placed_tiles, mouse_tile);
+    if (mouse_tile != entt::null)
+    {
+        render_mouse_tile(window, world_space, entities, tile_prefab,
+                          placed_tiles, mouse_tile);
+    }
     SDL_UpdateWindowSurface(window);
 }
 
