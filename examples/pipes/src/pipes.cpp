@@ -38,7 +38,7 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 
       loaded_tiles(ion::asset_loader{}, "tiles"),
       deck(_rng, 11u),
-      hand(_entities, _world_space)
+      hand(_entities, _world_space, tile_settings, _placed_tiles)
 {
     // quit when SDL quit event is triggered
     _events.on_quit().connect<&ion::input::quit>();
@@ -59,7 +59,7 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 
 void pipes::run()
 {
-    hand.current_tile = next_tile_from_deck(ion::input::mouse_position());
+    hand.current_tile = next_tile_from_deck(_world_space.nearest_point(ion::input::mouse_position()));
 
     // bind the mouse to the tile hand
     _events.on_mouse_scroll().connect<&Pipes::TileHand::on_cursor_scrolled>(hand);
@@ -73,8 +73,7 @@ void pipes::run()
 
         // process any events then render the window
         _events.poll();
-        systems::render(_window, _world_space, _entities, _placed_tiles, tile_settings, loaded_tiles,
-                        hand.current_tile? *hand.current_tile : entt::null);
+        systems::render(_window, _world_space, _entities, loaded_tiles);
     }
 }
 
@@ -117,6 +116,5 @@ void pipes::place_tile(const entt::entity tile_id)
 {
     const SDL_Point position = _entities.get<component::position>(tile_id);
     _entities.get<Pipes::Component::Tile>(tile_id).color = tile_settings.static_color;
-    _entities.emplace<component::static_tile>(tile_id);
     _placed_tiles.try_emplace(position, tile_id);
 }

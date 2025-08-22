@@ -6,6 +6,4 @@ struct position {
     int x, y;
     inline operator SDL_Point() const { return {x, y}; }
 };
-
-struct static_tile {};
 }
