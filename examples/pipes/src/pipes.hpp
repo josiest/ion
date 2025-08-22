@@ -1,10 +1,10 @@
 #pragma once
 
 #include "systems.hpp"
-#include "entities.hpp"
 
 #include "Pipes/TileDeck.hpp"
 #include "Pipes/TileHand.hpp"
+#include "Pipes/TileSettings.hpp"
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
@@ -36,10 +36,12 @@ private:
     // ecs
     engine_t _rng;
     entt::registry _entities;
-    prefab::tile _tile_prefab;
     pointset _placed_tiles;
 
     // tile
+    Pipes::TileSettings tile_settings;
+    Pipes::TileMap loaded_tiles;
+
     Pipes::TileDeck deck;
     Pipes::TileHand hand;
 };

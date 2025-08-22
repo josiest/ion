@@ -39,8 +39,8 @@ namespace Pipes
 class TileMap
 {
 public:
-    static TileMap load_all(const ion::asset_loader& asset_loader, std::string_view images_path);
-    SDL_Surface * image_for(TileInfo::Name name, TileInfo::Rotation rotation);
+    TileMap(const ion::asset_loader& asset_loader, std::string_view images_path);
+    SDL_Surface * image_for(TileInfo::Name name, TileInfo::Rotation rotation) const;
 private:
     TileMap() = default;
     std::unordered_map<TileID, ion::surface> tiles;

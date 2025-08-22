@@ -4,7 +4,9 @@
 #include "systems/point.hpp"
 #include "systems/grid.hpp"
 
-#include "entities/tile.hpp"
+#include "Pipes/Tile/TileMap.hpp"
+#include "Pipes/Tile/Tile.hpp"
+#include "Pipes/TileSettings.hpp"
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
@@ -14,7 +16,9 @@ namespace systems {
 
 void render(ion::window_resource auto & window,
             systems::grid const & world_space, entt::registry & entities,
-            prefab::tile & tile_prefab, pointset const & placed_tiles,
+            pointset const & placed_tiles,
+            const Pipes::TileSettings & tile_settings,
+            const Pipes::TileMap & loaded_tiles,
             entt::entity mouse_tile)
 {
     // clear the screen
@@ -22,11 +26,10 @@ void render(ion::window_resource auto & window,
     SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format, 0, 0, 0));
 
     // draw the tiles and update the window
-    render_static_tiles(window, world_space, entities, tile_prefab);
+    render_static_tiles(window, world_space, entities, loaded_tiles);
     if (mouse_tile != entt::null)
     {
-        render_mouse_tile(window, world_space, entities, tile_prefab,
-                          placed_tiles, mouse_tile);
+        render_mouse_tile(window, world_space, entities, tile_settings, loaded_tiles, placed_tiles, mouse_tile);
     }
     SDL_UpdateWindowSurface(window);
 }
@@ -34,7 +37,7 @@ void render(ion::window_resource auto & window,
 void render_static_tiles(ion::window_resource auto & window,
                          const grid & world_space,
                          entt::registry & entities,
-                         prefab::tile & tile_prefab)
+                         const Pipes::TileMap & loaded_tiles)
 {
     SDL_Surface * screen = SDL_GetWindowSurface(window);
 
@@ -42,7 +45,7 @@ void render_static_tiles(ion::window_resource auto & window,
             .each([&](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to
-        SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile.name, tile.rotation);
+        SDL_Surface * tile_surface = loaded_tiles.image_for(tile.name, tile.rotation);
         SDL_Rect grid_square = world_space.unit_square(position);
 
         // color the background and draw the tile
@@ -53,8 +56,11 @@ void render_static_tiles(ion::window_resource auto & window,
 
 void render_mouse_tile(ion::window_resource auto & window,
                        grid const & world_space,
-                       entt::registry & entities, prefab::tile & tile_prefab,
-                       pointset const & placed_tiles, entt::entity mouse_tile)
+                       entt::registry & entities,
+                       const Pipes::TileSettings & tile_settings,
+                       const Pipes::TileMap & loaded_tiles,
+                       pointset const & placed_tiles,
+                       entt::entity mouse_tile)
 {
     auto const & p = entities.get<component::position>(mouse_tile);
     // do nothing if a static tile already exists at p
@@ -64,12 +70,12 @@ void render_mouse_tile(ion::window_resource auto & window,
 
     // then the bitmap surface
     auto const & tile = entities.get<Pipes::Component::Tile>(mouse_tile);
-    SDL_Surface * tile_surface = tile_prefab.loaded_tiles.image_for(tile.name, tile.rotation);
+    SDL_Surface * tile_surface = loaded_tiles.image_for(tile.name, tile.rotation);
 
     // get the appropriate color: is the mouse next to an already placed tile?
     SDL_Surface * screen = SDL_GetWindowSurface(window);
-    const SDL_Color rgb = is_adjacent(placed_tiles, p) ? tile_prefab.placeable_color()
-                                                       : tile_prefab.distant_color();
+    const SDL_Color rgb = is_adjacent(placed_tiles, p) ? tile_settings.placeable_color
+                                                       : tile_settings.distant_color;
     const std::uint32_t color = SDL_MapRGB(screen->format, rgb.r, rgb.g, rgb.b);
 
     // finally, render

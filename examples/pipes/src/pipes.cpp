@@ -36,9 +36,7 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     // initialize the random engine with a random seed
       _rng{std::random_device{}()},
 
-    // tell the tile prefab where to find the tile images
-      _tile_prefab{"tiles"},
-
+      loaded_tiles(ion::asset_loader{}, "tiles"),
       deck(_rng, 11u),
       hand(_entities, _world_space)
 {
@@ -53,11 +51,6 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     if (not _window) {
         set_error("Couldn't create a window: " + _window.get_error());
         return;
-    }
-
-    // make sure the tile images were loaded properly
-    if (not _tile_prefab) {
-        set_error("Couldn't load tiles:\n" + _tile_prefab.get_error());
     }
 
     // create a random initial tile in the middle of the screen
@@ -80,7 +73,7 @@ void pipes::run()
 
         // process any events then render the window
         _events.poll();
-        systems::render(_window, _world_space, _entities, _tile_prefab, _placed_tiles,
+        systems::render(_window, _world_space, _entities, _placed_tiles, tile_settings, loaded_tiles,
                         hand.current_tile? *hand.current_tile : entt::null);
     }
 }
@@ -112,8 +105,8 @@ entt::entity pipes::next_tile_from_deck(const SDL_Point & position)
 
     const auto [name, rotation] = deck.next_tile();
     const SDL_Color color = systems::is_adjacent(_placed_tiles, position)
-                          ? _tile_prefab.placeable_color()
-                          : _tile_prefab.distant_color();
+                          ? tile_settings.placeable_color
+                          : tile_settings.distant_color;
 
     _entities.emplace<Pipes::Component::Tile>(next_tile, name, rotation, color);
 
@@ -123,7 +116,7 @@ entt::entity pipes::next_tile_from_deck(const SDL_Point & position)
 void pipes::place_tile(const entt::entity tile_id)
 {
     const SDL_Point position = _entities.get<component::position>(tile_id);
-    _entities.get<Pipes::Component::Tile>(tile_id).color = _tile_prefab.static_color();
+    _entities.get<Pipes::Component::Tile>(tile_id).color = tile_settings.static_color;
     _entities.emplace<component::static_tile>(tile_id);
     _placed_tiles.try_emplace(position, tile_id);
 }

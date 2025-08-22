@@ -18,6 +18,10 @@ void ion::event_sink::poll()
             mouse_up.publish();
             break;
 
+        case SDL_MOUSEMOTION:
+            mouse_moved.publish(event.motion.x, event.motion.y);
+            break;
+
         default:
             break;
         }

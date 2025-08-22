@@ -29,7 +29,7 @@ public:
     ~surface();
 
     /** Cast to the underlying SDL_Surface */
-    inline operator SDL_Surface *() noexcept { return _surface; }
+    inline operator SDL_Surface *() const noexcept { return _surface; }
 
     /**
      * Create a surface by loading a bitmap image
