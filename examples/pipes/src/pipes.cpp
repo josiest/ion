@@ -36,7 +36,9 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
       _rng{std::random_device{}()},
 
     // tell the tile prefab where to find the tile images
-      _tile_prefab{"tiles"}
+      _tile_prefab{"tiles"},
+
+      hand(_entities, _world_space)
 {
     // quit when SDL quit event is triggered
     _events.on_quit().connect<&ion::input::quit>();
@@ -64,31 +66,25 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
 void pipes::run()
 {
     // create a random tile associated with the mouse
-    _current_tile = _tile_prefab.random_dynamic( _entities, _rng, ion::input::mouse_position() );
+    hand.current_tile = _tile_prefab.random_dynamic( _entities, _rng, ion::input::mouse_position() );
 
-    // rotate the tile associated with the mouse when scrolled
-    _events.on_mouse_scroll().connect<&pipes::rotate_tile>(this);
+    // bind the mouse to the tile hand
+    _events.on_mouse_scroll().connect<&Pipes::TileHand::on_cursor_scrolled>(hand);
+    _events.on_mouse_moved().connect<&Pipes::TileHand::on_cursor_moved>(hand);
+
     // place the tile associated with the mouse when clicked
     _events.on_mouse_up().connect<&pipes::place_tile>(this);
 
     // create the window and run the game
     while (not ion::input::has_quit()) {
 
-        // bind the mouse-tile entity to the mouse position
-        systems::bind_to_mouse(_entities, *_current_tile, _world_space);
-
         // process any events then render the window
         _events.poll();
-        systems::render(_window, _world_space, _entities, _tile_prefab, _placed_tiles, *_current_tile);
+        systems::render(_window, _world_space, _entities, _tile_prefab, _placed_tiles, *hand.current_tile);
     }
-}
-
-void pipes::rotate_tile(int dy)
-{
-    systems::rotate_tile(_entities, *_current_tile, dy);
 }
 
 void pipes::place_tile()
 {
-    _tile_prefab.static_copy(_entities, _placed_tiles, *_current_tile, _rng);
+    _tile_prefab.static_copy(_entities, _placed_tiles, *hand.current_tile, _rng);
 }

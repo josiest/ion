@@ -2,6 +2,7 @@
 
 #include "systems.hpp"
 #include "entities.hpp"
+#include "Pipes/TileHand.hpp"
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
@@ -17,7 +18,6 @@ public:
     pipes(std::uint32_t width, std::uint32_t height);
     void run();
 private:
-    void rotate_tile(int dy);
     void place_tile();
 
     // events
@@ -35,5 +35,5 @@ private:
     pointset _placed_tiles;
 
     // tile
-    std::optional<entt::entity> _current_tile;
+    Pipes::TileHand hand;
 };
