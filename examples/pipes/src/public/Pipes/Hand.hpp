@@ -2,6 +2,7 @@
 #include <optional>
 #include <entt/entity/registry.hpp>
 #include "Pipes/Board.hpp"
+#include "Pipes/Tile/Tile.hpp"
 
 namespace Pipes
 {
@@ -14,9 +15,11 @@ public:
     void on_cursor_moved(int x, int y);
     void on_cursor_scrolled(int dy);
 
-    std::optional<entt::entity> current_tile = std::nullopt;
+    std::optional<TileHandle> current_tile = std::nullopt;
 private:
     Board * board;
     std::optional<TileID> cached_tile = std::nullopt;
+
+    TileHandle pop_cache();
 };
 }

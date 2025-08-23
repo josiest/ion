@@ -9,6 +9,7 @@ add_executable(pipes
     src/private/Board.cpp
     src/private/Deck.cpp
     src/private/Hand.cpp
+    src/private/Tile/Tile.cpp
     src/private/Tile/TileInfo.cpp
     src/private/Tile/TileMap.cpp)
 

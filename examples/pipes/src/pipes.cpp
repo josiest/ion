@@ -45,13 +45,13 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     }
 
     // create a random initial tile in the middle of the screen
-    board.place_tile(board.draw_from_deck(deck, board.world_space.center()));
+    board.place_tile(board.draw_from(deck, board.world_space.center()));
 }
 
 void pipes::run()
 {
     const SDL_Point mouse = board.world_space.nearest_point(ion::input::mouse_position());
-    hand.current_tile = board.draw_from_deck(deck, mouse);
+    hand.current_tile = board.draw_from(deck, mouse);
 
     // bind the mouse to the tile hand
     _events.on_mouse_scroll().connect<&Pipes::Hand::on_cursor_scrolled>(hand);
@@ -75,16 +75,16 @@ void pipes::on_mouse_clicked()
     {
         return;
     }
-    const SDL_Point position = static_cast<SDL_Point>(board.entities.get<component::position>(*hand.current_tile));
-    if (board.has_tile(position.x, position.y) or not board.has_adjacent_tile(position.x, position.y))
+    const SDL_Point position = hand.current_tile->position();
+    if (board.has_tile(position) or not board.has_adjacent_tile(position))
     {
         return;
     }
-    board.place_tile(*hand.current_tile);
+    board.place_tile(std::move(*hand.current_tile));
     if (deck.is_empty())
     {
         hand.current_tile = std::nullopt;
         return;
     }
-    hand.current_tile = board.draw_from_deck(deck, position);
+    hand.current_tile = board.draw_from(deck, position);
 }

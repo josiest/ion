@@ -31,25 +31,25 @@ bool Pipes::Board::has_adjacent_tile(int x, int y) const
     });
 }
 
-entt::entity Pipes::Board::draw_from_deck(Pipes::Deck & deck, const SDL_Point & position)
+Pipes::TileHandle Pipes::Board::draw_from(Pipes::Deck & deck, const SDL_Point & position)
 {
-    const entt::entity next_tile = entities.create();
-    entities.emplace<component::position>(next_tile, position.x, position.y);
+    auto tile = TileHandle(entities);
+    tile.position(position);
 
     const auto [name, rotation] = deck.next_tile();
-    const SDL_Color color = has_adjacent_tile(position.x, position.y)
-                          ? tile_settings.placeable_color
-                          : tile_settings.distant_color;
+    tile.name() = name;
+    tile.rotation() = rotation;
+    tile.color() = has_adjacent_tile(position)? tile_settings.placeable_color
+                                              : tile_settings.distant_color;
 
-    entities.emplace<Pipes::Component::Tile>(next_tile, name, rotation, color);
-    return next_tile;
+    return tile;
 }
 
-void Pipes::Board::place_tile(entt::entity tile_id)
+void Pipes::Board::place_tile(Pipes::TileHandle && tile)
 {
-    const SDL_Point position = static_cast<SDL_Point>(entities.get<component::position>(tile_id));
-    entities.get<Pipes::Component::Tile>(tile_id).color = tile_settings.static_color;
-    placed_tiles.try_emplace(position, tile_id);
+    tile.color() = tile_settings.static_color;
+    const SDL_Point position = tile.position();
+    placed_tiles.try_emplace(position, std::move(tile));
 }
 
 void Pipes::Board::render(SDL_Window * window) const

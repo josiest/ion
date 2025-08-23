@@ -2,6 +2,7 @@
 #include <SDL2/SDL_rect.h>
 #include <entt/entity/entity.hpp>
 #include <unordered_map>
+#include "Pipes/Tile/Tile.hpp"
 
 template<>
 struct std::hash<SDL_Point>
@@ -21,5 +22,5 @@ constexpr bool operator==(const SDL_Point & lhs, const SDL_Point & rhs)
 namespace Pipes
 {
 /** An alias for a set of points */
-using PointSet = std::unordered_map<SDL_Point, entt::entity>;
+using PointSet = std::unordered_map<SDL_Point, TileHandle>;
 }
