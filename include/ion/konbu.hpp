@@ -15,6 +15,7 @@
 #include <filesystem>
 
 #include <SDL2/SDL_pixels.h>
+#include "ion/serialization/yaml/sdl_primitives.hpp"
 
 // logging
 
@@ -60,6 +61,18 @@ bool decode(const YAML::Node& config, T& value)
             if (member_type.size_of() == sizeof(std::uint8_t))
             {
                 member_data.set(reflection, member_config.as<std::uint8_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::uint16_t))
+            {
+                member_data.set(reflection, member_config.as<std::uint16_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::uint32_t))
+            {
+                member_data.set(reflection, member_config.as<std::uint32_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::uint64_t))
+            {
+                member_data.set(reflection, member_config.as<std::uint64_t>());
             }
         }
         else if (member_type == entt::resolve<SDL_Color>())

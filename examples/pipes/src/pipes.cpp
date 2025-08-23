@@ -1,11 +1,28 @@
 #include "pipes.hpp"
+#include <yaml-cpp/yaml.h>
 #include <iostream>
 
 namespace ranges = std::ranges;
 
 int main(int argc, char * argv[])
 {
-    pipes game{800, 600};
+    ion::asset_loader asset_loader;
+    Pipes::WindowSettings window_settings;
+    Pipes::GameSettings game_settings;
+    Pipes::TileSettings tile_settings;
+    try
+    {
+        auto config = YAML::LoadFile("resources/settings.yaml");
+        window_settings = asset_loader.from_config<Pipes::WindowSettings>(config["window"]);
+        game_settings = asset_loader.from_config<Pipes::GameSettings>(config["game"]);
+        tile_settings = asset_loader.from_config<Pipes::TileSettings>(config["tile"]);
+    }
+    catch (const YAML::Exception & error)
+    {
+        std::cout << error.what() << "\n";
+    }
+
+    pipes game{ asset_loader, window_settings, game_settings, tile_settings };
 
     // crash if the game failed to initialize
     if (not game) {
@@ -43,6 +60,43 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
         set_error("Couldn't create a window: " + _window.get_error());
         return;
     }
+
+    // create a random initial tile in the middle of the screen
+    board.place_tile(board.draw_from(deck, board.world_space.center()));
+}
+
+pipes::pipes(const ion::asset_loader & asset_loader,
+             const Pipes::WindowSettings & window_settings,
+             const Pipes::GameSettings & game_settings,
+             const Pipes::TileSettings & tile_settings)
+
+    : _window(ion::software_renderer::basic_window(window_settings.name,
+                                                   window_settings.width,
+                                                   window_settings.height)),
+
+      _rng(std::random_device{}()),
+
+      board(Pipes::Grid(window_settings.width, window_settings.height, game_settings.unit_size),
+            Pipes::TileMap(asset_loader, game_settings.tiles_directory),
+            tile_settings),
+
+      deck(_rng, game_settings.deck_size),
+      hand(board)
+{
+    // quit when SDL quit event is triggered
+    _events.on_quit().connect<&ion::input::quit>();
+
+    // make sure SDL resources initialized properly
+    if (not _sdl) {
+        set_error("Couldn't initialize SDL: " + _sdl.get_error());
+        return;
+    }
+    if (not _window) {
+        set_error("Couldn't create a window: " + _window.get_error());
+        return;
+    }
+    std::cout << "deck size: " << game_settings.deck_size << "\n";
+    board.background_color = game_settings.background_color;
 
     // create a random initial tile in the middle of the screen
     board.place_tile(board.draw_from(deck, board.world_space.center()));

@@ -1,0 +1,9 @@
+window:
+  name: "Pipes Example"
+  width: 640
+  height: 480
+
+game:
+  deck-size: 5
+  unit-size: 50
+  background-color: [110, 175, 229]

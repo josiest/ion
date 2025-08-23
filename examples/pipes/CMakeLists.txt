@@ -44,3 +44,6 @@ target_link_libraries(pipes PRIVATE ion::window ion::graphics ion::input)
 find_package(EnTT REQUIRED CONFIG)
 target_link_libraries(pipes INTERFACE EnTT::EnTT)
 
+find_package(yaml-cpp REQUIRED CONFIG)
+target_link_libraries(pipes PRIVATE yaml-cpp::yaml-cpp)
+

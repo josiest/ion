@@ -5,12 +5,16 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_video.h>
 
-#include <vector>
+#include <array>
 #include <algorithm>
 
-Pipes::Board::Board(Pipes::Grid && world_space, TileMap && loaded_tiles)
+Pipes::Board::Board(Pipes::Grid && world_space,
+                    TileMap && loaded_tiles,
+                    const TileSettings & tile_settings)
 
-    : world_space(std::move(world_space)), loaded_tiles(std::move(loaded_tiles))
+    : world_space(std::move(world_space)),
+      loaded_tiles(std::move(loaded_tiles)),
+      tile_settings(tile_settings)
 {
 }
 
@@ -22,9 +26,9 @@ bool Pipes::Board::has_tile(int x, int y) const
 bool Pipes::Board::has_adjacent_tile(int x, int y) const
 {
     // a list of adjacent points
-    std::vector<SDL_Point> points{
+    std::array<SDL_Point, 4> points{{
         {x+1, y}, {x-1, y}, {x, y+1}, {x, y-1}
-    };
+    }};
     // determine if an adjacent tile has been placed
     return std::ranges::any_of(points, [this](auto const & p) {
         return placed_tiles.contains(p);
@@ -56,7 +60,8 @@ void Pipes::Board::render(SDL_Window * window) const
 {
     // clear the screen
     auto screen = SDL_GetWindowSurface(window);
-    SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format, 0, 0, 0));
+    SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format,
+                                             background_color.r, background_color.g, background_color.b));
 
     // draw the tiles and update the window
     entities.view<Component::Tile, component::position>()
