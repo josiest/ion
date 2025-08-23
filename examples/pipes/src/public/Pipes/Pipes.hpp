@@ -57,16 +57,18 @@ auto reflect<Pipes::GameSettings>()
 }
 }
 
-/** A resource manager for all game resources */
-class pipes : public ion::isotope {
+namespace Pipes
+{
+
+class App : public ion::isotope {
 public:
     using engine_t = std::mt19937;
 
-    pipes(std::uint32_t width, std::uint32_t height);
-    pipes(const ion::asset_loader & asset_loader,
-          const Pipes::WindowSettings & window_settings,
-          const Pipes::GameSettings & game_settings,
-          const Pipes::TileSettings & tile_settings);
+    App(std::uint32_t width, std::uint32_t height);
+    App(const ion::asset_loader & asset_loader,
+        const Pipes::WindowSettings & window_settings,
+        const Pipes::GameSettings & game_settings,
+        const Pipes::TileSettings & tile_settings);
     void run();
 private:
     void on_mouse_clicked();
@@ -86,3 +88,4 @@ private:
     Pipes::Deck deck;
     Pipes::Hand hand;
 };
+}

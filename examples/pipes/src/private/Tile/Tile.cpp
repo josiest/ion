@@ -9,7 +9,7 @@ Pipes::TileHandle::TileHandle()
 Pipes::TileHandle::TileHandle(entt::registry & entities)
     : entities(&entities), id(entities.create())
 {
-    entities.emplace<component::position>(id, 0, 0);
+    entities.emplace<Component::Position>(id, 0, 0);
     entities.emplace<Component::Tile>(id, TileInfo::Name::Bar, TileInfo::Rotation::Down, SDL_Color{});
 }
 
@@ -30,14 +30,14 @@ Pipes::TileHandle::TileHandle(const Pipes::TileHandle & other)
 {
     id = entities->create();
     const SDL_Point position = other.position();
-    entities->emplace<component::position>(id, position.x, position.y);
+    entities->emplace<Component::Position>(id, position.x, position.y);
     entities->emplace<Component::Tile>(id, other.name(), other.rotation(), other.color());
 }
 
 Pipes::TileHandle & Pipes::TileHandle::operator=(const Pipes::TileHandle & other) noexcept
 {
     const SDL_Point position = other.position();
-    entities->replace<component::position>(id, position.x, position.y);
+    entities->replace<Component::Position>(id, position.x, position.y);
     entities->replace<Component::Tile>(id, other.name(), other.rotation(), other.color());
     return *this;
 }
@@ -66,12 +66,12 @@ Pipes::TileInfo::Name & Pipes::TileHandle::name()
 
 SDL_Point Pipes::TileHandle::position() const
 {
-    return static_cast<SDL_Point>(entities->get<component::position>(id));
+    return static_cast<SDL_Point>(entities->get<Component::Position>(id));
 }
 
 void Pipes::TileHandle::position(int x, int y)
 {
-    auto & position = entities->get<component::position>(id);
+    auto & position = entities->get<Component::Position>(id);
     position.x = x;
     position.y = y;
 }

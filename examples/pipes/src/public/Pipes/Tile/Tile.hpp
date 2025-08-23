@@ -13,6 +13,11 @@ struct Tile
     TileInfo::Rotation rotation;
     SDL_Color color;
 };
+
+struct Position {
+    int x, y;
+    inline explicit operator SDL_Point() const { return {x, y}; }
+};
 }
 
 namespace Pipes

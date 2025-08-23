@@ -64,7 +64,7 @@ void Pipes::Board::render(SDL_Window * window) const
                                              background_color.r, background_color.g, background_color.b));
 
     // draw the tiles and update the window
-    entities.view<Component::Tile, component::position>()
+    entities.view<Component::Tile, Component::Position>()
             .each([this, screen](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to

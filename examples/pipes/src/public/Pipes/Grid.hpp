@@ -1,7 +1,5 @@
 #pragma once
 
-#include "components.hpp"
-
 #include <cstdint>
 #include <SDL2/SDL_rect.h>
 

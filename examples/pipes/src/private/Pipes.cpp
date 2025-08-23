@@ -1,4 +1,4 @@
-#include "pipes.hpp"
+#include "Pipes/Pipes.hpp"
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 
@@ -22,7 +22,7 @@ int main(int argc, char * argv[])
         std::cout << error.what() << "\n";
     }
 
-    pipes game{ asset_loader, window_settings, game_settings, tile_settings };
+    Pipes::App game{ asset_loader, window_settings, game_settings, tile_settings };
 
     // crash if the game failed to initialize
     if (not game) {
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
 }
 
 
-pipes::pipes(std::uint32_t width, std::uint32_t height)
+Pipes::App::App(std::uint32_t width, std::uint32_t height)
     : _window{ion::software_renderer::basic_window("Pipes", width, height)},
 
     // initialize the random engine with a random seed
@@ -65,10 +65,10 @@ pipes::pipes(std::uint32_t width, std::uint32_t height)
     board.place_tile(board.draw_from(deck, board.world_space.center()));
 }
 
-pipes::pipes(const ion::asset_loader & asset_loader,
-             const Pipes::WindowSettings & window_settings,
-             const Pipes::GameSettings & game_settings,
-             const Pipes::TileSettings & tile_settings)
+Pipes::App::App(const ion::asset_loader & asset_loader,
+                const Pipes::WindowSettings & window_settings,
+                const Pipes::GameSettings & game_settings,
+                const Pipes::TileSettings & tile_settings)
 
     : _window(ion::software_renderer::basic_window(window_settings.name,
                                                    window_settings.width,
@@ -95,14 +95,13 @@ pipes::pipes(const ion::asset_loader & asset_loader,
         set_error("Couldn't create a window: " + _window.get_error());
         return;
     }
-    std::cout << "deck size: " << game_settings.deck_size << "\n";
     board.background_color = game_settings.background_color;
 
     // create a random initial tile in the middle of the screen
     board.place_tile(board.draw_from(deck, board.world_space.center()));
 }
 
-void pipes::run()
+void Pipes::App::run()
 {
     const SDL_Point mouse = board.world_space.nearest_point(ion::input::mouse_position());
     hand.current_tile = board.draw_from(deck, mouse);
@@ -112,7 +111,7 @@ void pipes::run()
     _events.on_mouse_moved().connect<&Pipes::Hand::on_cursor_moved>(hand);
 
     // place the tile associated with the mouse when clicked
-    _events.on_mouse_up().connect<&pipes::on_mouse_clicked>(this);
+    _events.on_mouse_up().connect<&App::on_mouse_clicked>(this);
 
     // create the window and run the game
     while (not ion::input::has_quit()) {
@@ -123,7 +122,7 @@ void pipes::run()
     }
 }
 
-void pipes::on_mouse_clicked()
+void Pipes::App::on_mouse_clicked()
 {
     if (not hand.current_tile)
     {

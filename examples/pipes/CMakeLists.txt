@@ -4,8 +4,7 @@ project(pipes-example)
 file(COPY resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(pipes
-    src/pipes.cpp
-
+    src/private/Pipes.cpp
     src/private/Board.cpp
     src/private/Deck.cpp
     src/private/Hand.cpp
@@ -14,9 +13,7 @@ add_executable(pipes
     src/private/Tile/TileMap.cpp)
 
 target_sources(pipes PUBLIC FILE_SET HEADERS FILES
-    src/pipes.hpp
-    src/components.hpp
-
+    src/public/Pipes/Pipes.hpp
     src/public/Pipes/Grid.hpp
     src/public/Pipes/Board.hpp
     src/public/Pipes/PointSet.hpp
@@ -31,7 +28,7 @@ set_target_properties(pipes PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED TRUE)
 
-target_include_directories(pipes PRIVATE src src/public)
+target_include_directories(pipes PRIVATE src/public)
 
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 if (TARGET SDL2::SDL2main)

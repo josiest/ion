@@ -1,9 +1,0 @@
-#pragma once
-#include <SDL2/SDL_rect.h>
-
-namespace component {
-struct position {
-    int x, y;
-    inline explicit operator SDL_Point() const { return {x, y}; }
-};
-}
