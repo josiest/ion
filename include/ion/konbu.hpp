@@ -56,7 +56,11 @@ bool decode(const YAML::Node& config, T& value)
         const auto member_data = type.data(member_name);
         const auto member_type = member_data.type();
 
-        if (member_type.is_integral() and not member_type.is_signed())
+        if (member_type == entt::resolve<bool>())
+        {
+            member_data.set(reflection, member_config.as<bool>());
+        }
+        else if (member_type.is_integral() and not member_type.is_signed())
         {
             if (member_type.size_of() == sizeof(std::uint8_t))
             {
@@ -74,6 +78,44 @@ bool decode(const YAML::Node& config, T& value)
             {
                 member_data.set(reflection, member_config.as<std::uint64_t>());
             }
+        }
+        else if (member_type.is_integral())
+        {
+            if (member_type.size_of() == sizeof(std::int8_t))
+            {
+                member_data.set(reflection, member_config.as<std::int8_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::int16_t))
+            {
+                member_data.set(reflection, member_config.as<std::int16_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::int32_t))
+            {
+                member_data.set(reflection, member_config.as<std::int32_t>());
+            }
+            else if (member_type.size_of() == sizeof(std::int64_t))
+            {
+                member_data.set(reflection, member_config.as<std::int64_t>());
+            }
+        }
+        else if (member_type.is_arithmetic())
+        {
+            if (member_type.size_of() == sizeof(float))
+            {
+                member_data.set(reflection, member_config.as<float>());
+            }
+            else if (member_type.size_of() == sizeof(double))
+            {
+                member_data.set(reflection, member_config.as<double>());
+            }
+            else if (member_type.size_of() == sizeof(long double))
+            {
+                member_data.set(reflection, member_config.as<long double>());
+            }
+        }
+        else if (member_type == entt::resolve<std::string>())
+        {
+            member_data.set(reflection, member_config.as<std::string>());
         }
         else if (member_type == entt::resolve<SDL_Color>())
         {
