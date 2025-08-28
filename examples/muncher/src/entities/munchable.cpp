@@ -96,12 +96,11 @@ munchable::random_bbox(entt::registry & entities, entt::entity munchableid,
     std::uniform_int_distribution<std::size_t> idist(0, positions.size()-1);
     size_t const i = idist(rng);
 
-    // use lognomal distribution to generate a random size to ensure positivity
+    // use lognormal distribution to generate a random size to ensure positivity
     //  player_box.size is assumed to be positive
-    std::lognormal_distribution size_dist{std::log(player_box.size),
-                                          std::log(_size_variation)};
+    std::lognormal_distribution size_dist{std::log(player_box.size), std::log(_size_variation)};
 
-    // add the new bbox component to the munchable entitiy
+    // add the new bbox component to the munchable entity
     return entities.emplace<component::bbox>(munchableid,
             positions[i].first, positions[i].second, size_dist(rng));
 }
