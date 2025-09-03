@@ -4,11 +4,9 @@
 
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_video.h>
-#include <SDL2/SDL_log.h>
 
 #include <array>
 #include <algorithm>
-#include <cstdio>
 
 Pipes::Board::Board(TileMap && loaded_tiles,
                     const TileSettings & tile_settings)
@@ -59,19 +57,20 @@ void Pipes::Board::place_tile(Pipes::TileHandle && tile)
 SDL_Point Pipes::Board::nearest_point(int x, int y) const
 {
     auto board_position = pixel_to_board * glm::fvec3(x, y, 1.f);
+    // pixel_to_board will give us a fractional point, but we want to floor bc units start from bottom left
     board_position.x = std::floor(board_position.x);
     board_position.y = std::floor(board_position.y);
-    SDL_Log("pixel: (%d, %d)\nboard: (%.0f, %.0f)\n\n", x, y, board_position.x, board_position.y);
-    std::fflush(stderr);
     return { static_cast<int>(board_position.x), static_cast<int>(board_position.y) };
 }
 
 SDL_Rect Pipes::Board::unit_square(int x, int y) const
 {
     const auto board_to_pixels = transform.global_basis();
-    auto const q = board_to_pixels * glm::fvec3(x, y, 1.f);
-    int const unit_size = static_cast<int>(transform.scale.x);
-    return SDL_Rect{ static_cast<int>(q.x), static_cast<int>(q.y),
+    const auto pixel_position = board_to_pixels * glm::fvec3(x, y, 1.f);
+    const int unit_size = static_cast<int>(transform.scale.x);
+
+    // subtract unit size from y bc we're drawing from upper left, but coordinates start from bottom left
+    return SDL_Rect{ static_cast<int>(pixel_position.x), static_cast<int>(pixel_position.y - unit_size),
                      unit_size, unit_size };
 }
 
