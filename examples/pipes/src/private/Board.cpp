@@ -4,16 +4,16 @@
 
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_log.h>
 
 #include <array>
 #include <algorithm>
+#include <cstdio>
 
-Pipes::Board::Board(Pipes::Grid && world_space,
-                    TileMap && loaded_tiles,
+Pipes::Board::Board(TileMap && loaded_tiles,
                     const TileSettings & tile_settings)
 
-    : world_space(std::move(world_space)),
-      loaded_tiles(std::move(loaded_tiles)),
+    : loaded_tiles(std::move(loaded_tiles)),
       tile_settings(tile_settings)
 {
 }
@@ -56,6 +56,25 @@ void Pipes::Board::place_tile(Pipes::TileHandle && tile)
     placed_tiles.try_emplace(position, std::move(tile));
 }
 
+SDL_Point Pipes::Board::nearest_point(int x, int y) const
+{
+    auto board_position = pixel_to_board * glm::fvec3(x, y, 1.f);
+    board_position.x = std::floor(board_position.x);
+    board_position.y = std::floor(board_position.y);
+    SDL_Log("pixel: (%d, %d)\nboard: (%.0f, %.0f)\n\n", x, y, board_position.x, board_position.y);
+    std::fflush(stderr);
+    return { static_cast<int>(board_position.x), static_cast<int>(board_position.y) };
+}
+
+SDL_Rect Pipes::Board::unit_square(int x, int y) const
+{
+    const auto board_to_pixels = transform.global_basis();
+    auto const q = board_to_pixels * glm::fvec3(x, y, 1.f);
+    int const unit_size = static_cast<int>(transform.scale.x);
+    return SDL_Rect{ static_cast<int>(q.x), static_cast<int>(q.y),
+                     unit_size, unit_size };
+}
+
 void Pipes::Board::render(SDL_Window * window) const
 {
     // clear the screen
@@ -69,7 +88,7 @@ void Pipes::Board::render(SDL_Window * window) const
     {
         // get the sdl surface to render from and the grid square to render to
         SDL_Surface * tile_surface = loaded_tiles.image_for(tile.name, tile.rotation);
-        SDL_Rect grid_square = world_space.unit_square(position);
+        SDL_Rect grid_square = unit_square(position);
 
         // color the background and draw the tile
         SDL_FillRect(screen, &grid_square, SDL_MapRGB(screen->format, tile.color.r, tile.color.g, tile.color.b));

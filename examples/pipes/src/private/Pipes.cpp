@@ -34,37 +34,6 @@ int main(int argc, char * argv[])
     return EXIT_SUCCESS;
 }
 
-
-Pipes::App::App(std::uint32_t width, std::uint32_t height)
-    : _window{ion::software_renderer::basic_window("Pipes", width, height)},
-
-    // initialize the random engine with a random seed
-      _rng{std::random_device{}()},
-
-    // interface between grid-space and pixel-space
-    //   100 seems like a decent unit-size for now
-      board(Pipes::Grid{width, height, 100},
-            Pipes::TileMap(ion::asset_loader{}, "tiles")),
-      deck(_rng, 11u),
-      hand(board)
-{
-    // quit when SDL quit event is triggered
-    _events.on_quit().connect<&ion::input::quit>();
-
-    // make sure SDL resources initialized properly
-    if (not _sdl) {
-        set_error("Couldn't initialize SDL: " + _sdl.get_error());
-        return;
-    }
-    if (not _window) {
-        set_error("Couldn't create a window: " + _window.get_error());
-        return;
-    }
-
-    // create a random initial tile in the middle of the screen
-    board.place_tile(board.draw_from(deck, board.world_space.center()));
-}
-
 Pipes::App::App(const ion::asset_loader & asset_loader,
                 const Pipes::WindowSettings & window_settings,
                 const Pipes::GameSettings & game_settings,
@@ -76,8 +45,7 @@ Pipes::App::App(const ion::asset_loader & asset_loader,
 
       _rng(std::random_device{}()),
 
-      board(Pipes::Grid(window_settings.width, window_settings.height, game_settings.unit_size),
-            Pipes::TileMap(asset_loader, game_settings.tiles_directory),
+      board(Pipes::TileMap(asset_loader, game_settings.tiles_directory),
             tile_settings),
 
       deck(_rng, game_settings.deck_size),
@@ -96,14 +64,17 @@ Pipes::App::App(const ion::asset_loader & asset_loader,
         return;
     }
     board.background_color = game_settings.background_color;
+    board.transform.translate(window_settings.width/2.f, window_settings.height/2.f);
+    board.transform.scale_by(game_settings.unit_size, game_settings.unit_size);
+    board.pixel_to_board = glm::inverse(board.transform.global_basis());
 
     // create a random initial tile in the middle of the screen
-    board.place_tile(board.draw_from(deck, board.world_space.center()));
+    board.place_tile(board.draw_from(deck, SDL_Point{ 0, 0 }));
 }
 
 void Pipes::App::run()
 {
-    const SDL_Point mouse = board.world_space.nearest_point(ion::input::mouse_position());
+    const SDL_Point mouse = board.nearest_point(ion::input::mouse_position());
     hand.current_tile = board.draw_from(deck, mouse);
 
     // bind the mouse to the tile hand

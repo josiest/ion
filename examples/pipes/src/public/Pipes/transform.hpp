@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_transform_2d.hpp>
 
 namespace ion
@@ -80,7 +81,8 @@ void ion::transform2<Float>::rotate(Numeric theta)
 template<std::floating_point Float>
 ion::transform2<Float>::matrix_t ion::transform2<Float>::local_basis() const
 {
-    auto basis = glm::translate(matrix_t(1), translation);
+    auto basis = matrix_t(1);
+    basis = glm::translate(basis, translation);
     basis = glm::scale(basis, scale);
     basis = glm::rotate(basis, glm::radians(rotation));
     return basis;

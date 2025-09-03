@@ -8,7 +8,7 @@ Pipes::Hand::Hand(Board & board)
 
 void Pipes::Hand::on_cursor_moved(int x, int y)
 {
-    const SDL_Point mouse = board->world_space.nearest_point(x, y);
+    const SDL_Point mouse = board->nearest_point(x, y);
     const SDL_Color color = board->has_adjacent_tile(mouse.x, mouse.y)
                           ? board->tile_settings.placeable_color
                           : board->tile_settings.distant_color;

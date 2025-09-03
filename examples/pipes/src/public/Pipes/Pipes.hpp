@@ -63,7 +63,6 @@ class App : public ion::isotope {
 public:
     using engine_t = std::mt19937;
 
-    App(std::uint32_t width, std::uint32_t height);
     App(const ion::asset_loader & asset_loader,
         const Pipes::WindowSettings & window_settings,
         const Pipes::GameSettings & game_settings,
