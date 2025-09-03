@@ -64,8 +64,11 @@ Pipes::App::App(const ion::asset_loader & asset_loader,
         return;
     }
     board.background_color = game_settings.background_color;
-    board.transform.translate(window_settings.width/2.f, window_settings.height/2.f);
-    board.transform.scale_by(game_settings.unit_size, game_settings.unit_size);
+    board.transform.translate(static_cast<float>(window_settings.width)/2.f,
+                              static_cast<float>(window_settings.height)/2.f);
+
+    board.transform.scale_by(static_cast<float>(game_settings.unit_size),
+                            -static_cast<float>(game_settings.unit_size));
     board.pixel_to_board = glm::inverse(board.transform.global_basis());
 
     // create a random initial tile in the middle of the screen
