@@ -1,9 +1,7 @@
 #pragma once
 #include "Pipes/Grid.hpp"
 #include "Pipes/PointSet.hpp"
-#include "Pipes/TileSettings.hpp"
-#include "Pipes/Tile/TileMap.hpp"
-#include "Pipes/Tile/Tile.hpp"
+#include "Pipes/Tile.hpp"
 #include <entt/entity/registry.hpp>
 
 struct SDL_Window;

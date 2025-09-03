@@ -17,10 +17,13 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/public/Pipes/Grid.hpp
     src/public/Pipes/Board.hpp
     src/public/Pipes/PointSet.hpp
-    src/public/Pipes/TileSettings.hpp
     src/public/Pipes/Deck.hpp
     src/public/Pipes/Hand.hpp
+    src/public/Pipes/transform.hpp
+
+    src/public/Pipes/Tile.hpp
     src/public/Pipes/Tile/Tile.hpp
+    src/public/Pipes/Tile/TileSettings.hpp
     src/public/Pipes/Tile/TileInfo.hpp
     src/public/Pipes/Tile/TileMap.hpp)
 
@@ -37,6 +40,9 @@ endif ()
 
 find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS window graphics input)
 target_link_libraries(pipes PRIVATE ion::window ion::graphics ion::input)
+
+find_package(glm REQUIRED CONFIG)
+target_link_libraries(pipes PRIVATE glm::glm)
 
 find_package(EnTT REQUIRED CONFIG)
 target_link_libraries(pipes INTERFACE EnTT::EnTT)

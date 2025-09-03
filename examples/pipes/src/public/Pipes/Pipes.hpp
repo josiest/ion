@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Pipes/PointSet.hpp"
 #include "Pipes/Board.hpp"
 #include "Pipes/Deck.hpp"
 #include "Pipes/Hand.hpp"
-#include "Pipes/TileSettings.hpp"
+#include "Pipes/Tile/TileSettings.hpp"
 
 #include <ion/ion.hpp>
 #include <entt/entt.hpp>
