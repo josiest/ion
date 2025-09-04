@@ -16,8 +16,8 @@ void Pipes::Hand::on_cursor_moved(int x, int y)
     if (not current_tile and cached_tile and not board->has_tile(mouse))
     {
         current_tile = pop_cache();
+        current_tile->position(mouse);
     }
-
     if (current_tile)
     {
         const SDL_Point position = current_tile->position();
