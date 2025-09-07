@@ -19,7 +19,7 @@ target_sources(pipes PUBLIC FILE_SET HEADERS FILES
     src/public/Pipes/PointSet.hpp
     src/public/Pipes/Deck.hpp
     src/public/Pipes/Hand.hpp
-    src/public/Pipes/transform.hpp
+    src/public/ion/transform.hpp
 
     src/public/Pipes/Tile.hpp
     src/public/Pipes/Tile/Tile.hpp
