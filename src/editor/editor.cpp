@@ -34,6 +34,14 @@ std::unique_ptr<ion::editor> ion::editor::initialize()
         SDL_Log("Couldn't create window: %s\n", SDL_GetError());
         return nullptr;
     }
+
+    ed->renderer = create_renderer(ed->window.get());
+    if (not ed->renderer)
+    {
+        SDL_Log("Couldn't create renderer: %s\n", SDL_GetError());
+        return nullptr;
+    }
+
     sdl_events::on_quit().connect<&editor::request_quit>(ed.get());
     return std::move(ed);
 }

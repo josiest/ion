@@ -14,6 +14,7 @@ public:
     void request_quit() { wants_to_quit = true; }
 
     sdl_window window = nullptr;
+    sdl_renderer renderer = nullptr;
 protected:
     sdl_system sdl = nullptr;
     bool wants_to_quit = false;
