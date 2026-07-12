@@ -9,6 +9,7 @@ target_sources(ion-serialization
     PRIVATE
         paths.cpp
         misc_serialization.cpp
+        sdl_yaml.cpp
 
     PUBLIC
         FILE_SET ion_serialization_headers
@@ -16,7 +17,8 @@ target_sources(ion-serialization
         BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/serialization
         FILES
             ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp)
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/sdl_yaml.hpp)
 
 # specify the include directories for ion-serialization
 target_include_directories(ion-serialization PUBLIC
@@ -24,7 +26,8 @@ target_include_directories(ion-serialization PUBLIC
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 # link the required dependencies into a static library
-target_link_libraries(ion-serialization PUBLIC SDL3::SDL3)
+find_package(yaml-cpp REQUIRED)
+target_link_libraries(ion-serialization PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-containers)
 
 #
 # Install the library

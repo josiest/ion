@@ -1,7 +1,6 @@
 #include "ion/editor/editor.hpp"
 #include "ion/engine/sdl_events.hpp"
-#include "ion/serialization/paths.hpp"
-#include "ion/serialization/misc_serialization.hpp"
+#include "ion/serialization.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -61,6 +60,16 @@ ion::editor_settings ion::editor_settings::load()
     if (const auto resolution_config = general_settings["resolution"])
     {
         read_resolution(resolution_config.Scalar(), settings.screen_width, settings.screen_height);
+    }
+    if (const auto subsystem_settings = general_settings["sdl-subsystems"])
+    {
+        settings.init_flags = 0u;
+        read_subsystem_flags(subsystem_settings, settings.init_flags);
+    }
+    if (const auto window_settings = general_settings["window-options"])
+    {
+        settings.window_flags = 0u;
+        read_window_flags(window_settings, settings.window_flags);
     }
     return settings;
 }

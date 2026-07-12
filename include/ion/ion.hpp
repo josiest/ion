@@ -3,6 +3,7 @@
 #include "ion/engine.hpp"
 #include "ion/editor.hpp"
 #include "ion/serialization.hpp"
+#include "ion/containers.hpp"
 
 #include "ion/window.hpp"
 #include "ion/graphics.hpp"
