@@ -7,5 +7,5 @@ set_target_properties(hello PROPERTIES
         CXX_STANDARD 23
         CXX_STANDARD_REQUIRED TRUE)
 
-find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS engine)
-target_link_libraries(hello PRIVATE ion::ion-engine)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS engine editor)
+target_link_libraries(hello PRIVATE ion::engine ion::editor)

@@ -23,6 +23,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 # static components
 add_subdirectory(src)
 add_subdirectory(src/engine)
+add_subdirectory(src/editor)
+
 add_subdirectory(src/window)
 add_subdirectory(src/input)
 add_subdirectory(src/graphics)

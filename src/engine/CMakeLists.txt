@@ -8,13 +8,15 @@ add_library(ion::engine ALIAS ion-engine)
 target_sources(ion-engine
     PRIVATE
         sdl_resources.cpp
+        sdl_events.cpp
 
     PUBLIC
         FILE_SET ion_engine_headers
         TYPE HEADERS
         BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/engine
         FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_resources.hpp)
+            ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_resources.hpp
+            ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp)
 
 # specify the include directories for ion-engine
 target_include_directories(ion-engine PUBLIC

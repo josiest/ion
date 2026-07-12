@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ion/engine.hpp"
+#include "ion/editor.hpp"
 #include "ion/window.hpp"
 
 #include "ion/graphics.hpp"

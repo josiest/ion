@@ -1,6 +1,6 @@
 @PACKAGE_INIT@
-set(_ion_supported_components graphics input window yaml-serialization engine)
-set(_ion_subdirs graphics input window serialization engine)
+set(_ion_supported_components graphics input window yaml-serialization engine editor)
+set(_ion_subdirs graphics input window serialization engine editor)
 
 foreach (_subdir ${_ion_subdirs})
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/${_subdir})
