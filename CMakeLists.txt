@@ -1,5 +1,5 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.23)
 project(ion VERSION 0.8.1)
 
 #
@@ -13,9 +13,16 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+
+# set the output directory for built objects.
+# This makes sure that the dynamic library goes into the build directory automatically.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
 # static components
 add_subdirectory(src)
+add_subdirectory(src/engine)
 add_subdirectory(src/window)
 add_subdirectory(src/input)
 add_subdirectory(src/graphics)
