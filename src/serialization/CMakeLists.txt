@@ -8,13 +8,15 @@ add_library(ion::serialization ALIAS ion-serialization)
 target_sources(ion-serialization
     PRIVATE
         paths.cpp
+        misc_serialization.cpp
 
     PUBLIC
         FILE_SET ion_serialization_headers
         TYPE HEADERS
         BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/serialization
         FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp)
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp)
 
 # specify the include directories for ion-serialization
 target_include_directories(ion-serialization PUBLIC

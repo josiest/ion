@@ -1,12 +1,14 @@
 #include "ion/editor/editor.hpp"
 #include "ion/engine/sdl_events.hpp"
 #include "ion/serialization/paths.hpp"
+#include "ion/serialization/misc_serialization.hpp"
 
 #include <filesystem>
 #include <memory>
 
 #include <SDL3/SDL_log.h>
 #include <yaml-cpp/yaml.h>
+
 
 namespace fs = std::filesystem;
 using namespace std::string_literals;
@@ -55,6 +57,10 @@ ion::editor_settings ion::editor_settings::load()
     if (const auto editor_name = general_settings["editor-name"])
     {
         settings.window_name = editor_name.Scalar();
+    }
+    if (const auto resolution_config = general_settings["resolution"])
+    {
+        read_resolution(resolution_config.Scalar(), settings.screen_width, settings.screen_height);
     }
     return settings;
 }
