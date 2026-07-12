@@ -2,8 +2,9 @@
 
 #include "ion/engine.hpp"
 #include "ion/editor.hpp"
-#include "ion/window.hpp"
+#include "ion/serialization.hpp"
 
+#include "ion/window.hpp"
 #include "ion/graphics.hpp"
 #include "ion/input.hpp"
 #include "ion/time.hpp"

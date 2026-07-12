@@ -14,6 +14,7 @@ include(CMakePackageConfigHelpers)
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+find_package(EnTT REQUIRED)
 
 # set the output directory for built objects.
 # This makes sure that the dynamic library goes into the build directory automatically.
@@ -23,6 +24,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 # static components
 add_subdirectory(src)
 add_subdirectory(src/engine)
+add_subdirectory(src/serialization)
 add_subdirectory(src/editor)
 
 add_subdirectory(src/window)

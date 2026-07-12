@@ -1,4 +1,7 @@
 include(CMakeFindDependencyMacro)
 find_dependency(SDL3)
+find_dependency(yaml-cpp)
+find_dependency(ion-engine)
+find_dependency(ion-serialization)
 include("${CMAKE_CURRENT_LIST_DIR}/ion-editor-targets.cmake")
 add_library(ion::editor ALIAS ion::ion-editor)

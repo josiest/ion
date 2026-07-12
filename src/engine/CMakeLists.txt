@@ -24,7 +24,8 @@ target_include_directories(ion-engine PUBLIC
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 # link the required dependencies into a static library
-target_link_libraries(ion-engine PUBLIC SDL3::SDL3)
+find_package(EnTT REQUIRED)
+target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT)
 
 #
 # Install the library

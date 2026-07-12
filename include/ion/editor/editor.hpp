@@ -21,6 +21,9 @@ protected:
 
 struct editor_settings
 {
+    static std::string config_path;
+    static editor_settings load();
+
     SDL_InitFlags init_flags = SDL_INIT_VIDEO;
 
     std::string window_name = "ion Editor";

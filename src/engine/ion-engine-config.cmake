@@ -1,4 +1,5 @@
 include(CMakeFindDependencyMacro)
 find_dependency(SDL3)
+find_dependency(EnTT)
 include("${CMAKE_CURRENT_LIST_DIR}/ion-engine-targets.cmake")
 add_library(ion::engine ALIAS ion::ion-engine)

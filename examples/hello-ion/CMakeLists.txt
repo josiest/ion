@@ -7,5 +7,7 @@ set_target_properties(hello PROPERTIES
         CXX_STANDARD 23
         CXX_STANDARD_REQUIRED TRUE)
 
-find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS engine editor)
-target_link_libraries(hello PRIVATE ion::engine ion::editor)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS editor)
+target_link_libraries(hello PRIVATE ion::editor)
+
+file(COPY config DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

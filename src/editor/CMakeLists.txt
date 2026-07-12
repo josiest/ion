@@ -22,7 +22,8 @@ target_include_directories(ion-editor PUBLIC
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 # link the required dependencies into a static library
-target_link_libraries(ion-editor PUBLIC SDL3::SDL3)
+find_package(yaml-cpp REQUIRED CONFIG)
+target_link_libraries(ion-editor PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-engine ion-serialization)
 
 #
 # Install the library
