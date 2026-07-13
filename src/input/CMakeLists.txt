@@ -28,10 +28,6 @@ install(TARGETS ion-input
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/input
         FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/input)
 
-# install the header files for the input component
-install(FILES ${CMAKE_SOURCE_DIR}/include/ion/input.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
-
 # create and install the target files
 install(EXPORT ion-input-targets
         FILE ion-input-targets.cmake

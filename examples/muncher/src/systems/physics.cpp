@@ -1,9 +1,7 @@
 #include "systems/physics.hpp"
 #include "components.hpp"
 
-#include <ion/input.hpp>
-#include <SDL2/SDL.h>
-
+#include <ion/input/axis.hpp>
 #include <cmath>
 
 namespace systems {
@@ -19,7 +17,7 @@ void accelerate_player(entt::registry & entities, entt::entity player,
         return;
     }
 
-    // get the components they need for accelration
+    // get the components they need for acceleration
     auto [v, constants] =
         entities.get<cmpt::velocity, cmpt::dynamic_mover const>(player);
 
@@ -28,13 +26,13 @@ void accelerate_player(entt::registry & entities, entt::entity player,
     float const acc_fr = -constants.friction * dt;
 
     // calculate the velocity from the various accelerations
-    float const eps = constants.minspeed;
+    float const eps = constants.min_speed;
     auto const in = normalized({input.x(), input.y()}, eps);
     auto const vn = normalized(v, eps);
     v += acc_in*in + acc_fr*vn;
 
     // clamp the velocity to be within the defined thresholds
-    float const speed = std::min(magnitude(v), constants.maxspeed);
+    float const speed = std::min(magnitude(v), constants.max_speed);
     v = speed * normalized(v, eps);
 }
 

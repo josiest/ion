@@ -1,33 +1,30 @@
 #pragma once
-
-#include <ion/window/resource.hpp>
-#include <SDL2/SDL_render.h>
-
 #include <entt/entity/registry.hpp>
+#include <SDL3/SDL_render.h>
 #include "components.hpp"
 
 namespace systems {
 
-void render_colored_box(ion::hardware_renderable auto & window,
-                        const component::bbox& box, const component::color & color);
+void render_colored_box(SDL_Renderer * renderer, const component::bbox& box,
+                                                 const component::color & color);
 
-void render(ion::hardware_renderable auto & window, entt::registry & registry)
+inline void render(SDL_Renderer * renderer, entt::registry & registry)
 {
     // clear the screen with white
-    SDL_SetRenderDrawColor(window, 0xff, 0xff, 0xff, 0xff);
-    SDL_RenderClear(window);
+    SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+    SDL_RenderClear(renderer);
 
     // render the game objects
     registry.view<component::bbox, component::color>()
-            .each([&](const auto & box, const auto & color) { render_colored_box(window, box, color); });
-    SDL_RenderPresent(window);
+            .each([&](const auto & box, const auto & color) { render_colored_box(renderer, box, color); });
+    SDL_RenderPresent(renderer);
 }
 
-void render_colored_box(ion::hardware_renderable auto & window,
-                        const component::bbox& box, const component::color & color)
+inline void render_colored_box(SDL_Renderer * renderer, const component::bbox& box,
+                                                        const component::color & color)
 {
-    SDL_SetRenderDrawColor(window, color.r, color.g, color.b, 0xff);
-    const auto render_rect = static_cast<SDL_Rect>(box);
-    SDL_RenderFillRect(window, &render_rect);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0xff);
+    const auto render_rect = static_cast<SDL_FRect>(box);
+    SDL_RenderFillRect(renderer, &render_rect);
 }
 }

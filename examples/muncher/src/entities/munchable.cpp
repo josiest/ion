@@ -5,7 +5,6 @@
 #include "systems/physics.hpp"
 
 #include <entt/entity/registry.hpp>
-#include <SDL2/SDL_video.h>
 
 #include <random>
 #include <utility>
@@ -16,17 +15,14 @@
 namespace prefab {
 
 using namespace std::numbers;
-munchable::munchable(SDL_Window * window) noexcept
+munchable::munchable()
 
-      // a reference to the window that defines the bounds
-    : _window{window},
-
-      // some arbitrary colors to choose from that look nice
+    : // some arbitrary colors to choose from that look nice
       _colors{{0xf3, 0x91, 0x89}, {0xbb, 0x80, 0x82},
               {0x6e, 0x75, 0x82}, {0x04, 0x65, 0x82}},
 
       // these seem like good speeds to vary between
-      _minspeed{100.f}, _maxspeed{200.f},
+      _min_speed{100.f}, _max_speed{200.f},
 
       // the variation of the angle in radians
       _angle_variation{pi_v<float>/6.f},
@@ -36,61 +32,61 @@ munchable::munchable(SDL_Window * window) noexcept
 
       // how likely it is for munchable to be created
       //    at any given millisecond
-      _munchtime_likelihood{.01f}
+      _munch_time_likelihood{.01f}
 {}
 
 entt::entity
-munchable::create(entt::registry & entities, entt::entity playerid,
-                  player const & player_settings, engine_t rng) const noexcept
+munchable::create(entt::registry & entities, entt::entity player_id, SDL_FRect bounds,
+                  player const & player_settings, engine_t rng) const
 {
     // get the size of the player as a mean for the size of the munchable
-    auto const player_box = player_settings.try_get_bbox(entities, playerid);
+    auto const player_box = player_settings.try_get_bbox(entities, player_id, bounds);
 
     // create the munchable entity
-    auto munchableid = entities.create();
+    auto munchable_id = entities.create();
 
     // assign the munchable a random bbox component
-    auto const & munchable_box = random_bbox(entities, munchableid,
-                                             player_box, rng);
+    auto const & munchable_box = random_bbox(entities, munchable_id,
+                                             player_box, bounds, rng);
 
     // assign the munchable a random velocity and color component
-    random_velocity(entities, munchableid, munchable_box, player_box, rng);
-    random_color(entities, munchableid, rng);
+    random_velocity(entities, munchable_id, munchable_box, player_box, rng);
+    random_color(entities, munchable_id, rng);
 
     // tag the munchable and return its id
-    entities.emplace<component::munchable>(munchableid);
-    return munchableid;
+    entities.emplace<component::munchable>(munchable_id);
+    return munchable_id;
 }
 
-bool munchable::should_munch(float dt, engine_t & rng) const noexcept
+bool munchable::should_munch(float dt, engine_t & rng) const
 {
     // convert dt to milliseconds
     dt *= 1000.f;
 
-    // coin flip distribution determine wether to munch
-    std::binomial_distribution<bool> is_munchtime{1, _munchtime_likelihood*dt};
-    return is_munchtime(rng);
+    // coin flip distribution determine whether to munch
+    std::binomial_distribution is_munch_time{true, _munch_time_likelihood*dt};
+    return is_munch_time(rng);
 }
 
 component::bbox &
-munchable::random_bbox(entt::registry & entities, entt::entity munchableid,
-                       component::bbox const & player_box,
-                       engine_t & rng) const noexcept
+munchable::random_bbox(entt::registry & entities, entt::entity munchable_id,
+                       component::bbox const & player_box, SDL_FRect bounds,
+                       engine_t & rng) const
 {
-    // query the window for it's size
-    int width, height;
-    SDL_GetWindowSize(_window, &width, &height);
-
     // the distribution for the x and y position
-    std::uniform_real_distribution<float> xdist(0.f, width);
-    float const x = xdist(rng);
+    std::uniform_real_distribution x_dist(bounds.x, bounds.x+bounds.w);
+    float const x = x_dist(rng);
 
-    std::uniform_real_distribution<float> ydist(0.f, height);
-    float const y = ydist(rng);
+    std::uniform_real_distribution y_dist(bounds.y, bounds.y+bounds.h);
+    float const y = y_dist(rng);
 
     // the choices for the positions (must be on a boundary)
     using point = std::pair<float, float>;
-    std::vector<point> positions{{0, y}, {width, y}, {x, 0}, {x, height}};
+    std::vector<point> positions
+    {
+        { bounds.x, y }, { bounds.x + bounds.w, y },
+        { x, bounds.y }, { x, bounds.y + bounds.h }
+    };
 
     // choose a random position
     std::uniform_int_distribution<std::size_t> idist(0, positions.size()-1);
@@ -101,18 +97,18 @@ munchable::random_bbox(entt::registry & entities, entt::entity munchableid,
     std::lognormal_distribution size_dist{std::log(player_box.size), std::log(_size_variation)};
 
     // add the new bbox component to the munchable entity
-    return entities.emplace<component::bbox>(munchableid,
+    return entities.emplace<component::bbox>(munchable_id,
             positions[i].first, positions[i].second, size_dist(rng));
 }
 
 component::velocity &
-munchable::random_velocity(entt::registry & entities, entt::entity munchableid,
+munchable::random_velocity(entt::registry & entities, entt::entity munchable_id,
                            component::bbox const & munchable_box,
                            component::bbox const & player_box,
-                           engine_t & rng) const noexcept
+                           engine_t & rng) const
 {
     // the distributions for velocity speed and angle
-    std::uniform_real_distribution speed_dist(_minspeed, _maxspeed);
+    std::uniform_real_distribution speed_dist(_min_speed, _max_speed);
     float const speed = speed_dist(rng);
 
     // calculate the angle to the player
@@ -125,20 +121,20 @@ munchable::random_velocity(entt::registry & entities, entt::entity munchableid,
     float const phi = angle_dist(rng);
 
     // calculate the velocity from the random speed and angle
-    return entities.emplace<component::velocity>(munchableid,
+    return entities.emplace<component::velocity>(munchable_id,
             speed*std::cos(phi), speed*std::sin(phi));
 }
 
 component::color &
-munchable::random_color(entt::registry & entities, entt::entity munchableid,
-                        engine_t & rng) const noexcept
+munchable::random_color(entt::registry & entities, entt::entity munchable_id,
+                        engine_t & rng) const
 {
     // choose a color
     std::uniform_int_distribution<std::size_t> idist(0, _colors.size()-1);
     auto const color = _colors[idist(rng)];
 
     // add it as a component to the munchable entity
-    return entities.emplace<component::color>(munchableid,
+    return entities.emplace<component::color>(munchable_id,
             color.r, color.g, color.b);
 }
 }

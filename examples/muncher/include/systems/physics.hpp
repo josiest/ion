@@ -3,7 +3,7 @@
 #include "components.hpp"
 
 #include <entt/entity/registry.hpp>
-#include <ion/input.hpp>
+#include <ion/input/axis.hpp>
 
 namespace systems {
 

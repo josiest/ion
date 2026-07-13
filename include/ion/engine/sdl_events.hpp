@@ -13,11 +13,15 @@ public:
     static auto on_mouse_scroll() { return entt::sink{ mouse_scroll_signal }; }
     static auto on_mouse_up() { return entt::sink{ mouse_up_signal }; }
     static auto on_mouse_moved() { return entt::sink{ mouse_moved_signal }; }
+    static auto on_key_up() { return entt::sink{ key_up_signal }; }
+    static auto on_key_down() { return entt::sink{ key_down_signal }; }
 private:
     static entt::sigh<void(SDL_Event*)> poll_signal;
     static entt::sigh<void()> quit_signal;
     static entt::sigh<void(int)> mouse_scroll_signal;
     static entt::sigh<void()> mouse_up_signal;
     static entt::sigh<void(int, int)> mouse_moved_signal;
+    static entt::sigh<void(SDL_Keycode)> key_up_signal;
+    static entt::sigh<void(SDL_Keycode)> key_down_signal;
 };
 }

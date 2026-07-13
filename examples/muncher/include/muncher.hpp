@@ -3,23 +3,21 @@
 #include "entities/player.hpp"
 #include "entities/munchable.hpp"
 
-#include <ion/ion.hpp>
-#include <SDL2/SDL_events.h>
+#include <SDL3/SDL_events.h>
 #include <entt/entity/registry.hpp>
 #include <entt/signal/sigh.hpp>
 
-#include <string>
-#include <cstdint>
 #include <random>
+#include <ion/input/axis.hpp>
 
 class event_sink
 {
 public:
     void poll();
 
-    inline auto on_quit() { return entt::sink{ quit }; }
-    inline auto on_key_down() { return entt::sink{ key_down }; }
-    inline auto on_key_up() { return entt::sink{ key_up }; }
+    auto on_quit() { return entt::sink{ quit }; }
+    auto on_key_down() { return entt::sink{ key_down }; }
+    auto on_key_up() { return entt::sink{ key_up }; }
 protected:
     entt::sigh<void()> quit;
     entt::sigh<void(SDL_Keycode)> key_down;
@@ -29,10 +27,9 @@ protected:
 /**
  * A manager class for game resources
  */
-class muncher : public ion::isotope {
+class muncher {
 public:
     // delete any unwanted implicit constructors
-    muncher() = delete;
     muncher(muncher const &) = delete;
 
     /**
@@ -42,30 +39,20 @@ public:
 
     /**
      * Create a muncher game
-     *
-     * \param width the width of the game window
-     * \param height the height of the game window
      */
-    muncher(std::uint32_t width, std::uint32_t height) noexcept;
+    muncher();
 
     /**
      * Run the game
      */
-    void run() noexcept;
+    void update(float delta_time);
 
     /**
      * Reset the game
      */
-    void reset() noexcept;
+    void reset();
 private:
-    // sdl resources
-
-    // it's important to put the sdl context before any other sdl resources
-    ion::sdl_context _sdl;
-    ion::hardware_renderer _window;
-
     // events and input
-    event_sink _events;
     ion::input::keyboard_axis _input;
 
     // entt setup
@@ -77,8 +64,8 @@ private:
     prefab::munchable _munchable_settings;
 
     // entity references
-    entt::entity _player;
+    entt::entity _player = entt::null;
 };
 
-muncher & get_game() noexcept;
+muncher & get_game();
 void reset_game(SDL_Keycode keycode);

@@ -6,6 +6,8 @@ entt::sigh<void()> ion::sdl_events::quit_signal{};
 entt::sigh<void(int)> ion::sdl_events::mouse_scroll_signal{};
 entt::sigh<void()> ion::sdl_events::mouse_up_signal{};
 entt::sigh<void(int, int)> ion::sdl_events::mouse_moved_signal{};
+entt::sigh<void(SDL_Keycode)> ion::sdl_events::key_up_signal{};
+entt::sigh<void(SDL_Keycode)> ion::sdl_events::key_down_signal{};
 
 void ion::sdl_events::poll()
 {
@@ -29,6 +31,14 @@ void ion::sdl_events::poll()
 
         case SDL_EVENT_MOUSE_MOTION:
             mouse_moved_signal.publish(event.motion.x, event.motion.y);
+            break;
+
+        case SDL_EVENT_KEY_UP:
+            key_up_signal.publish(event.key.key);
+            break;
+
+        case SDL_EVENT_KEY_DOWN:
+            key_down_signal.publish(event.key.key);
             break;
 
         default:

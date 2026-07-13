@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cmath>
-#include <SDL2/SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 
 namespace component {
 
@@ -9,11 +9,9 @@ struct bbox {
     float x, y, size;
 
     // convert the bbox to an SDL_Rect
-    explicit operator SDL_Rect() const noexcept
+    explicit operator SDL_FRect() const noexcept
     {
-        int const s = static_cast<int>(std::round(size));
-        return SDL_Rect{static_cast<int>(std::round(x)),
-                        static_cast<int>(std::round(y)), s, s};
+        return { x, y, size, size };
     }
 };
 
@@ -28,8 +26,8 @@ struct color {
 struct dynamic_mover {
     float acceleration;
     float friction;
-    float minspeed;
-    float maxspeed;
+    float min_speed;
+    float max_speed;
 };
 
 struct growth_rate {
