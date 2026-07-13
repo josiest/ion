@@ -4,7 +4,7 @@
 #include <utility>
 #include <array>
 
-inline namespace ion
+namespace ion
 {
 
 /** A simple map with a static size that allows for constexpr initialization */

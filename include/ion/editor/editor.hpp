@@ -1,8 +1,13 @@
 #pragma once
-#include <ion/engine/sdl_resources.hpp>
+#include "ion/engine/sdl_resources.hpp"
 #include <SDL3/SDL_init.h>
 
-inline namespace ion
+namespace YAML
+{
+class Node;
+}
+
+namespace ion
 {
 class editor
 {
@@ -25,11 +30,16 @@ struct editor_settings
     static std::string config_path;
     static editor_settings load();
 
+    static YAML::Node load_setting(std::string_view setting_name);
+
     SDL_InitFlags init_flags = SDL_INIT_VIDEO;
 
     std::string window_name = "ion Editor";
     std::uint32_t screen_width = 1920;
     std::uint32_t screen_height = 1080;
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE;
+
+private:
+    static YAML::Node load_root();
 };
 }

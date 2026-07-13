@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-inline namespace ion
+namespace ion
 {
 struct paths
 {

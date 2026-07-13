@@ -6,7 +6,7 @@
 struct SDL_Window;
 struct SDL_Renderer;
 
-inline namespace ion
+namespace ion
 {
 namespace internal
 {

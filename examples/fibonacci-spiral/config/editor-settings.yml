@@ -1,2 +1,7 @@
 general:
   editor-name: Fibonacci Spiral
+
+spiral:
+  initial-color: 0xf6efa7
+  final-color: 0xff0078
+  num-frames: 11

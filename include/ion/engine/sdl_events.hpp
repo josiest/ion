@@ -2,7 +2,7 @@
 #include <entt/signal/sigh.hpp>
 #include <SDL3/SDL_events.h>
 
-inline namespace ion
+namespace ion
 {
 class sdl_events
 {

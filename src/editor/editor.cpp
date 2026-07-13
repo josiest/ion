@@ -48,14 +48,8 @@ std::unique_ptr<ion::editor> ion::editor::initialize()
 
 ion::editor_settings ion::editor_settings::load()
 {
-    if (config_path.empty())
-    {
-        const fs::path config_dir = paths::config_dir();
-        config_path = (config_dir/"editor-settings.yml").string();
-    }
-
     editor_settings settings;
-    const auto root = YAML::LoadFile(config_path);
+    const auto root = load_root();
     if (not root) { return settings; }
 
     const auto general_settings = root["general"];
@@ -80,4 +74,20 @@ ion::editor_settings ion::editor_settings::load()
         read_window_flags(window_settings, settings.window_flags);
     }
     return settings;
+}
+
+YAML::Node ion::editor_settings::load_setting(std::string_view setting_name)
+{
+    const auto root = load_root();
+    return root[setting_name];
+}
+
+YAML::Node ion::editor_settings::load_root()
+{
+    if (config_path.empty())
+    {
+        const fs::path config_dir = paths::config_dir();
+        config_path = (config_dir/"editor-settings.yml").string();
+    }
+    return YAML::LoadFile(config_path);
 }

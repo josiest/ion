@@ -21,20 +21,18 @@ find_package(EnTT REQUIRED)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
-# static components
-add_subdirectory(src)
 add_subdirectory(src/containers)
+add_subdirectory(src/mylar)
+
 add_subdirectory(src/engine)
 add_subdirectory(src/serialization)
 add_subdirectory(src/editor)
 
+add_subdirectory(src)
 add_subdirectory(src/window)
 add_subdirectory(src/input)
 add_subdirectory(src/graphics)
 add_subdirectory(src/serialization/yaml)
-
-# interface components
-add_subdirectory(include/ion/mylar)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"

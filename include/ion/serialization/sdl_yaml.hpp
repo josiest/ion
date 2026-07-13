@@ -1,14 +1,17 @@
 #pragma once
 #include "ion/containers/lookup_table.hpp"
+
 #include <SDL3/SDL_init.h>
+
 #include <string_view>
+#include <yaml-cpp/yaml.h>
 
 namespace YAML
 {
 class Node;
 }
 
-inline namespace ion
+namespace ion
 {
 bool read_subsystem_flags(const YAML::Node & node, SDL_InitFlags & flags);
 bool read_window_flags(const YAML::Node & node, SDL_WindowFlags & flags);

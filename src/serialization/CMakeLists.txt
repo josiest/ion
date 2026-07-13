@@ -10,6 +10,8 @@ target_sources(ion-serialization
         paths.cpp
         misc_serialization.cpp
         sdl_yaml.cpp
+        meta_yaml.cpp
+        color_yaml.cpp
 
     PUBLIC
         FILE_SET ion_serialization_headers
@@ -18,7 +20,9 @@ target_sources(ion-serialization
         FILES
             ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp
             ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/sdl_yaml.hpp)
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/sdl_yaml.hpp
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/meta_yaml.hpp
+            ${CMAKE_SOURCE_DIR}/include/ion/serialization/color_yaml.hpp)
 
 # specify the include directories for ion-serialization
 target_include_directories(ion-serialization PUBLIC
@@ -27,7 +31,9 @@ target_include_directories(ion-serialization PUBLIC
 
 # link the required dependencies into a static library
 find_package(yaml-cpp REQUIRED)
-target_link_libraries(ion-serialization PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-containers)
+find_package(EnTT REQUIRED)
+target_link_libraries(ion-serialization
+        PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp EnTT::EnTT ion-containers ion-mylar)
 
 #
 # Install the library

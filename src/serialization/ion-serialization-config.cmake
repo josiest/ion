@@ -1,6 +1,8 @@
 include(CMakeFindDependencyMacro)
 find_dependency(SDL3)
 find_dependency(yaml-cpp)
+find_dependency(EnTT)
 find_dependency(ion-containers)
+find_dependency(ion-mylar)
 include("${CMAKE_CURRENT_LIST_DIR}/ion-serialization-targets.cmake")
 add_library(ion::serialization ALIAS ion::ion-serialization)

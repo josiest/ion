@@ -1,6 +1,11 @@
 #pragma once
+#ifdef USE_SDL2
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_pixels.h>
+#else
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_pixels.h>
+#endif
 #include <entt/meta/factory.hpp>
 
 namespace ion {
@@ -44,4 +49,10 @@ inline auto reflect<SDL_Color>()
         .data<&SDL_Color::b>("b"_hs)
         .data<&SDL_Color::a>("a"_hs);
 }
+
+template<typename T>
+concept reflectable = requires
+{
+    { reflect<T>() } -> std::same_as<entt::meta_factory<T>>;
+};
 }
