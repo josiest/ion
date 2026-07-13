@@ -1,4 +1,4 @@
-#include "ion/serialization/sdl_yaml.hpp"
+#include "ion/konbu/sdl_yaml.hpp"
 #include <string_view>
 
 #include <SDL3/SDL_init.h>

@@ -1,4 +1,4 @@
-#include "ion/serialization/paths.hpp"
+#include "ion/konbu/paths.hpp"
 
 #include <filesystem>
 #include <SDL3/SDL_filesystem.h>

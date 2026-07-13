@@ -2,8 +2,6 @@
 #include <ion/engine.hpp>
 #include <ion/editor.hpp>
 #include <ion/math.hpp>
-#include <ion/serialization.hpp>
-#include <ion/mylar.hpp>
 
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>

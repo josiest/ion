@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include <SDL3/SDL_log.h>
-#include <ion/serialization/paths.hpp>
+#include <ion/konbu/paths.hpp>
 
 #include "ion/editor/editor.hpp"
 

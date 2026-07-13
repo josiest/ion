@@ -1,4 +1,4 @@
-#include "ion/serialization/meta_yaml.hpp"
+#include "ion/konbu/meta_yaml.hpp"
 #include <cstdio>
 #include <yaml-cpp/yaml.h>
 

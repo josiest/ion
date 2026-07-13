@@ -42,6 +42,10 @@ function(install_ion_module MODULE_NAME)
         install_interface_targets(${MODULE_NAME})
     endif()
 
+    # install the header file
+    install(FILES ${CMAKE_SOURCE_DIR}/include/ion/${MODULE_NAME}.hpp
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
+
     install(EXPORT ion-${MODULE_NAME}-targets
             FILE ion-${MODULE_NAME}-targets.cmake
             NAMESPACE ion::
@@ -66,7 +70,7 @@ add_subdirectory(src/mylar)
 add_subdirectory(src)
 
 add_subdirectory(src/engine)
-add_subdirectory(src/serialization)
+add_subdirectory(src/konbu)
 add_subdirectory(src/editor)
 add_subdirectory(src/input)
 

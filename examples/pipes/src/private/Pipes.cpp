@@ -4,9 +4,6 @@
 #include <ion/engine.hpp>
 #include <ion/editor.hpp>
 #include <ion/input/axis.hpp>
-#include <iostream>
-
-#include <ion/serialization/paths.hpp>
 #include <SDL3/SDL_log.h>
 
 namespace fs = std::filesystem;
