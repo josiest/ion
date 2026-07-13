@@ -12,13 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
-
-# set the output directory for built objects.
-# This makes sure that the dynamic library goes into the build directory automatically.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
-
 function(install_interface_targets MODULE_NAME)
     target_include_directories(ion-${MODULE_NAME} INTERFACE
             "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
@@ -67,9 +60,7 @@ function(install_ion_module MODULE_NAME)
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/${MODULE_NAME})
 endfunction()
 
-function(install_static_ion_module MODULE_NAME)
-endfunction()
-
+find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
 add_subdirectory(src/containers)
 add_subdirectory(src/mylar)
 add_subdirectory(src)
