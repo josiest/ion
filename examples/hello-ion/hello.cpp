@@ -8,7 +8,7 @@ int main(int argc, char * argv[])
 
     while (not editor->has_quit())
     {
-        sdl_events::poll();
+        ion::sdl_events::poll();
     }
     return EXIT_SUCCESS;
 }
