@@ -5,29 +5,20 @@
 add_library(ion-mylar INTERFACE)
 add_library(ion::mylar ALIAS ion-mylar)
 
-target_sources(ion-mylar
-PUBLIC
-    FILE_SET ion_mylar_headers
-    TYPE HEADERS
-    BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/mylar
-    FILES
-        ${CMAKE_SOURCE_DIR}/include/ion/mylar/reflect.hpp)
+target_sources(ion-mylar PUBLIC FILE_SET HEADERS
+BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/mylar
+FILES
+    ${CMAKE_SOURCE_DIR}/include/ion/mylar/reflect.hpp)
 
 set_target_properties(ion-mylar PROPERTIES
         CXX_STANDARD 23
         CX_STANDARD_REQUIRED True
-        VERSION 0.1.0
+        VERSION 0.2.0
         SOVERSION 0)
 
 find_package(EnTT REQUIRED CONFIG)
-
-if(DEFINED USE_SDL2)
-    find_package(SDL2 REQUIRED CONFIG)
-    target_link_libraries(ion-mylar INTERFACE SDL2::SDL2 EnTT::EnTT)
-else()
-    find_package(SDL3 REQUIRED CONFIG)
-    target_link_libraries(ion-mylar INTERFACE SDL3::SDL3 EnTT::EnTT)
-endif()
+find_package(SDL3 REQUIRED CONFIG)
+target_link_libraries(ion-mylar INTERFACE SDL3::SDL3 EnTT::EnTT)
 
 # specify include directories for ion-mylar
 target_include_directories(ion-mylar INTERFACE
@@ -41,8 +32,7 @@ target_include_directories(ion-mylar INTERFACE
 # install the compiled object and library files
 install(TARGETS ion-mylar
         EXPORT ion-mylar-targets
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/mylar
-        FILE_SET ion_mylar_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/mylar)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/mylar)
 
 # create and install the target files
 install(EXPORT ion-mylar-targets

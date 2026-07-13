@@ -1,5 +1,0 @@
-include(CMakeFindDependencyMacro)
-find_dependency(SDL2)
-find_dependency(yaml-cpp)
-include("${CMAKE_CURRENT_LIST_DIR}/ion-yaml-serialization-targets.cmake")
-add_library(ion::yaml-serialization ALIAS ion::ion-yaml-serialization)

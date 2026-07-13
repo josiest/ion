@@ -1,29 +1,32 @@
 #
-# Define the Library
+# Define
 #
 
 add_library(ion-editor STATIC)
+set_target_properties(ion-editor PROPERTIES VERSION 0.1.0 SOVERSION 0)
 add_library(ion::editor ALIAS ion-editor)
 
 target_sources(ion-editor
-        PRIVATE
-            editor.cpp
+   PRIVATE
+       editor.cpp
 
-        PUBLIC
-        FILE_SET ion_editor_headers
-        TYPE HEADERS
-        BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/editor
-        FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/editor/editor.hpp)
+   PUBLIC FILE_SET HEADERS
+   BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/editor
+   FILES
+       ${CMAKE_SOURCE_DIR}/include/ion/editor/editor.hpp)
+
+#
+# Compile
+#
+
+# link the required dependencies into a static library
+find_package(yaml-cpp REQUIRED CONFIG)
+target_link_libraries(ion-editor PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-engine ion-serialization)
 
 # specify the include directories for ion-editor
 target_include_directories(ion-editor PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-
-# link the required dependencies into a static library
-find_package(yaml-cpp REQUIRED CONFIG)
-target_link_libraries(ion-editor PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-engine ion-serialization)
 
 #
 # Install the library
@@ -33,8 +36,7 @@ target_link_libraries(ion-editor PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-engine
 install(TARGETS ion-editor
         EXPORT ion-editor-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/editor
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/editor
-        FILE_SET ion_editor_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/editor)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/editor)
 
 # install the header files for the editor component
 install(FILES ${CMAKE_SOURCE_DIR}/include/ion/editor.hpp

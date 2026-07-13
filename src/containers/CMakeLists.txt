@@ -5,18 +5,15 @@
 add_library(ion-containers INTERFACE)
 add_library(ion::containers ALIAS ion-containers)
 
-target_sources(ion-containers
-    PUBLIC
-        FILE_SET ion_containers_headers
-        TYPE HEADERS
-        BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/containers
-        FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/containers/lookup_table.hpp)
+target_sources(ion-containers PUBLIC FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/containers
+    FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/containers/lookup_table.hpp)
 
 set_target_properties(ion-containers PROPERTIES
         CXX_STANDARD 23
         CX_STANDARD_REQUIRED True
-        VERSION 0.1.0
+        VERSION 0.2.0
         SOVERSION 0)
 
 # specify include directories for ion-containers
@@ -30,8 +27,7 @@ target_include_directories(ion-containers INTERFACE
 # install the compiled objects for ion-containers
 install(TARGETS ion-containers
         EXPORT ion-containers-targets
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/containers
-        FILE_SET ion_containers_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/containers)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/containers)
 
 # create and install the target files
 install(EXPORT ion-containers-targets

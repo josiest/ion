@@ -1,12 +1,7 @@
 #pragma once
 #include <concepts>
 #include <cmath>
-
-#ifdef USE_SDL2
-#include <SDL2/SDL_pixels.h>
-#else
 #include <SDL3/SDL_pixels.h>
-#endif
 
 namespace ion
 {

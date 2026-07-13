@@ -9,7 +9,7 @@ target_sources(ion-input PUBLIC FILE_SET HEADERS
     FILES
         ${CMAKE_SOURCE_DIR}/include/ion/input/axis.hpp)
 
-set_target_properties(ion-input PROPERTIES VERSION 0.1.0 SOVERSION 0)
+set_target_properties(ion-input PROPERTIES VERSION 0.2.0 SOVERSION 0)
 
 # specify the include directories for ion-input
 target_include_directories(ion-input PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
@@ -27,6 +27,8 @@ install(TARGETS ion-input
         EXPORT ion-input-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/input
         FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/input)
+
+# install the header files for the input component
 
 # create and install the target files
 install(EXPORT ion-input-targets

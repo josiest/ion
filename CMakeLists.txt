@@ -1,6 +1,6 @@
 # --- project setup ---
 cmake_minimum_required(VERSION 3.23)
-project(ion VERSION 0.8.1)
+project(ion VERSION 0.9.0)
 
 #
 # Export and install the libary
@@ -12,7 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
 find_package(EnTT REQUIRED)
 
@@ -23,16 +22,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
 add_subdirectory(src/containers)
 add_subdirectory(src/mylar)
+add_subdirectory(src)
 
 add_subdirectory(src/engine)
 add_subdirectory(src/serialization)
 add_subdirectory(src/editor)
-
-add_subdirectory(src)
-add_subdirectory(src/window)
 add_subdirectory(src/input)
-add_subdirectory(src/graphics)
-add_subdirectory(src/serialization/yaml)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"

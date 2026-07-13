@@ -5,6 +5,12 @@
 add_library(ion-serialization STATIC)
 add_library(ion::serialization ALIAS ion-serialization)
 
+set_target_properties(ion-serialization PROPERTIES
+        CXX_STANDARD 23
+        CX_STANDARD_REQUIRED True
+        VERSION 0.1.0
+        SOVERSION 0)
+
 target_sources(ion-serialization
     PRIVATE
         paths.cpp
@@ -13,16 +19,14 @@ target_sources(ion-serialization
         meta_yaml.cpp
         color_yaml.cpp
 
-    PUBLIC
-        FILE_SET ion_serialization_headers
-        TYPE HEADERS
-        BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/serialization
-        FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/sdl_yaml.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/meta_yaml.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/serialization/color_yaml.hpp)
+    PUBLIC FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/serialization
+    FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/serialization/paths.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/serialization/misc_serialization.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/serialization/sdl_yaml.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/serialization/meta_yaml.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/serialization/color_yaml.hpp)
 
 # specify the include directories for ion-serialization
 target_include_directories(ion-serialization PUBLIC
@@ -43,8 +47,7 @@ target_link_libraries(ion-serialization
 install(TARGETS ion-serialization
         EXPORT ion-serialization-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/serialization
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/serialization
-        FILE_SET ion_serialization_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/serialization)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/serialization)
 
 # install the header files for the serialization component
 install(FILES ${CMAKE_SOURCE_DIR}/include/ion/serialization.hpp

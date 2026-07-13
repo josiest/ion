@@ -1,8 +1,9 @@
 #
-# Define the Library
+# Define
 #
 
 add_library(ion-engine STATIC)
+set_target_properties(ion-engine PROPERTIES VERSION 0.1.0 SOVERSION 0)
 add_library(ion::engine ALIAS ion-engine)
 
 target_sources(ion-engine
@@ -10,37 +11,34 @@ target_sources(ion-engine
         sdl_resources.cpp
         sdl_events.cpp
 
-    PUBLIC
-        FILE_SET ion_engine_headers
-        TYPE HEADERS
-        BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/engine
-        FILES
-            ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_resources.hpp
-            ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp)
+    PUBLIC FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/engine
+    FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_resources.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp)
+
+#
+# Compile
+#
+
+# link the required dependencies into a static library
+find_package(EnTT REQUIRED)
+target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT)
 
 # specify the include directories for ion-engine
 target_include_directories(ion-engine PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-# link the required dependencies into a static library
-find_package(EnTT REQUIRED)
-target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT)
-
 #
-# Install the library
+# Install
 #
 
 # install the compiled object and library files
 install(TARGETS ion-engine
         EXPORT ion-engine-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/engine
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/engine
-        FILE_SET ion_engine_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/engine)
-
-# install the header files for the engine component
-install(FILES ${CMAKE_SOURCE_DIR}/include/ion/engine.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/engine)
 
 # create and install the target files
 install(EXPORT ion-engine-targets
