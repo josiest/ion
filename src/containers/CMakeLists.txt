@@ -16,38 +16,8 @@ set_target_properties(ion-containers PROPERTIES
         VERSION 0.2.0
         SOVERSION 0)
 
-# specify include directories for ion-containers
-target_include_directories(ion-containers INTERFACE
-        "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-
-# Install the Library
+#
+# Compile and Install
 #
 
-# install the compiled objects for ion-containers
-install(TARGETS ion-containers
-        EXPORT ion-containers-targets
-        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/containers)
-
-# create and install the target files
-install(EXPORT ion-containers-targets
-        FILE ion-containers-targets.cmake
-        NAMESPACE ion::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/containers)
-
-install(FILES ${CMAKE_SOURCE_DIR}/include/ion/containers.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
-
-#
-# generate version for config file
-include(CMakePackageConfigHelpers)
-get_target_property(ion_containers_VERSION ion-containers VERSION)
-write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/ion-containers-config-version.cmake"
-        VERSION ${ion_containers_VERSION}
-        COMPATIBILITY AnyNewerVersion)
-
-# install the config files
-install(FILES ion-containers-config.cmake
-              "${CMAKE_CURRENT_BINARY_DIR}/ion-containers-config-version.cmake"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/containers)
+install_ion_module(containers)

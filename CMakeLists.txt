@@ -13,12 +13,62 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
-find_package(EnTT REQUIRED)
 
 # set the output directory for built objects.
 # This makes sure that the dynamic library goes into the build directory automatically.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+
+function(install_interface_targets MODULE_NAME)
+    target_include_directories(ion-${MODULE_NAME} INTERFACE
+            "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+
+    install(TARGETS ion-${MODULE_NAME}
+            EXPORT ion-${MODULE_NAME}-targets
+            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/${MODULE_NAME})
+endfunction()
+
+function(install_static_targets MODULE_NAME)
+    target_include_directories(ion-${MODULE_NAME} PUBLIC
+            "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+
+    install(TARGETS ion-${MODULE_NAME}
+            EXPORT ion-${MODULE_NAME}-targets
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/${MODULE_NAME}
+            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/${MODULE_NAME})
+endfunction()
+
+function(install_ion_module MODULE_NAME)
+
+    get_target_property(ion_module_type ion-${MODULE_NAME} TYPE)
+    if(${ion_module_type} STREQUAL STATIC_LIBRARY)
+        install_static_targets(${MODULE_NAME})
+    elseif(${ion_module_type} STREQUAL INTERFACE_LIBRARY)
+        install_interface_targets(${MODULE_NAME})
+    endif()
+
+    install(EXPORT ion-${MODULE_NAME}-targets
+            FILE ion-${MODULE_NAME}-targets.cmake
+            NAMESPACE ion::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/${MODULE_NAME})
+
+    # generate and install version and config files
+    get_target_property(ion_module_VERSION ion-${MODULE_NAME} VERSION)
+    set(ion_module_version_filepath "${CMAKE_CURRENT_BINARY_DIR}/ion-${MODULE_NAME}-config-version.cmake")
+
+    write_basic_package_version_file(${ion_module_version_filepath}
+            VERSION ${ion_module_VERSION}
+            COMPATIBILITY AnyNewerVersion)
+
+    # install the config files
+    install(FILES ion-${MODULE_NAME}-config.cmake ${ion_module_version_filepath}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/${MODULE_NAME})
+endfunction()
+
+function(install_static_ion_module MODULE_NAME)
+endfunction()
 
 add_subdirectory(src/containers)
 add_subdirectory(src/mylar)

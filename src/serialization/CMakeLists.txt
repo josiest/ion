@@ -28,10 +28,9 @@ target_sources(ion-serialization
         ${CMAKE_SOURCE_DIR}/include/ion/serialization/meta_yaml.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/serialization/color_yaml.hpp)
 
-# specify the include directories for ion-serialization
-target_include_directories(ion-serialization PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+#
+# Compile and Install
+#
 
 # link the required dependencies into a static library
 find_package(yaml-cpp REQUIRED)
@@ -39,34 +38,4 @@ find_package(EnTT REQUIRED)
 target_link_libraries(ion-serialization
         PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp EnTT::EnTT ion-containers ion-mylar)
 
-#
-# Install the library
-#
-
-# install the compiled object and library files
-install(TARGETS ion-serialization
-        EXPORT ion-serialization-targets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/serialization
-        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/serialization)
-
-# install the header files for the serialization component
-install(FILES ${CMAKE_SOURCE_DIR}/include/ion/serialization.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
-
-# create and install the target files
-install(EXPORT ion-serialization-targets
-        FILE ion-serialization-targets.cmake
-        NAMESPACE ion::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/serialization)
-
-# generate and install version and config files
-get_target_property(ion_serialization_VERSION ion-serialization VERSION)
-set(ion_serialization_version_filepath "${CMAKE_CURRENT_BINARY_DIR}/ion-serialization-config-version.cmake")
-
-write_basic_package_version_file(${ion_serialization_version_filepath}
-        VERSION ${ion_serialization_VERSION}
-        COMPATIBILITY AnyNewerVersion)
-
-# install the config files
-install(FILES ion-serialization-config.cmake ${ion_serialization_version_filepath}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/serialization)
+install_ion_module(serialization)
