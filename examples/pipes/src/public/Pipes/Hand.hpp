@@ -1,6 +1,5 @@
 #pragma once
 #include <optional>
-#include <entt/entity/registry.hpp>
 #include "Pipes/Board.hpp"
 #include "Pipes/Tile/Tile.hpp"
 

@@ -1,71 +1,62 @@
 #include "Pipes/Pipes.hpp"
-#include <yaml-cpp/yaml.h>
+
+#include <filesystem>
+#include <ion/engine.hpp>
+#include <ion/editor.hpp>
+#include <ion/input/axis.hpp>
 #include <iostream>
 
+#include <ion/serialization/paths.hpp>
+#include <SDL3/SDL_log.h>
+
+namespace fs = std::filesystem;
 namespace ranges = std::ranges;
+ion::editor * GEditor = nullptr;
 
 int main(int argc, char * argv[])
 {
-    ion::asset_loader asset_loader;
-    Pipes::WindowSettings window_settings;
-    Pipes::GameSettings game_settings;
-    Pipes::TileSettings tile_settings;
-    try
-    {
-        auto config = YAML::LoadFile("resources/settings.yaml");
-        window_settings = asset_loader.from_config<Pipes::WindowSettings>(config["window"]);
-        game_settings = asset_loader.from_config<Pipes::GameSettings>(config["game"]);
-        tile_settings = asset_loader.from_config<Pipes::TileSettings>(config["tile"]);
-    }
-    catch (const YAML::Exception & error)
-    {
-        std::cout << error.what() << "\n";
-    }
+    const fs::path root_dir = ion::paths::root_dir();
+    ion::editor_settings::config_path((root_dir/"resources/settings.yaml").string());
+    SDL_Log("Config Dir: %s\n", ion::editor_settings::config_path().data());
 
-    Pipes::App game{ asset_loader, window_settings, game_settings, tile_settings };
+    auto editor = ion::editor::initialize();
+    if (not editor) { return EXIT_FAILURE; }
+    GEditor = editor.get();
 
-    // crash if the game failed to initialize
-    if (not game) {
-        std::cout << game.get_error() << std::endl;
-        return EXIT_FAILURE;
-    }
+    const auto editor_settings = ion::editor_settings::load();
+    SDL_Log("Editor name: %s\n", editor_settings.window_name.c_str());
+
+    const Pipes::GameSettings game_settings;
+    constexpr Pipes::TileSettings tile_settings;
+    Pipes::App game{ game_settings, tile_settings };
+
     // otherwise run the game
-    game.run();
+    game.start();
+    while (not editor->has_quit())
+    {
+        ion::sdl_events::poll();
+        game.update();
+    }
     return EXIT_SUCCESS;
 }
 
-Pipes::App::App(const ion::asset_loader & asset_loader,
-                const Pipes::WindowSettings & window_settings,
-                const Pipes::GameSettings & game_settings,
-                const Pipes::TileSettings & tile_settings)
+Pipes::App::App(const GameSettings & game_settings,
+                const TileSettings & tile_settings)
 
-    : _window(ion::software_renderer::basic_window(window_settings.name,
-                                                   window_settings.width,
-                                                   window_settings.height)),
+    : _rng(std::random_device{}()),
 
-      _rng(std::random_device{}()),
-
-      board(Pipes::TileMap(asset_loader, game_settings.tiles_directory),
-            tile_settings),
+      board(TileMap(game_settings.tiles_directory), tile_settings),
 
       deck(_rng, game_settings.deck_size),
       hand(board)
 {
-    // quit when SDL quit event is triggered
-    _events.on_quit().connect<&ion::input::quit>();
 
-    // make sure SDL resources initialized properly
-    if (not _sdl) {
-        set_error("Couldn't initialize SDL: " + _sdl.get_error());
-        return;
-    }
-    if (not _window) {
-        set_error("Couldn't create a window: " + _window.get_error());
-        return;
-    }
     board.background_color = game_settings.background_color;
-    board.transform.translate(static_cast<float>(window_settings.width)/2.f,
-                              static_cast<float>(window_settings.height)/2.f);
+    SDL_Point window_size;
+    SDL_GetWindowSize(GEditor->window.get(), &window_size.x, &window_size.y);
+
+    board.transform.translate(static_cast<float>(window_size.x)/2.f,
+                              static_cast<float>(window_size.y)/2.f);
 
     board.transform.scale_by(static_cast<float>(game_settings.unit_size),
                             -static_cast<float>(game_settings.unit_size));
@@ -75,25 +66,22 @@ Pipes::App::App(const ion::asset_loader & asset_loader,
     board.place_tile(board.draw_from(deck, SDL_Point{ 0, 0 }));
 }
 
-void Pipes::App::run()
+void Pipes::App::start()
 {
     const SDL_Point mouse = board.nearest_point(ion::input::mouse_position());
     hand.current_tile = board.draw_from(deck, mouse);
 
     // bind the mouse to the tile hand
-    _events.on_mouse_scroll().connect<&Pipes::Hand::on_cursor_scrolled>(hand);
-    _events.on_mouse_moved().connect<&Pipes::Hand::on_cursor_moved>(hand);
+    ion::sdl_events::on_mouse_scroll().connect<&Hand::on_cursor_scrolled>(hand);
+    ion::sdl_events::on_mouse_moved().connect<&Hand::on_cursor_moved>(hand);
 
     // place the tile associated with the mouse when clicked
-    _events.on_mouse_up().connect<&App::on_mouse_clicked>(this);
+    ion::sdl_events::on_mouse_up().connect<&App::on_mouse_clicked>(this);
+}
 
-    // create the window and run the game
-    while (not ion::input::has_quit()) {
-
-        // process any events then render the window
-        _events.poll();
-        board.render(_window);
-    }
+void Pipes::App::update()
+{
+    board.render(GEditor->window.get());
 }
 
 void Pipes::App::on_mouse_clicked()

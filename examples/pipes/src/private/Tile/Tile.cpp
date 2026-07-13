@@ -42,7 +42,7 @@ Pipes::TileHandle & Pipes::TileHandle::operator=(const Pipes::TileHandle & other
     return *this;
 }
 
-Pipes::TileHandle::TileHandle(Pipes::TileHandle && other)
+Pipes::TileHandle::TileHandle(Pipes::TileHandle && other) noexcept
     : entities{ std::exchange(other.entities, nullptr) }, id{ std::exchange(other.id, entt::null) }
 {
 }

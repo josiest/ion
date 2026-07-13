@@ -5,21 +5,12 @@
 #include "Pipes/Hand.hpp"
 #include "Pipes/Tile/TileSettings.hpp"
 
-#include <ion/ion.hpp>
 #include <entt/entt.hpp>
 
-#include <cstdint>
 #include <random>
 
 namespace Pipes
 {
-struct WindowSettings
-{
-    std::string name = "Pipes";
-    std::uint32_t width = 800;
-    std::uint32_t height = 600;
-};
-
 struct GameSettings
 {
     std::uint32_t deck_size = 20;
@@ -32,18 +23,7 @@ struct GameSettings
 namespace ion
 {
 template<>
-auto reflect<Pipes::WindowSettings>()
-{
-    using namespace entt::literals;
-    return entt::meta_factory<Pipes::WindowSettings>{}
-        .type("Pipes::WindowSettings"_hs)
-        .data<&Pipes::WindowSettings::name>("name"_hs)
-        .data<&Pipes::WindowSettings::width>("width"_hs)
-        .data<&Pipes::WindowSettings::height>("height"_hs);
-}
-
-template<>
-auto reflect<Pipes::GameSettings>()
+inline auto reflect<Pipes::GameSettings>()
 {
     using namespace entt::literals;
     ion::reflect<SDL_Color>();
@@ -59,31 +39,24 @@ auto reflect<Pipes::GameSettings>()
 namespace Pipes
 {
 
-class App : public ion::isotope {
+class App {
 public:
     using engine_t = std::mt19937;
 
-    App(const ion::asset_loader & asset_loader,
-        const Pipes::WindowSettings & window_settings,
-        const Pipes::GameSettings & game_settings,
-        const Pipes::TileSettings & tile_settings);
-    void run();
+    App(const GameSettings & game_settings,
+        const TileSettings & tile_settings);
+
+    void start();
+    void update();
 private:
     void on_mouse_clicked();
-
-    // events
-    ion::event_sink _events;
-
-    // initialize sdl before other sdl resources
-    ion::sdl_context _sdl;
-    ion::software_renderer _window;
 
     // ecs
     engine_t _rng;
 
     // tile
-    Pipes::Board board;
-    Pipes::Deck deck;
-    Pipes::Hand hand;
+    Board board;
+    Deck deck;
+    Hand hand;
 };
 }

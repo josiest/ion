@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <SDL2/SDL_rect.h>
+#include <concepts>
+#include <SDL3/SDL_rect.h>
 
 namespace Pipes {
 

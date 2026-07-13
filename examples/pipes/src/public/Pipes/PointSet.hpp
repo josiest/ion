@@ -1,6 +1,5 @@
 #pragma once
-#include <SDL2/SDL_rect.h>
-#include <entt/entity/entity.hpp>
+#include <SDL3/SDL_rect.h>
 #include <unordered_map>
 #include "Pipes/Tile/Tile.hpp"
 

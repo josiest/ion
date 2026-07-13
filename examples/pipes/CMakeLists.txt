@@ -33,20 +33,8 @@ set_target_properties(pipes PROPERTIES
 
 target_include_directories(pipes PRIVATE src/public)
 
-find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
-if (TARGET SDL2::SDL2main)
-    target_link_libraries(pipes PRIVATE SDL2::SDL2main)
-endif ()
-
-find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS window graphics input)
-target_link_libraries(pipes PRIVATE ion::window ion::graphics ion::input)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS editor mylar)
+target_link_libraries(pipes PRIVATE ion::editor ion::mylar)
 
 find_package(glm REQUIRED CONFIG)
 target_link_libraries(pipes PRIVATE glm::glm)
-
-find_package(EnTT REQUIRED CONFIG)
-target_link_libraries(pipes INTERFACE EnTT::EnTT)
-
-find_package(yaml-cpp REQUIRED CONFIG)
-target_link_libraries(pipes PRIVATE yaml-cpp::yaml-cpp)
-

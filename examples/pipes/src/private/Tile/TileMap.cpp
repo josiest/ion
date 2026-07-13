@@ -1,22 +1,27 @@
 #include "Pipes/Tile/TileMap.hpp"
 
-#include <ion/konbu.hpp>
-#include <SDL2/SDL_surface.h>
-
 #include <sstream>
 #include <filesystem>
 #include <string_view>
 
-Pipes::TileMap::TileMap(const ion::asset_loader& asset_loader,
-                        const std::string_view images_path)
+#include <SDL3/SDL_log.h>
+#include <ion/serialization/paths.hpp>
+
+#include "ion/editor/editor.hpp"
+
+namespace fs = std::filesystem;
+
+Pipes::TileMap::TileMap(const std::string_view images_path)
 {
     std::stringstream filename;
 
-    const auto root_dir = asset_loader.asset_root_path/images_path;
-    if (not std::filesystem::exists(root_dir))
+    const fs::path root_dir = ion::paths::root_dir();
+    const auto images_dir = root_dir/"resources"/images_path;
+
+    if (not std::filesystem::exists(images_dir))
     {
         SDL_Log("Trying to load images at root-directory %s but it doesn't exist\n",
-                root_dir.string().c_str());
+                images_dir.string().c_str());
     }
 
     for (const auto name : TileInfo::names)
@@ -24,12 +29,12 @@ Pipes::TileMap::TileMap(const ion::asset_loader& asset_loader,
         for (const auto rotation : TileInfo::rotations)
         {
             filename << name << "-" << rotation << ".bmp";
-            const auto filepath = root_dir/filename.str();
+            const auto filepath = images_dir/filename.str();
             if (not std::filesystem::exists(filepath))
             {
                 SDL_Log("Expecting tile image at path %s but it doesn't exist!\n", filepath.string().c_str());
             }
-            tiles.try_emplace(TileID{ name, rotation }, ion::surface::load_bitmap(filepath));
+            tiles.try_emplace(TileID{ name, rotation }, ion::load_bitmap(filepath.string()));
             filename.str("");
         }
     }
@@ -39,7 +44,7 @@ SDL_Surface * Pipes::TileMap::image_for(TileInfo::Name name, TileInfo::Rotation 
 {
     if (const auto search = tiles.find(TileID{ name, rotation }); search != tiles.end())
     {
-        return search->second;
+        return search->second.get();
     }
     return nullptr;
 }

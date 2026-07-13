@@ -1,7 +1,6 @@
-window:
-  name: "Pipes Example"
-  width: 640
-  height: 480
+general:
+  editor-name: "Pipes Example"
+  resolution: 640x480
 
 game:
   deck-size: 5

@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 std::string ion::paths::root_dir()
 {
     const fs::path base_path = SDL_GetBasePath();
-    return base_path.parent_path().parent_path().string();
+    return base_path.parent_path().string();
 }
 
 std::string ion::paths::config_dir()

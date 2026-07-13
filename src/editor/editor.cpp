@@ -11,7 +11,7 @@
 
 namespace fs = std::filesystem;
 using namespace std::string_literals;
-std::string ion::editor_settings::config_path = ""s;
+std::string ion::editor_settings::config_path_ = ""s;
 
 std::unique_ptr<ion::editor> ion::editor::initialize()
 {
@@ -49,7 +49,12 @@ std::unique_ptr<ion::editor> ion::editor::initialize()
 ion::editor_settings ion::editor_settings::load()
 {
     editor_settings settings;
-    const auto root = load_root();
+    if (not fs::exists(config_path()))
+    {
+        SDL_Log("Couldn't load settings because of bad path: %s\n", config_path().data());
+        return settings;
+    }
+    const auto root = YAML::LoadFile(std::string{ config_path() });
     if (not root) { return settings; }
 
     const auto general_settings = root["general"];
@@ -78,16 +83,26 @@ ion::editor_settings ion::editor_settings::load()
 
 YAML::Node ion::editor_settings::load_setting(std::string_view setting_name)
 {
-    const auto root = load_root();
+    if (not fs::exists(config_path()))
+    {
+        SDL_Log("Couldn't load settings because of bad path: %s\n", config_path().data());
+        return YAML::Node{};
+    }
+    const auto root = YAML::LoadFile(std::string{ config_path() });
     return root[setting_name];
 }
 
-YAML::Node ion::editor_settings::load_root()
+void ion::editor_settings::config_path(std::string_view path)
 {
-    if (config_path.empty())
+    config_path_ = path;
+}
+
+std::string_view ion::editor_settings::config_path()
+{
+    if (config_path_.empty())
     {
-        const fs::path config_dir = paths::config_dir();
-        config_path = (config_dir/"editor-settings.yml").string();
+        const fs::path config_dir_ = paths::config_dir();
+        config_path_ = (config_dir_/"editor-settings.yml").string();
     }
-    return YAML::LoadFile(config_path);
+    return config_path_;
 }

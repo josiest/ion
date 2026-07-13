@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL_pixels.h>
+#include <SDL3/SDL_pixels.h>
 #include <entt/entity/registry.hpp>
 
 #include "Pipes/Tile/TileInfo.hpp"
@@ -32,7 +32,7 @@ public:
     TileHandle(const TileHandle & other);
     TileHandle& operator=(const TileHandle & other) noexcept;
 
-    TileHandle(TileHandle && other);
+    TileHandle(TileHandle && other) noexcept;
     TileHandle& operator=(TileHandle && other) noexcept;
 
     TileInfo::Name name() const;

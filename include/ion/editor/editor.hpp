@@ -1,6 +1,7 @@
 #pragma once
-#include "ion/engine/sdl_resources.hpp"
+#include <string_view>
 #include <SDL3/SDL_init.h>
+#include "ion/engine/sdl_resources.hpp"
 
 namespace YAML
 {
@@ -27,7 +28,9 @@ protected:
 
 struct editor_settings
 {
-    static std::string config_path;
+    static void config_path(std::string_view path);
+    static std::string_view config_path();
+
     static editor_settings load();
 
     static YAML::Node load_setting(std::string_view setting_name);
@@ -40,6 +43,6 @@ struct editor_settings
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE;
 
 private:
-    static YAML::Node load_root();
+    static std::string config_path_;
 };
 }

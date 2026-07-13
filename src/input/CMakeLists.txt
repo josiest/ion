@@ -2,8 +2,13 @@
 # Define the library
 #
 
-add_library(ion-input STATIC axis.cpp quit.cpp)
+add_library(ion-input STATIC axis.cpp)
 add_library(ion::input ALIAS ion-input)
+target_sources(ion-input PUBLIC FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/input
+    FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/input/axis.hpp)
+
 set_target_properties(ion-input PROPERTIES VERSION 0.1.0 SOVERSION 0)
 
 # specify the include directories for ion-input
@@ -11,7 +16,7 @@ target_include_directories(ion-input PUBLIC "$<BUILD_INTERFACE:${CMAKE_SOURCE_DI
                                             "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 # link the required dependencies into a static library
-target_link_libraries(ion-input PUBLIC SDL2::SDL2)
+target_link_libraries(ion-input PUBLIC SDL3::SDL3)
 
 #
 # Install the library
@@ -21,15 +26,11 @@ target_link_libraries(ion-input PUBLIC SDL2::SDL2)
 install(TARGETS ion-input
         EXPORT ion-input-targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/ion/input
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/input)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/input)
 
 # install the header files for the input component
 install(FILES ${CMAKE_SOURCE_DIR}/include/ion/input.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion)
-
-install(FILES ${CMAKE_SOURCE_DIR}/include/ion/input/axis.hpp
-              ${CMAKE_SOURCE_DIR}/include/ion/input/quit.hpp
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ion/input)
 
 # create and install the target files
 install(EXPORT ion-input-targets

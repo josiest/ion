@@ -1,12 +1,11 @@
 #pragma once
 #include "Pipes/Tile/TileInfo.hpp"
-#include <ion/graphics/surface.hpp>
 #include <string_view>
+#include <ion/engine/sdl_resources.hpp>
 
 namespace ion
 {
 class surface;
-class asset_loader;
 }
 
 struct SDL_Surface;
@@ -39,10 +38,10 @@ namespace Pipes
 class TileMap
 {
 public:
-    TileMap(const ion::asset_loader& asset_loader, std::string_view images_path);
+    TileMap(std::string_view images_path);
     SDL_Surface * image_for(TileInfo::Name name, TileInfo::Rotation rotation) const;
 private:
     TileMap() = default;
-    std::unordered_map<TileID, ion::surface> tiles;
+    std::unordered_map<TileID, ion::sdl_surface> tiles;
 };
 }

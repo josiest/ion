@@ -12,9 +12,9 @@ public:
     Deck(RandomEngine & rng, Natural num_tiles);
 
     bool is_empty() const;
-    Pipes::TileID next_tile();
+    TileID next_tile();
 private:
-    std::vector<Pipes::TileID> tile_stack;
+    std::vector<TileID> tile_stack;
 };
 }
 

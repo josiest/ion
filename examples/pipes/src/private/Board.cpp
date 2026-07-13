@@ -2,8 +2,9 @@
 #include "Pipes/Tile/Tile.hpp"
 #include "Pipes/Deck.hpp"
 
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_video.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_render.h>
 
 #include <array>
 #include <algorithm>
@@ -11,8 +12,8 @@
 Pipes::Board::Board(TileMap && loaded_tiles,
                     const TileSettings & tile_settings)
 
-    : loaded_tiles(std::move(loaded_tiles)),
-      tile_settings(tile_settings)
+    : tile_settings(tile_settings),
+      loaded_tiles(std::move(loaded_tiles))
 {
 }
 
@@ -78,20 +79,25 @@ void Pipes::Board::render(SDL_Window * window) const
 {
     // clear the screen
     auto screen = SDL_GetWindowSurface(window);
-    SDL_FillRect(screen, nullptr, SDL_MapRGB(screen->format,
-                                             background_color.r, background_color.g, background_color.b));
+
+    const auto * pixel_format = SDL_GetPixelFormatDetails(screen->format);
+    const int bg_color = SDL_MapRGB(pixel_format, nullptr,
+                                    background_color.r, background_color.g, background_color.b);
+
+    SDL_FillSurfaceRect(screen, nullptr, bg_color);
 
     // draw the tiles and update the window
     entities.view<Component::Tile, Component::Position>()
-            .each([this, screen](const auto & tile, const auto & position)
+            .each([&](const auto & tile, const auto & position)
     {
         // get the sdl surface to render from and the grid square to render to
         SDL_Surface * tile_surface = loaded_tiles.image_for(tile.name, tile.rotation);
         SDL_Rect grid_square = unit_square(position);
 
-        // color the background and draw the tile
-        SDL_FillRect(screen, &grid_square, SDL_MapRGB(screen->format, tile.color.r, tile.color.g, tile.color.b));
-        SDL_BlitScaled(tile_surface, nullptr, screen, &grid_square);
+        // color the background and draw the til
+        const int fg_color = SDL_MapRGB(pixel_format, nullptr, tile.color.r, tile.color.g, tile.color.b);
+        SDL_FillSurfaceRect(screen, &grid_square, fg_color);
+        SDL_BlitSurfaceScaled(tile_surface, nullptr, screen, &grid_square, SDL_SCALEMODE_NEAREST);
     });
     SDL_UpdateWindowSurface(window);
 }
