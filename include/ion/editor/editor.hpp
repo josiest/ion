@@ -45,4 +45,6 @@ struct editor_settings
 private:
     static std::string config_path_;
 };
+
+inline editor * GEditor = nullptr;
 }

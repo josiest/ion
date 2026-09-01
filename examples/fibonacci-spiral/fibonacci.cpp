@@ -36,6 +36,26 @@ auto reflect<spiral_data>()
 }
 }
 
+class spiral
+{
+public:
+    void start();
+    spiral_data settings;
+};
+
+namespace ion
+{
+template<>
+auto reflect<spiral>()
+{
+    using namespace entt::literals;
+    return entt::meta_factory<spiral>()
+        .type("spiral"_hs)
+        .func<&spiral::start>("spiral::start"_hs)
+        .data<&spiral::settings>("spiral::settings"_hs);
+}
+}
+
 /** Transform a guide rect into the next subframe of the fibonacci spiral
  *
  * \param guide changed into the next fibonacci spiral frame

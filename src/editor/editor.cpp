@@ -42,6 +42,7 @@ std::unique_ptr<ion::editor> ion::editor::initialize()
         return nullptr;
     }
 
+    GEditor = ed.get();
     sdl_events::on_quit().connect<&editor::request_quit>(ed.get());
     return std::move(ed);
 }

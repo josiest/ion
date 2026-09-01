@@ -8,20 +8,14 @@
 
 namespace fs = std::filesystem;
 namespace ranges = std::ranges;
-ion::editor * GEditor = nullptr;
 
 int main(int argc, char * argv[])
 {
     const fs::path root_dir = ion::paths::root_dir();
     ion::editor_settings::config_path((root_dir/"resources/settings.yaml").string());
-    SDL_Log("Config Dir: %s\n", ion::editor_settings::config_path().data());
 
     auto editor = ion::editor::initialize();
     if (not editor) { return EXIT_FAILURE; }
-    GEditor = editor.get();
-
-    const auto editor_settings = ion::editor_settings::load();
-    SDL_Log("Editor name: %s\n", editor_settings.window_name.c_str());
 
     const Pipes::GameSettings game_settings;
     constexpr Pipes::TileSettings tile_settings;
@@ -50,7 +44,7 @@ Pipes::App::App(const GameSettings & game_settings,
 
     board.background_color = game_settings.background_color;
     SDL_Point window_size;
-    SDL_GetWindowSize(GEditor->window.get(), &window_size.x, &window_size.y);
+    SDL_GetWindowSize(ion::GEditor->window.get(), &window_size.x, &window_size.y);
 
     board.transform.translate(static_cast<float>(window_size.x)/2.f,
                               static_cast<float>(window_size.y)/2.f);
@@ -78,7 +72,7 @@ void Pipes::App::start()
 
 void Pipes::App::update()
 {
-    board.render(GEditor->window.get());
+    board.render(ion::GEditor->window.get());
 }
 
 void Pipes::App::on_mouse_clicked()
