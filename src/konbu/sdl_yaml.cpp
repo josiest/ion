@@ -5,6 +5,7 @@
 #include <SDL3/SDL_log.h>
 
 #include <yaml-cpp/yaml.h>
+#include "ion/engine/sdl_resources.hpp"
 
 bool ion::read_subsystem_flags(const YAML::Node & node, SDL_InitFlags & flags)
 {
@@ -50,7 +51,7 @@ bool ion::read_window_flags(const YAML::Node & node, SDL_WindowFlags & flags)
 
 bool ion::read_subsystem_flag(std::string_view src, SDL_InitFlags & flag)
 {
-    if (auto * result = internal::subsystem_flags.find(src))
+    if (auto * result = subsystem_flag_names.find(src))
     {
         flag = result->first;
         return true;
@@ -60,7 +61,7 @@ bool ion::read_subsystem_flag(std::string_view src, SDL_InitFlags & flag)
 
 bool ion::read_window_flag(std::string_view src, SDL_WindowFlags & flag)
 {
-    if (auto * result = internal::window_flags.find(src))
+    if (auto * result = window_flag_names.find(src))
     {
         flag = result->first;
         return true;

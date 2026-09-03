@@ -10,12 +10,16 @@ target_sources(ion-engine
     PRIVATE
         sdl_resources.cpp
         sdl_events.cpp
+        engine_component.cpp
+        engine.cpp
 
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/engine
     FILES
         ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_resources.hpp
-        ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp)
+        ${CMAKE_SOURCE_DIR}/include/ion/engine/engine_component.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/engine/engine.hpp)
 
 #
 # Compile and Install

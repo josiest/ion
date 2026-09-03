@@ -19,10 +19,15 @@ public:
     bool has_quit() const { return wants_to_quit; }
     void request_quit() { wants_to_quit = true; }
 
+    // resource handles
+protected:
+    sdl_system_DEPRECATED sdl = nullptr;
+public:
     sdl_window window = nullptr;
     sdl_renderer renderer = nullptr;
+
+    // members
 protected:
-    sdl_system sdl = nullptr;
     bool wants_to_quit = false;
 };
 

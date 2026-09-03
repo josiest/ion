@@ -18,7 +18,7 @@ std::unique_ptr<ion::editor> ion::editor::initialize()
     const auto settings = editor_settings::load();
     auto ed = std::make_unique<editor>();
 
-    ed->sdl = init_sdl(settings.init_flags);
+    ed->sdl = init_sdl_DEPRECATED(settings.init_flags);
     if (not ed->sdl->was_init())
     {
         SDL_Log("Couldn't initialize SDL: %s\n", SDL_GetError());
