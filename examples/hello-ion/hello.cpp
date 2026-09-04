@@ -1,12 +1,11 @@
-#include <ion/editor.hpp>
 #include <ion/engine.hpp>
 
 int main(int argc, char * argv[])
 {
-    const auto editor = ion::editor::initialize();
-    if (not editor) { return EXIT_FAILURE; }
+    const auto engine = ion::engine::initialize();
+    if (not engine) { return EXIT_FAILURE; }
 
-    while (not editor->has_quit())
+    while (not engine->has_quit())
     {
         ion::sdl_events::poll();
     }

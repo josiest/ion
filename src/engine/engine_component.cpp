@@ -1,21 +1,11 @@
 #include "ion/engine/engine_component.hpp"
 
-void ion::window_component::set_owner(engine * new_owner)
+ion::window_component::window_component(std::string_view title, int width, int height, SDL_WindowFlags flags)
+    : window(create_window(title, width, height, flags))
 {
-    owner = new_owner;
 }
 
-ion::engine * ion::window_component::get_owner() const
+ion::renderer_component::renderer_component(SDL_Window * window)
+    : renderer(create_renderer(window))
 {
-    return owner;
-}
-
-void ion::renderer_component::set_owner(engine * new_owner)
-{
-    owner = new_owner;
-}
-
-ion::engine * ion::renderer_component::get_owner() const
-{
-    return owner;
 }

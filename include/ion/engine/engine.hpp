@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <vector>
+#include <list>
 #include <concepts>
 
 #include "ion/engine/sdl_resources.hpp"
@@ -12,9 +12,10 @@ class engine
 {
 public:
     static std::unique_ptr<engine> initialize();
+    engine() = default;
 
-    template<std::derived_from<IEngineComponent> ComponentType>
-    void add_component(ComponentType * component);
+    template<std::derived_from<IEngineComponent> ComponentType, typename... Args>
+    ComponentType * emplace_component(Args &&... args);
 
     template<std::derived_from<IEngineComponent> ComponentType>
     ComponentType * find_component() const;
@@ -24,17 +25,22 @@ public:
 
     bool has_quit() const { return wants_to_quit; }
 protected:
-    std::vector<std::unique_ptr<IEngineComponent>> components;
     sdl_context sdl = nullptr;
+    std::list<std::unique_ptr<IEngineComponent>> components;
+
     bool wants_to_quit = false;
 };
+
+inline engine * GEngine = nullptr;
 }
 
-template<std::derived_from<ion::IEngineComponent> ComponentType>
-void ion::engine::add_component(ComponentType * component)
+template<std::derived_from<ion::IEngineComponent> ComponentType, typename... Args>
+ComponentType * ion::engine::emplace_component(Args &&... args)
 {
-    components.emplace_back(component);
-    component->set_owner(this);
+    auto * component = new ComponentType(std::forward<Args>(args)...);
+    component->owner(this);
+    components.emplace_back(dynamic_cast<IEngineComponent *>(component));
+    return component;
 }
 
 template<std::derived_from<ion::IEngineComponent> ComponentType>
@@ -42,7 +48,7 @@ ComponentType * ion::engine::find_component() const
 {
     for (const auto & engine_component : components)
     {
-        if (auto * component = dynamic_cast<ComponentType>(engine_component.get()))
+        if (auto * component = dynamic_cast<ComponentType *>(engine_component.get()))
         {
             return component;
         }

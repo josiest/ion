@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <optional>
 #include <cstdint>
 #include <SDL3/SDL_init.h>
 #include "ion/containers.hpp"
@@ -101,16 +103,22 @@ constexpr lookup_table<SDL_WindowFlags, std::string_view, 26> window_flag_names
     { SDL_WINDOW_NOT_FOCUSABLE,       "not focusable" }
 };
 
-struct sdl_settings
+struct project_settings
 {
+    std::string name = "ion Project";
+};
+
+struct engine_settings
+{
+    std::string installation_directory = "C:/msys64/mingw64";
     SDL_InitFlags subsystem_flags = SDL_INIT_VIDEO;
 };
 
 struct window_settings
 {
-    std::string name = "ion Project";
+    std::optional<std::string> name = std::nullopt;
     std::uint32_t width = 640u;
     std::uint32_t height = 480u;
-    SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE;
+    SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE;
 };
 }

@@ -7,33 +7,27 @@ class engine;
 class IEngineComponent
 {
 public:
-    virtual void set_owner(engine * new_owner);
-    virtual engine * get_owner() const;
+    void owner(engine * new_owner) { _owner = new_owner; }
+    engine * owner() const { return _owner; }
 
     virtual void start() {}
     virtual void quit() {}
-    virtual ~IEngineComponent();
+    virtual ~IEngineComponent() = default;
+private:
+    engine * _owner = nullptr;
 };
 
 class window_component : public IEngineComponent
 {
 public:
-    sdl_window window;
-
-    void set_owner(engine * new_owner) override;
-    engine * get_owner() const override;
-protected:
-    engine * owner = nullptr;
+    window_component(std::string_view title, int width, int height, SDL_WindowFlags flags);
+    sdl_window window = nullptr;
 };
 
 class renderer_component : public IEngineComponent
 {
 public:
-    sdl_renderer renderer;
-
-    void set_owner(engine * new_owner) override;
-    engine * get_owner() const override;
-protected:
-    engine * owner = nullptr;
+    explicit renderer_component(SDL_Window * window);
+    sdl_renderer renderer = nullptr;
 };
 }
