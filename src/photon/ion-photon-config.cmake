@@ -1,0 +1,5 @@
+include(CMakeFindDependencyMacro)
+find_dependency(SDL3)
+find_dependency(GLEW)
+include("${CMAKE_CURRENT_LIST_DIR}/ion-photon-targets.cmake")
+add_library(ion::photon ALIAS ion::ion-photon)

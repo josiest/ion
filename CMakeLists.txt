@@ -73,6 +73,7 @@ add_subdirectory(src/engine)
 add_subdirectory(src/konbu)
 add_subdirectory(src/editor)
 add_subdirectory(src/input)
+add_subdirectory(src/photon)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"

@@ -1,9 +1,9 @@
 @PACKAGE_INIT@
 set(_ion_supported_components
-        containers engine mylar konbu editor input)
+        containers engine mylar konbu editor input photon)
 
 set(_ion_subdirs
-        containers engine mylar konbu editor input)
+        containers engine mylar konbu editor input photon)
 
 foreach (_subdir ${_ion_subdirs})
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/${_subdir})
