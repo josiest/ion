@@ -39,18 +39,25 @@ struct sdl_deleter
     void operator()(const sdl_system_DEPRECATED * sdl) const;
     void operator()(SDL_Window * window) const;
     void operator()(SDL_Renderer * renderer) const;
+    void operator()(SDL_GLContextState * ctx) const;
     void operator()(SDL_Surface * surface) const;
 };
 }
 
 using sdl_context = std::unique_ptr<internal::sdl_lifetime_helper, internal::sdl_deleter>;
 using sdl_system_DEPRECATED = std::unique_ptr<internal::sdl_system_DEPRECATED, internal::sdl_deleter>;
+using opengl_context = std::unique_ptr<SDL_GLContextState, internal::sdl_deleter>;
 using sdl_window = std::unique_ptr<SDL_Window, internal::sdl_deleter>;
 using sdl_renderer = std::unique_ptr<SDL_Renderer, internal::sdl_deleter>;
 using sdl_surface = std::unique_ptr<SDL_Surface, internal::sdl_deleter>;
 
 sdl_context init_sdl(std::uint32_t subsystem_flags);
 sdl_system_DEPRECATED init_sdl_DEPRECATED(std::uint32_t init_flags);
+
+struct opengl_settings;
+void configure_opengl(const opengl_settings & settings);
+opengl_context init_opengl(SDL_Window * window);
+
 sdl_window create_window(std::string_view name, int width, int height, std::uint32_t window_flags);
 sdl_renderer create_renderer(SDL_Window * window);
 sdl_surface load_bitmap(std::string_view path);
@@ -120,5 +127,17 @@ struct window_settings
     std::uint32_t width = 640u;
     std::uint32_t height = 480u;
     SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE;
+};
+
+struct opengl_settings
+{
+    SDL_GLProfile profile_mask = SDL_GL_CONTEXT_PROFILE_CORE;
+
+    std::uint8_t major_version = 3u;
+    std::uint8_t minor_version = 3u;
+    std::uint8_t depth_size = 24u;
+
+    std::uint8_t hardware_accelerated : 1 = true;
+    std::uint8_t use_double_buffer : 1 = true;
 };
 }

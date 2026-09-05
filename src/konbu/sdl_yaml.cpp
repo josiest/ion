@@ -37,6 +37,8 @@ bool ion::read_window_flags(const YAML::Node & node, SDL_WindowFlags & flags)
         SDL_WindowFlags flag = 0u;
         if (read_window_flag(flag_config.Scalar(), flag))
         {
+            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Setting window option '%s' = true\n",
+                                                      flag_config.Scalar().c_str());
             any_success = true;
         }
         else

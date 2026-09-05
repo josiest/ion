@@ -6,6 +6,8 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
 
+#include <gl/glew.h>
+
 #include <string_view>
 #include <cstdint>
 #include <cstdlib>
@@ -65,6 +67,15 @@ void ion::internal::sdl_deleter::operator()(const sdl_system_DEPRECATED * sdl) c
     else
     {
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Trying to quit SDL but it wasn't initialized!\n");
+    }
+}
+
+void ion::internal::sdl_deleter::operator()(SDL_GLContextState * ctx) const
+{
+    if (ctx)
+    {
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Destroying OpenGL context...");
+        SDL_GL_DestroyContext(ctx);
     }
 }
 
@@ -131,6 +142,40 @@ ion::sdl_system_DEPRECATED ion::init_sdl_DEPRECATED(std::uint32_t init_flags)
 ion::sdl_context ion::init_sdl(std::uint32_t subsystem_flags)
 {
     return sdl_context(new internal::sdl_lifetime_helper(subsystem_flags), internal::sdl_deleter{});
+}
+
+void ion::configure_opengl(const opengl_settings & settings)
+{
+    SDL_GL_LoadLibrary(nullptr);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, settings.hardware_accelerated);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, settings.major_version);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, settings.minor_version);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, settings.profile_mask);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, settings.use_double_buffer);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, settings.depth_size);
+}
+
+ion::opengl_context ion::init_opengl(SDL_Window * window)
+{
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Initializing OpenGL...");
+    SDL_GLContextState * ctx = SDL_GL_CreateContext(window);
+    if (not ctx)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize OpenGL: %s\n", SDL_GetError());
+        return nullptr;
+    }
+    glewExperimental = GL_TRUE;
+    if (const GLenum glew_error = glewInit(); glew_error != GLEW_OK)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize GLEW: %s\n", SDL_GetError());
+        SDL_GL_DestroyContext(ctx);
+        return nullptr;
+    }
+    if (not SDL_GL_SetSwapInterval(true))
+    {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unable to set VSync: %s\n", SDL_GetError());
+    }
+    return opengl_context(ctx, internal::sdl_deleter{});
 }
 
 ion::sdl_window ion::create_window(std::string_view name, int width, int height, std::uint32_t window_flags)

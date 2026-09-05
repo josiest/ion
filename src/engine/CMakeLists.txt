@@ -28,5 +28,6 @@ target_sources(ion-engine
 # link the required dependencies into a static library
 find_package(EnTT REQUIRED)
 find_package(yaml-cpp REQUIRED)
-target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT yaml-cpp::yaml-cpp ion::konbu)
+find_package(GLEW REQUIRED)
+target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT GLEW::GLEW yaml-cpp::yaml-cpp ion::konbu)
 install_ion_module(engine)

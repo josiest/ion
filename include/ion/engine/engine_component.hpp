@@ -24,6 +24,13 @@ public:
     sdl_window window = nullptr;
 };
 
+class opengl_component : public IEngineComponent
+{
+public:
+    opengl_component(SDL_Window * window);
+    opengl_context gl_context = nullptr;
+};
+
 class renderer_component : public IEngineComponent
 {
 public:

@@ -47,6 +47,14 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
     local_engine->sdl = init_sdl(custom_engine_settings.subsystem_flags);
     if (not local_engine->sdl) { return nullptr; }
 
+    const bool uses_opengl = (custom_window_settings.flags & SDL_WINDOW_OPENGL) != 0u;
+    if (uses_opengl)
+    {
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Configuring OpenGL...\n");
+        opengl_settings custom_opengl_settings;
+        configure_opengl(custom_opengl_settings);
+    }
+
     const std::string window_title = custom_window_settings.name.value_or(custom_project_settings.name);
     const auto * engine_window = local_engine
         ->emplace_component<window_component>(window_title,
@@ -54,9 +62,18 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
                                               custom_window_settings.flags);
     if (not engine_window->window) { return nullptr; }
 
-    const auto * engine_renderer = local_engine
-        ->emplace_component<renderer_component>(engine_window->window.get());
-    if (not engine_renderer->renderer) { return nullptr; }
+    if (uses_opengl)
+    {
+        const auto * engine_gl_ctx = local_engine
+            ->emplace_component<opengl_component>(engine_window->window.get());
+        if (not engine_gl_ctx->gl_context) { return nullptr; }
+    }
+    else
+    {
+        const auto * engine_renderer = local_engine
+            ->emplace_component<renderer_component>(engine_window->window.get());
+        if (not engine_renderer->renderer) { return nullptr; }
+    }
 
     GEngine = local_engine.get();
     sdl_events::on_quit().connect<&engine::quit>(local_engine.get());

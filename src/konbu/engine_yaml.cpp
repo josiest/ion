@@ -85,6 +85,7 @@ ion::window_settings ion::load_window_settings(const YAML::Node & window_config)
     if (const YAML::Node flag_config = window_config["options"];
         flag_config.IsDefined() and flag_config.IsSequence())
     {
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Reading window configuration options...\n");
         read_window_flags(flag_config, settings.flags);
     }
     else if (flag_config.IsDefined() and flag_config.IsScalar())
