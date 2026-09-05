@@ -38,7 +38,8 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
     else
     {
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                    "Couldn't load project settings because path doesn't exist (%s)\n",
+                    "Couldn't load project settings because path doesn't exist\n"
+                    "  path: %s\n",
                     settings_path.generic_string().c_str());
     }
 

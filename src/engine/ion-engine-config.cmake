@@ -1,5 +1,7 @@
 include(CMakeFindDependencyMacro)
 find_dependency(SDL3)
 find_dependency(EnTT)
+find_dependency(yaml-cpp)
+find_dependency(ion-konbu)
 include("${CMAKE_CURRENT_LIST_DIR}/ion-engine-targets.cmake")
 add_library(ion::engine ALIAS ion::ion-engine)
