@@ -1,0 +1,10 @@
+project-name: Hello ion
+
+engine:
+  subsystems:
+    - video
+    - gamepad
+
+window:
+  resolution: 640x480
+  options: []

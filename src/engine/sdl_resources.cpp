@@ -23,6 +23,10 @@ ion::internal::sdl_lifetime_helper::sdl_lifetime_helper(std::uint32_t subsystem_
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n", SDL_GetError());
     }
+    else
+    {
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "All subsystems initialized successfully\n");
+    }
 }
 
 ion::internal::sdl_system_DEPRECATED::sdl_system_DEPRECATED(std::uint32_t init_flags)

@@ -2,25 +2,60 @@
 #include "ion/engine/sdl_resources.hpp"
 #include "ion/engine/sdl_events.hpp"
 
+#include "ion/konbu/paths.hpp"
+#include "ion/konbu/engine_yaml.hpp"
+
+#include <yaml-cpp/yaml.h>
+#include <SDL3/SDL_log.h>
+#include <filesystem>
+
 std::unique_ptr<ion::engine> ion::engine::initialize()
 {
-    project_settings project_config;
-    engine_settings engine_config;
-    window_settings window_config;
+    namespace fs = std::filesystem;
+
+    engine_settings custom_engine_settings;
+    project_settings custom_project_settings;
+    window_settings custom_window_settings;
+
+    if (const auto settings_path = fs::path{paths::root_dir()}/"project.yml";
+        fs::exists(settings_path))
+    {
+        YAML::Node project_config = YAML::LoadFile(settings_path.generic_string());
+        custom_project_settings = load_project_settings(project_config);
+
+        if (const YAML::Node engine_config = project_config["engine"];
+            engine_config.IsDefined() and engine_config.IsMap())
+        {
+            custom_engine_settings = load_engine_settings(engine_config);
+        }
+
+        if (const YAML::Node window_config = project_config["window"];
+            window_config.IsDefined() and window_config.IsMap())
+        {
+            custom_window_settings = load_window_settings(window_config);
+        }
+    }
+    else
+    {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                    "Couldn't load project settings because path doesn't exist (%s)\n",
+                    settings_path.generic_string().c_str());
+    }
 
     auto local_engine = std::make_unique<engine>();
-    local_engine->sdl = init_sdl(engine_config.subsystem_flags);
+    local_engine->sdl = init_sdl(custom_engine_settings.subsystem_flags);
     if (not local_engine->sdl) { return nullptr; }
 
-    const std::string_view window_title = window_config.name.value_or(project_config.name);
-    auto * window_reference = local_engine
-        ->emplace_component<window_component>(window_title, window_config.width, window_config.height,
-                                              window_config.flags);
-    if (not window_reference->window) { return nullptr; }
+    const std::string window_title = custom_window_settings.name.value_or(custom_project_settings.name);
+    const auto * engine_window = local_engine
+        ->emplace_component<window_component>(window_title,
+                                              custom_window_settings.width, custom_window_settings.height,
+                                              custom_window_settings.flags);
+    if (not engine_window->window) { return nullptr; }
 
-    auto * renderer_reference = local_engine
-        ->emplace_component<renderer_component>(window_reference->window.get());
-    if (not renderer_reference->renderer) { return nullptr; }
+    const auto * engine_renderer = local_engine
+        ->emplace_component<renderer_component>(engine_window->window.get());
+    if (not engine_renderer->renderer) { return nullptr; }
 
     GEngine = local_engine.get();
     sdl_events::on_quit().connect<&engine::quit>(local_engine.get());

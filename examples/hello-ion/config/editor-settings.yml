@@ -1,7 +1,0 @@
-general:
-  editor-name: Hello ion
-  resolution: 640x480
-  window-options: []
-  sdl-subsystems:
-    - video
-    - gamepad
