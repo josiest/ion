@@ -66,3 +66,5 @@ build/
 external/
 cmake-build*/
 .idea/
+
+print_install_message.bat

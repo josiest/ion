@@ -60,18 +60,16 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
         ->emplace_component<window_component>(window_title,
                                               custom_window_settings.width, custom_window_settings.height,
                                               custom_window_settings.flags);
-    if (not engine_window->window) { return nullptr; }
+    if (not engine_window->get()) { return nullptr; }
 
     if (uses_opengl)
     {
-        const auto * engine_gl_ctx = local_engine
-            ->emplace_component<opengl_component>(engine_window->window.get());
+        const auto * engine_gl_ctx = local_engine ->emplace_component<opengl_component>(engine_window->get());
         if (not engine_gl_ctx->gl_context) { return nullptr; }
     }
     else
     {
-        const auto * engine_renderer = local_engine
-            ->emplace_component<renderer_component>(engine_window->window.get());
+        const auto * engine_renderer = local_engine ->emplace_component<renderer_component>(engine_window->get());
         if (not engine_renderer->renderer) { return nullptr; }
     }
 

@@ -21,7 +21,9 @@ class window_component : public IEngineComponent
 {
 public:
     window_component(std::string_view title, int width, int height, SDL_WindowFlags flags);
-    sdl_window window = nullptr;
+    SDL_Window * get() const;
+protected:
+    sdl_window window_handle = nullptr;
 };
 
 class opengl_component : public IEngineComponent

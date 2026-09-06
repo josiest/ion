@@ -14,7 +14,7 @@ void ion::internal::shader_program_deleter::operator()(const GLuint * id) const
 ion::shader_component ion::compile_shader_component(GLenum component_type, std::string_view source_code)
 {
     const GLuint shader_id = glCreateShader(component_type);
-    const char * raw_source = source_code.data();
+    const char * const raw_source = source_code.data();
     glShaderSource(shader_id, 1, &raw_source, nullptr);
     glCompileShader(shader_id);
 
@@ -28,7 +28,7 @@ ion::shader_component ion::compile_shader_component(GLenum component_type, std::
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't compile shader: %s\n", error_log);
         return nullptr;
     }
-    return shader_component(new GLuint(shader_id), internal::shader_component_deleter{});
+    return shader_component(new GLuint(shader_id));
 }
 
 ion::shader_component ion::compile_vertex_shader(std::string_view source_code)
@@ -70,4 +70,9 @@ ion::shader_program ion::compile_shader(std::string_view vertex_source, std::str
         return nullptr;
     }
     return link_shader(*vertex_shader.get(), *fragment_shader.get());
+}
+
+void ion::shader_handle::use_program() const
+{
+    glUseProgram(id);
 }
