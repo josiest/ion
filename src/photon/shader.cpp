@@ -84,39 +84,40 @@ void ion::shader_handle::use_program() const
 std::optional<ion::shader_data> ion::load_shader_data(const std::filesystem::path & path)
 {
     namespace fs = std::filesystem;
-    static const fs::path base_dir = SDL_GetBasePath(); // TODO: use search paths instead
+    SDL_Log("Reading shader from file \"%s\"\n", path.generic_string().c_str());
 
     const YAML::Node shader_config = YAML::LoadFile(path.generic_string());
     if (not shader_config.IsDefined() or not shader_config.IsMap()) { return std::nullopt; }
 
     bool success = true;
     const YAML::Node name_config = shader_config["name"];
-    if (not name_config.IsDefined() or not name_config.IsScalar()) { success = false; }
+    if (not name_config.IsDefined() or not name_config.IsScalar())
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no name, or name isn't a string\n");
+        success = false;
+    }
 
     const YAML::Node vertex_config = shader_config["vertex"];
-    if (not vertex_config.IsDefined() or not vertex_config.IsScalar()) { success = false; }
-
-    if (const auto vertex_filepath = base_dir/vertex_config.Scalar();
-        not fs::exists(vertex_filepath))
+    if (not vertex_config.IsDefined() or not vertex_config.IsScalar())
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                     "couldn't find vertex shader \"%s\"\n",
-                     vertex_filepath.generic_string().c_str());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no vertex path, or vertex path isn't a string\n");
         success = false;
     }
 
     const YAML::Node fragment_config = shader_config["fragment"];
-    if (not fragment_config.IsDefined() or not fragment_config.IsScalar()) { success = false; }
-
-    if (const auto fragment_filepath = base_dir/fragment_config.Scalar();
-        not fs::exists(fragment_filepath))
+    if (not fragment_config.IsDefined() or not fragment_config.IsScalar())
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                     "couldn't find fragment shader \"%s\"\n",
-                     fragment_filepath.generic_string().c_str());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no fragment path, or fragment path isn't a string\n");
         success = false;
     }
-    if (not success) { return std::nullopt; }
+
+    if (not success)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Failed to read shader\n");
+        return std::nullopt;
+    }
+
+    SDL_Log("  Read shader \"%s\" successfully\n", name_config.Scalar().c_str());
     return shader_data
     {
         .name = name_config.Scalar(),
@@ -125,12 +126,29 @@ std::optional<ion::shader_data> ion::load_shader_data(const std::filesystem::pat
     };
 }
 
-ion::shader_program ion::compile_shader(const shader_data & settings)
+ion::shader_program ion::compile_shader(const shader_data & settings, const std::filesystem::path & shader_root_dir)
 {
     namespace fs = std::filesystem;
-    static const fs::path base_dir = SDL_GetBasePath(); // TODO: use search paths instead
-    const auto vertex_source = internal::read_file((base_dir/settings.vertex_path).generic_string());
-    const auto fragment_source = internal::read_file((base_dir/settings.fragment_path).generic_string());
+
+    const auto vertex_filepath = shader_root_dir/settings.vertex_path;
+    if (not fs::exists(vertex_filepath))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "couldn't find vertex shader \"%s\"\n",
+                     vertex_filepath.generic_string().c_str());
+        return nullptr;
+    }
+    const auto vertex_source = internal::read_file(vertex_filepath.generic_string());
+
+    const auto fragment_filepath = shader_root_dir/settings.fragment_path;
+    if (not fs::exists(fragment_filepath))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "couldn't find fragment shader \"%s\"\n",
+                     fragment_filepath.generic_string().c_str());
+        return nullptr;
+    }
+    const auto fragment_source = internal::read_file(fragment_filepath.generic_string());
     if (not vertex_source or not fragment_source) { return nullptr; }
     return compile_shader(*vertex_source, *fragment_source);
 }

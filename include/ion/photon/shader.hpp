@@ -62,7 +62,7 @@ struct shader_data
 };
 
 std::optional<shader_data> load_shader_data(const std::filesystem::path & path);
-shader_program compile_shader(const shader_data & settings);
+shader_program compile_shader(const shader_data & settings, const std::filesystem::path & shader_root_dir);
 }
 
 template<ion::shader_uniform T>
@@ -83,5 +83,10 @@ void ion::shader_handle::uniform(std::string_view uniform_name, const T & value)
     else if constexpr (std::is_same_v<T, glm::vec4>)
     {
         glUniform4fv(location, 1u, glm::value_ptr(value));
+    }
+    else
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "uniform type is currently unsupported\n");
     }
 }

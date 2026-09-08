@@ -15,17 +15,27 @@ namespace ion
 {
 
 template<std::output_iterator<shader_data> ShaderDataOutput>
-ShaderDataOutput scan_shader_definitions(std::string_view root_dir, ShaderDataOutput into_shader_data)
+ShaderDataOutput scan_shader_definitions(const std::filesystem::path & directory_to_scan,
+                                         ShaderDataOutput into_shader_data)
 {
+    SDL_Log("Reading shaders in directory \"%s\"\n", directory_to_scan.generic_string().c_str());
     namespace fs = std::filesystem; namespace vies = std::views;
-    if (not fs::exists(root_dir) or not fs::is_directory(root_dir)) { return into_shader_data; }
-    for (const auto & path : fs::directory_iterator(root_dir) | std::views::transform(&fs::directory_entry::path))
+    if (not fs::exists(directory_to_scan) or not fs::is_directory(directory_to_scan))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "Couldn't read shaders because directory doesn't exist or isn't a directory\n");
+        return into_shader_data;
+    }
+
+    for (const auto & path : fs::directory_iterator(directory_to_scan)
+                           | std::views::transform(&fs::directory_entry::path))
     {
         if (path.extension().generic_string() != ".yml") { continue; }
         if (auto loaded_shader = load_shader_data(path)) { *into_shader_data++ = *loaded_shader; }
     }
     return into_shader_data;
 }
+
 template<typename T>
 concept shader_like = requires(T shader)
 {
@@ -43,7 +53,8 @@ public:
     template<shader_like ShaderType>
     std::optional<ShaderType> add_shader(const shader_data & settings);
 
-    void add_shaders_in_directory(std::string_view path);
+    void add_shaders_in_directory(const std::filesystem::path & directory_to_scan,
+                                  const std::filesystem::path & shader_root_dir);
 private:
     struct shader_entry
     {
@@ -56,9 +67,12 @@ private:
 class shader_manager_component : public IEngineComponent
 {
 public:
+    // engine component interface
+    void start() override;
+
+    // public members
     shader_manager shaders;
 
-    void start() override;
 };
 }
 
