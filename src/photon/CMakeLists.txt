@@ -4,8 +4,9 @@ add_library(ion::photon ALIAS ion-photon)
 
 target_sources(ion-photon
     PRIVATE
-        shader.cpp
         mesh.cpp
+        shader.cpp
+        shader_manager.cpp
 
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/photon

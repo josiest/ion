@@ -6,6 +6,8 @@
 #include <memory>
 #include <string_view>
 #include <cstdint>
+#include <optional>
+#include <filesystem>
 
 #include <SDL3/SDL_log.h>
 
@@ -58,6 +60,9 @@ struct shader_data
     std::string vertex_path;
     std::string fragment_path;
 };
+
+std::optional<shader_data> load_shader_data(const std::filesystem::path & path);
+shader_program compile_shader(const shader_data & settings);
 }
 
 template<ion::shader_uniform T>

@@ -1,5 +1,9 @@
 #include "ion/photon/shader.hpp"
+
+#include "ion/konbu/filesystem.hpp"
+#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_log.h>
+#include <yaml-cpp/yaml.h>
 
 void ion::internal::shader_component_deleter::operator()(const GLuint * id) const
 {
@@ -75,4 +79,58 @@ ion::shader_program ion::compile_shader(std::string_view vertex_source, std::str
 void ion::shader_handle::use_program() const
 {
     glUseProgram(id);
+}
+
+std::optional<ion::shader_data> ion::load_shader_data(const std::filesystem::path & path)
+{
+    namespace fs = std::filesystem;
+    static const fs::path base_dir = SDL_GetBasePath(); // TODO: use search paths instead
+
+    const YAML::Node shader_config = YAML::LoadFile(path.generic_string());
+    if (not shader_config.IsDefined() or not shader_config.IsMap()) { return std::nullopt; }
+
+    bool success = true;
+    const YAML::Node name_config = shader_config["name"];
+    if (not name_config.IsDefined() or not name_config.IsScalar()) { success = false; }
+
+    const YAML::Node vertex_config = shader_config["vertex"];
+    if (not vertex_config.IsDefined() or not vertex_config.IsScalar()) { success = false; }
+
+    if (const auto vertex_filepath = base_dir/vertex_config.Scalar();
+        not fs::exists(vertex_filepath))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "couldn't find vertex shader \"%s\"\n",
+                     vertex_filepath.generic_string().c_str());
+        success = false;
+    }
+
+    const YAML::Node fragment_config = shader_config["fragment"];
+    if (not fragment_config.IsDefined() or not fragment_config.IsScalar()) { success = false; }
+
+    if (const auto fragment_filepath = base_dir/fragment_config.Scalar();
+        not fs::exists(fragment_filepath))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "couldn't find fragment shader \"%s\"\n",
+                     fragment_filepath.generic_string().c_str());
+        success = false;
+    }
+    if (not success) { return std::nullopt; }
+    return shader_data
+    {
+        .name = name_config.Scalar(),
+        .vertex_path = vertex_config.Scalar(),
+        .fragment_path = fragment_config.Scalar()
+    };
+}
+
+ion::shader_program ion::compile_shader(const shader_data & settings)
+{
+    namespace fs = std::filesystem;
+    static const fs::path base_dir = SDL_GetBasePath(); // TODO: use search paths instead
+    const auto vertex_source = internal::read_file((base_dir/settings.vertex_path).generic_string());
+    const auto fragment_source = internal::read_file((base_dir/settings.fragment_path).generic_string());
+    if (not vertex_source or not fragment_source) { return nullptr; }
+    return compile_shader(*vertex_source, *fragment_source);
 }

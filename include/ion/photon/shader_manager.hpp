@@ -8,6 +8,8 @@
 #include <optional>
 #include <concepts>
 #include <string_view>
+#include <filesystem>
+#include <ranges>
 
 namespace ion
 {
@@ -17,6 +19,19 @@ concept shader_like = std::constructible_from<T, GLuint, std::string_view> and r
     shader.use_program();
 };
 
+template<std::output_iterator<shader_data> ShaderDataOutput>
+ShaderDataOutput scan_shader_definitions(std::string_view root_dir, ShaderDataOutput into_shader_data)
+{
+    namespace fs = std::filesystem; namespace vies = std::views;
+    if (not fs::exists(root_dir) or not fs::is_directory(root_dir)) { return into_shader_data; }
+    for (const auto & path : fs::directory_iterator(root_dir) | std::views::transform(&fs::directory_entry::path))
+    {
+        if (path.extension().generic_string() != ".yml") { continue; }
+        if (auto loaded_shader = load_shader_data(path)) { *into_shader_data++ = *loaded_shader; }
+    }
+    return into_shader_data;
+}
+
 class shader_manager
 {
 public:
@@ -25,6 +40,8 @@ public:
 
     template<shader_like ShaderType>
     std::optional<ShaderType> add_shader(const shader_data & settings);
+
+    void add_shaders_in_directory(std::string_view path);
 private:
     struct shader_entry
     {
@@ -38,6 +55,8 @@ class shader_manager_component : public IEngineComponent
 {
 public:
     shader_manager shaders;
+
+    void start() override;
 };
 }
 
