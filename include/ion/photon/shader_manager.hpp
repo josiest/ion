@@ -13,11 +13,6 @@
 
 namespace ion
 {
-template<typename T>
-concept shader_like = std::constructible_from<T, GLuint, std::string_view> and requires(T shader)
-{
-    shader.use_program();
-};
 
 template<std::output_iterator<shader_data> ShaderDataOutput>
 ShaderDataOutput scan_shader_definitions(std::string_view root_dir, ShaderDataOutput into_shader_data)
@@ -31,12 +26,19 @@ ShaderDataOutput scan_shader_definitions(std::string_view root_dir, ShaderDataOu
     }
     return into_shader_data;
 }
+template<typename T>
+concept shader_like = requires(T shader)
+{
+    requires std::constructible_from<T, GLuint>;
+    requires std::convertible_to<decltype(T::shader_name), std::string_view>;
+    shader.use_program();
+};
 
 class shader_manager
 {
 public:
     template<shader_like ShaderType>
-    std::optional<ShaderType> find_shader(std::string_view name);
+    std::optional<ShaderType> find_shader();
 
     template<shader_like ShaderType>
     std::optional<ShaderType> add_shader(const shader_data & settings);
@@ -61,12 +63,12 @@ public:
 }
 
 template<ion::shader_like ShaderType>
-std::optional<ShaderType> ion::shader_manager::find_shader(std::string_view name)
+std::optional<ShaderType> ion::shader_manager::find_shader()
 {
-    auto matches_name = [&](const shader_data & data) { return data.name == name; };
+    auto matches_name = [](const shader_data & data) { return data.name == ShaderType::shader_name; };
     const auto search = std::ranges::find_if(shaders, matches_name, &shader_entry::info);
     return search != shaders.end()
-        ? std::optional<ShaderType>(std::in_place, *search->program, search->info.name)
+        ? std::optional<ShaderType>(std::in_place, *search->program)
         : std::nullopt;
 }
 
@@ -81,5 +83,5 @@ std::optional<ShaderType> ion::shader_manager::add_shader(const shader_data & se
     if (not program) { return std::nullopt; }
 
     const auto & entry = shaders.emplace_back(settings, std::move(program));
-    return std::optional<ShaderType>(std::in_place, *entry.program, entry.info.name);
+    return std::optional<ShaderType>(std::in_place, *entry.program);
 }
