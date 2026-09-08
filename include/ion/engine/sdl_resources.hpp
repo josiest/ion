@@ -62,6 +62,8 @@ sdl_window create_window(std::string_view name, int width, int height, std::uint
 sdl_renderer create_renderer(SDL_Window * window);
 sdl_surface load_bitmap(std::string_view path);
 
+SDL_FPoint resolution_of(SDL_Window * window);
+
 constexpr lookup_table<SDL_InitFlags, std::string_view, 8> subsystem_flag_names
 {
     { SDL_INIT_AUDIO,       "audio" },

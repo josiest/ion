@@ -214,3 +214,14 @@ ion::sdl_surface ion::load_bitmap(std::string_view path)
 {
     return { SDL_LoadBMP(path.data()), {} };
 }
+
+SDL_FPoint ion::resolution_of(SDL_Window * window)
+{
+    int width = 0; int height = 0;
+    SDL_GetWindowSize(window, &width, &height);
+    return SDL_FPoint
+    {
+        .x = static_cast<float>(width),
+        .y = static_cast<float>(height)
+    };
+}
