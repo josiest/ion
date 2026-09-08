@@ -1,0 +1,3 @@
+name: solid-fill
+vertex: shader/basic2d.vert
+fragment: shader/solid_fill.frag

@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <SDL3/SDL_filesystem.h>
 
 #include <SDL3/SDL_log.h>
 #include <yaml-cpp/yaml.h>
@@ -102,7 +103,7 @@ std::string_view ion::editor_settings::config_path()
 {
     if (config_path_.empty())
     {
-        const fs::path config_dir_ = paths::config_dir();
+        const fs::path config_dir_ = fs::path(SDL_GetBasePath())/"config";
         config_path_ = (config_dir_/"editor-settings.yml").string();
     }
     return config_path_;

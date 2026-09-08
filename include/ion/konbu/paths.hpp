@@ -1,11 +1,22 @@
 #pragma once
+#include <filesystem>
 #include <string>
+
+#include "ion/engine/engine_component.hpp"
 
 namespace ion
 {
-struct paths
+struct engine_paths
 {
-    static std::string root_dir();
-    static std::string config_dir();
+    std::filesystem::path resource_dir() const;
+
+    std::string install_root = "C:/msys64/mingw64";
+    std::string resource_relpath = "share/ion";
+};
+
+class paths_component : public IEngineComponent
+{
+public:
+    engine_paths paths;
 };
 }

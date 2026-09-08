@@ -13,6 +13,7 @@
 
 namespace ion
 {
+struct engine_paths;
 
 template<std::output_iterator<shader_data> ShaderDataOutput>
 ShaderDataOutput scan_shader_definitions(const std::filesystem::path & directory_to_scan,
@@ -48,7 +49,7 @@ class shader_manager
 {
 public:
     template<shader_like ShaderType>
-    std::optional<ShaderType> find_shader();
+    std::optional<ShaderType> find_shader() const;
 
     template<shader_like ShaderType>
     std::optional<ShaderType> add_shader(const shader_data & settings);
@@ -67,17 +68,20 @@ private:
 class shader_manager_component : public IEngineComponent
 {
 public:
+    explicit shader_manager_component(const engine_paths & in_paths);
+
     // engine component interface
     void start() override;
 
     // public members
     shader_manager shaders;
-
+private:
+    const engine_paths * paths;
 };
 }
 
 template<ion::shader_like ShaderType>
-std::optional<ShaderType> ion::shader_manager::find_shader()
+std::optional<ShaderType> ion::shader_manager::find_shader() const
 {
     auto matches_name = [](const shader_data & data) { return data.name == ShaderType::shader_name; };
     const auto search = std::ranges::find_if(shaders, matches_name, &shader_entry::info);

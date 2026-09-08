@@ -93,27 +93,27 @@ std::optional<ion::shader_data> ion::load_shader_data(const std::filesystem::pat
     const YAML::Node name_config = shader_config["name"];
     if (not name_config.IsDefined() or not name_config.IsScalar())
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no name, or name isn't a string\n");
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Shader has no name, or name isn't a string\n");
         success = false;
     }
 
     const YAML::Node vertex_config = shader_config["vertex"];
     if (not vertex_config.IsDefined() or not vertex_config.IsScalar())
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no vertex path, or vertex path isn't a string\n");
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Shader has no vertex path, or vertex path isn't a string\n");
         success = false;
     }
 
     const YAML::Node fragment_config = shader_config["fragment"];
     if (not fragment_config.IsDefined() or not fragment_config.IsScalar())
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Shader has no fragment path, or fragment path isn't a string\n");
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Shader has no fragment path, or fragment path isn't a string\n");
         success = false;
     }
 
     if (not success)
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Failed to read shader\n");
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to read shader\n");
         return std::nullopt;
     }
 

@@ -1,5 +1,5 @@
 # --- project setup ---
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.4)
 project(ion VERSION 0.9.0)
 
 #
@@ -62,6 +62,11 @@ function(install_ion_module MODULE_NAME)
     # install the config files
     install(FILES ion-${MODULE_NAME}-config.cmake ${ion_module_version_filepath}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ion/${MODULE_NAME})
+endfunction()
+
+function(reset_resource resource_path)
+    file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/${resource_path})
+    file(COPY ${resource_path} DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
 
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)

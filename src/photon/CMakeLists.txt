@@ -4,6 +4,7 @@ add_library(ion::photon ALIAS ion-photon)
 
 target_sources(ion-photon
     PRIVATE
+        default_shaders.cpp
         mesh.cpp
         shader.cpp
         shader_manager.cpp
@@ -11,6 +12,7 @@ target_sources(ion-photon
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/photon
     FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/photon/default_shaders.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/photon/mesh.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/photon/shader.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/photon/shader_manager.hpp)
@@ -23,3 +25,7 @@ target_sources(ion-photon
 find_package(GLEW REQUIRED)
 target_link_libraries(ion-photon PUBLIC SDL3::SDL3 GLEW::GLEW)
 install_ion_module(photon)
+
+# install shaders
+reset_resource(${CMAKE_SOURCE_DIR}/shader)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/shader DESTINATION ${CMAKE_INSTALL_DATADIR}/ion)

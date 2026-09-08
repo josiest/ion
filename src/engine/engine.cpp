@@ -8,6 +8,9 @@
 #include <yaml-cpp/yaml.h>
 #include <SDL3/SDL_log.h>
 #include <filesystem>
+#include <SDL3/SDL_filesystem.h>
+
+#include "ion/photon/shader_manager.hpp"
 
 std::unique_ptr<ion::engine> ion::engine::initialize()
 {
@@ -17,7 +20,8 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
     project_settings custom_project_settings;
     window_settings custom_window_settings;
 
-    if (const auto settings_path = fs::path{paths::root_dir()}/"project.yml";
+    SDL_Log("Initializing ion with root path: %s\n", SDL_GetBasePath());
+    if (const auto settings_path = fs::path(SDL_GetBasePath())/"project.yml";
         fs::exists(settings_path))
     {
         YAML::Node project_config = YAML::LoadFile(settings_path.generic_string());
@@ -46,6 +50,7 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
     auto local_engine = std::make_unique<engine>();
     local_engine->sdl = init_sdl(custom_engine_settings.subsystem_flags);
     if (not local_engine->sdl) { return nullptr; }
+    const auto * engine_paths_component = local_engine->emplace_component<paths_component>();
 
     const bool uses_opengl = (custom_window_settings.flags & SDL_WINDOW_OPENGL) != 0u;
     if (uses_opengl)
@@ -66,6 +71,7 @@ std::unique_ptr<ion::engine> ion::engine::initialize()
     {
         const auto * engine_gl_ctx = local_engine ->emplace_component<opengl_component>(engine_window->get());
         if (not engine_gl_ctx->gl_context) { return nullptr; }
+        local_engine->emplace_component<shader_manager_component>(engine_paths_component->paths);
     }
     else
     {

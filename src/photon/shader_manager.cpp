@@ -1,5 +1,6 @@
 #include "ion/photon/shader_manager.hpp"
 #include <algorithm>
+#include "ion/konbu/paths.hpp"
 
 void ion::shader_manager::add_shaders_in_directory(const std::filesystem::path & directory_to_scan,
                                                    const std::filesystem::path & shader_root_dir)
@@ -14,6 +15,12 @@ void ion::shader_manager::add_shaders_in_directory(const std::filesystem::path &
             shaders.emplace_back(settings, std::move(shader));
         }
     }
+}
+
+ion::shader_manager_component::shader_manager_component(const engine_paths & in_paths)
+    : paths(&in_paths)
+{
+    shaders.add_shaders_in_directory(paths->resource_dir()/"shader", paths->resource_dir());
 }
 
 void ion::shader_manager_component::start()
