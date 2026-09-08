@@ -43,8 +43,8 @@ concept shader_uniform = requires(const T & value)
 
 struct shader_handle
 {
-    std::string shader_name;
     GLuint id = 0;
+    std::string shader_name;
 
     void use_program() const;
 
@@ -52,6 +52,12 @@ struct shader_handle
     void uniform(std::string_view uniform_name, const T & value) const;
 };
 
+struct shader_data
+{
+    std::string name;
+    std::string vertex_path;
+    std::string fragment_path;
+};
 }
 
 template<ion::shader_uniform T>

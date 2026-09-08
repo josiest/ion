@@ -13,22 +13,24 @@ set_target_properties(ion-konbu PROPERTIES
 
 target_sources(ion-konbu
     PRIVATE
-        paths.cpp
-        misc_serialization.cpp
-        sdl_yaml.cpp
-        engine_yaml.cpp
-        meta_yaml.cpp
         color_yaml.cpp
+        engine_yaml.cpp
+        filesystem.cpp
+        meta_yaml.cpp
+        misc_serialization.cpp
+        paths.cpp
+        sdl_yaml.cpp
 
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/konbu
     FILES
-        ${CMAKE_SOURCE_DIR}/include/ion/konbu/paths.hpp
-        ${CMAKE_SOURCE_DIR}/include/ion/konbu/misc_serialization.hpp
-        ${CMAKE_SOURCE_DIR}/include/ion/konbu/sdl_yaml.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/konbu/color_yaml.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/konbu/engine_yaml.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/konbu/filesystem.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/konbu/meta_yaml.hpp
-        ${CMAKE_SOURCE_DIR}/include/ion/konbu/color_yaml.hpp)
+        ${CMAKE_SOURCE_DIR}/include/ion/konbu/misc_serialization.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/konbu/paths.hpp
+        ${CMAKE_SOURCE_DIR}/include/ion/konbu/sdl_yaml.hpp)
 
 #
 # Compile and Install

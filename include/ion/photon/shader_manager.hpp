@@ -1,0 +1,66 @@
+#pragma once
+#include "ion/engine/engine_component.hpp"
+#include "ion/photon/shader.hpp"
+#include "ion/konbu/filesystem.hpp"
+
+#include <gl/glew.h>
+
+#include <optional>
+#include <concepts>
+#include <string_view>
+
+namespace ion
+{
+template<typename T>
+concept shader_like = std::constructible_from<T, GLuint, std::string_view> and requires(T shader)
+{
+    shader.use_program();
+};
+
+class shader_manager
+{
+public:
+    template<shader_like ShaderType>
+    std::optional<ShaderType> find_shader(std::string_view name);
+
+    template<shader_like ShaderType>
+    std::optional<ShaderType> add_shader(const shader_data & settings);
+private:
+    struct shader_entry
+    {
+        shader_data info;
+        shader_program program;
+    };
+    std::vector<shader_entry> shaders;
+};
+
+class shader_manager_component : public IEngineComponent
+{
+public:
+    shader_manager shaders;
+};
+}
+
+template<ion::shader_like ShaderType>
+std::optional<ShaderType> ion::shader_manager::find_shader(std::string_view name)
+{
+    auto matches_name = [&](const shader_data & data) { return data.name == name; };
+    const auto search = std::ranges::find_if(shaders, matches_name, &shader_entry::info);
+    return search != shaders.end()
+        ? std::optional<ShaderType>(std::in_place, *search->program, search->info.name)
+        : std::nullopt;
+}
+
+template<ion::shader_like ShaderType>
+std::optional<ShaderType> ion::shader_manager::add_shader(const shader_data & settings)
+{
+    const auto vertex_source = internal::read_file(settings.vertex_path);
+    const auto fragment_source = internal::read_file(settings.fragment_path);
+    if (not vertex_source or not fragment_source) { return std::nullopt; }
+
+    auto program = compile_shader(*vertex_source, *fragment_source);
+    if (not program) { return std::nullopt; }
+
+    const auto & entry = shaders.emplace_back(settings, std::move(program));
+    return std::optional<ShaderType>(std::in_place, *entry.program, entry.info.name);
+}

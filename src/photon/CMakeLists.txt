@@ -10,8 +10,9 @@ target_sources(ion-photon
     PUBLIC FILE_SET HEADERS
     BASE_DIRS ${CMAKE_SOURCE_DIR}/include/ion/photon
     FILES
+        ${CMAKE_SOURCE_DIR}/include/ion/photon/mesh.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/photon/shader.hpp
-        ${CMAKE_SOURCE_DIR}/include/ion/photon/mesh.hpp)
+        ${CMAKE_SOURCE_DIR}/include/ion/photon/shader_manager.hpp)
 
 #
 # Compile and Install
