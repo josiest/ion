@@ -1,4 +1,5 @@
 include(CMakeFindDependencyMacro)
 find_dependency(SDL3)
 find_dependency(GLEW)
+find_dependency(ion-konbu)
 include("${CMAKE_CURRENT_LIST_DIR}/ion-photon-targets.cmake")

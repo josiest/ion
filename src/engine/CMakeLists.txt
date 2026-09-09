@@ -34,5 +34,5 @@ target_sources(ion-engine
 find_package(EnTT REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(GLEW REQUIRED)
-target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT GLEW::GLEW yaml-cpp::yaml-cpp ion::konbu)
+target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT GLEW::GLEW yaml-cpp::yaml-cpp ion::konbu ion::photon)
 install_ion_module(engine)
