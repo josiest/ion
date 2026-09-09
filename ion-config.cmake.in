@@ -1,6 +1,6 @@
 @PACKAGE_INIT@
 set(_ion_supported_components
-        containers engine mylar konbu editor input photon)
+        containers engine mylar konbu editor input photon canvas)
 
 set(_ion_subdirs
         containers engine mylar konbu editor input photon)

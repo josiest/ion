@@ -6,7 +6,7 @@ project(ion VERSION 0.9.0)
 # Export and install the libary
 #
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include(GNUInstallDirs)
@@ -79,6 +79,7 @@ add_subdirectory(src/konbu)
 add_subdirectory(src/editor)
 add_subdirectory(src/input)
 add_subdirectory(src/photon)
+add_subdirectory(src/canvas)
 
 # create and install config files
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/ion-config-version.cmake"

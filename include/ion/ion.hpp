@@ -8,3 +8,4 @@
 #include "ion/input.hpp"
 #include "ion/time.hpp"
 #include "ion/math.hpp"
+#include "ion/canvas.hpp"

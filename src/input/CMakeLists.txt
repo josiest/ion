@@ -4,7 +4,11 @@
 
 add_library(ion-input STATIC)
 add_library(ion::input ALIAS ion-input)
-set_target_properties(ion-input PROPERTIES VERSION 0.2.0 SOVERSION 0)
+set_target_properties(ion-input
+    PROPERTIES
+        VERSION 0.2.0
+        SOVERSION 0
+        EXPORT_NAME input)
 
 target_sources(ion-input
     PRIVATE

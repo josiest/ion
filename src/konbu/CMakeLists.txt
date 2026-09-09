@@ -6,10 +6,9 @@ add_library(ion-konbu STATIC)
 add_library(ion::konbu ALIAS ion-konbu)
 
 set_target_properties(ion-konbu PROPERTIES
-        CXX_STANDARD 23
-        CX_STANDARD_REQUIRED True
         VERSION 0.1.0
-        SOVERSION 0)
+        SOVERSION 0
+        EXPORT_NAME konbu)
 
 target_sources(ion-konbu
     PRIVATE

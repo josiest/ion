@@ -11,10 +11,9 @@ target_sources(ion-mylar PUBLIC FILE_SET HEADERS
         ${CMAKE_SOURCE_DIR}/include/ion/mylar/reflect.hpp)
 
 set_target_properties(ion-mylar PROPERTIES
-    CXX_STANDARD 23
-    CX_STANDARD_REQUIRED True
     VERSION 0.2.0
-    SOVERSION 0)
+    SOVERSION 0
+    EXPORT_NAME mylar)
 
 #
 # Compile and Install the library

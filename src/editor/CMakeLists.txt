@@ -3,8 +3,13 @@
 #
 
 add_library(ion-editor STATIC)
-set_target_properties(ion-editor PROPERTIES VERSION 0.1.0 SOVERSION 0)
 add_library(ion::editor ALIAS ion-editor)
+
+set_target_properties(ion-editor
+    PROPERTIES
+        VERSION 0.1.0
+        SOVERSION 0
+        EXPORT_NAME editor)
 
 target_sources(ion-editor
    PRIVATE

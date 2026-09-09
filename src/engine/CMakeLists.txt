@@ -3,8 +3,13 @@
 #
 
 add_library(ion-engine STATIC)
-set_target_properties(ion-engine PROPERTIES VERSION 0.1.0 SOVERSION 0)
 add_library(ion::engine ALIAS ion-engine)
+
+set_target_properties(ion-engine
+    PROPERTIES
+        VERSION 0.1.0
+        SOVERSION 0
+        EXPORT_NAME engine)
 
 target_sources(ion-engine
     PRIVATE

@@ -1,0 +1,5 @@
+include(CMakeFindDependencyMacro)
+find_dependency(glm)
+find_dependency(ion-photon)
+include("${CMAKE_CURRENT_LIST_DIR}/ion-canvas-targets.cmake")
+add_library(ion::canvas ALIAS ion::ion-canvas)

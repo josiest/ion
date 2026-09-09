@@ -1,5 +1,14 @@
+#
+# Define
+#
+
 add_library(ion-photon STATIC)
-set_target_properties(ion-photon PROPERTIES VERSION 0.1.0 SOVERSION 0)
+set_target_properties(ion-photon
+    PROPERTIES
+        VERSION 0.1.0
+        SOVERSION 0
+        EXPORT_NAME photon)
+
 add_library(ion::photon ALIAS ion-photon)
 
 target_sources(ion-photon
