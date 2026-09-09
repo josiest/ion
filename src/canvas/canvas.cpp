@@ -34,6 +34,14 @@ void ion::canvas::triangle(float x1, float y1, float x2, float y2, float x3, flo
    triangle_mesh.render();
 }
 
+void ion::canvas::rect(float x, float y, float w, float h)
+{
+   std::array verts{ x, y, x, y+h, x+w, y, x+w, y+h };
+   rect_mesh.set_vertices(verts);
+   solid_fill.use_program();
+   rect_mesh.render();
+}
+
 void ion::canvas::background_internal(const SDL_FColor & color)
 {
    glClearColor(color.r, color.g, color.b, color.a);

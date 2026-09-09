@@ -22,6 +22,20 @@ requires(Color color)
     { color.a } -> std::convertible_to<color_field_t<Color>>;
 };
 
+template<typename Vector>
+using vector_field_t = std::remove_cvref_t<decltype(std::declval<Vector>().x)>;
+
+template<typename Rect>
+concept rect_class = std::constructible_from<Rect, vector_field_t<Rect>, vector_field_t<Rect>,
+                                                   vector_field_t<Rect>, vector_field_t<Rect>> and
+requires(Rect rect)
+{
+    { rect.x } -> std::convertible_to<vector_field_t<Rect>>;
+    { rect.y } -> std::convertible_to<vector_field_t<Rect>>;
+    { rect.w } -> std::convertible_to<vector_field_t<Rect>>;
+    { rect.h } -> std::convertible_to<vector_field_t<Rect>>;
+};
+
 template<typename Color>
 concept integral_color = (color_class<Color> and std::is_integral_v<color_field_t<Color>>)
                        or std::is_integral_v<Color>;
