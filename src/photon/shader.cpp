@@ -1,7 +1,6 @@
 #include "ion/photon/shader.hpp"
 
 #include "ion/konbu/filesystem.hpp"
-#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_log.h>
 #include <yaml-cpp/yaml.h>
 
@@ -73,7 +72,7 @@ ion::shader_program ion::compile_shader(std::string_view vertex_source, std::str
     {
         return nullptr;
     }
-    return link_shader(*vertex_shader.get(), *fragment_shader.get());
+    return link_shader(*vertex_shader, *fragment_shader);
 }
 
 void ion::shader_handle::use_program() const

@@ -5,17 +5,20 @@
 
 #include <memory>
 #include <string_view>
-#include <cstdint>
 #include <optional>
 #include <filesystem>
 
 #include <SDL3/SDL_log.h>
+#include <SDL3/SDL_rect.h>
+
+#include "ion/math.hpp"
 
 namespace ion
 {
 namespace internal
 {
 constexpr std::uint32_t ION_GL_LOG_LENGTH = 512u;
+
 struct shader_component_deleter
 {
     void operator()(const GLuint * id) const;
@@ -31,17 +34,29 @@ using shader_component = std::unique_ptr<GLuint, internal::shader_component_dele
 using shader_program = std::unique_ptr<GLuint, internal::shader_program_deleter>;
 
 shader_component compile_shader_component(GLenum component_type, std::string_view source_code);
+
 shader_component compile_vertex_shader(std::string_view source_code);
+
 shader_component compile_fragment_shader(std::string_view source_code);
 
 shader_program link_shader(GLuint vertex_shader, GLuint fragment_shader);
+
 shader_program compile_shader(std::string_view vertex_source, std::string_view fragment_source);
 
 template<typename T>
-concept shader_uniform = requires(const T & value)
+concept sdl_primitive =
+    std::is_same_v<T, SDL_Point> or std::is_same_v<T, SDL_FPoint> or
+    std::is_same_v<T, SDL_Rect> or std::is_same_v<T, SDL_FRect> or
+    std::is_same_v<T, SDL_Color> or std::is_same_v<T, SDL_FColor>;
+
+template<typename T>
+concept glm_primitive = requires(T value)
 {
     glm::value_ptr(value);
 };
+
+template<typename T>
+concept shader_uniform = ion::numeric<T> or sdl_primitive<T> or glm_primitive<T>;
 
 struct shader_handle
 {
@@ -49,6 +64,9 @@ struct shader_handle
     std::string shader_name;
 
     void use_program() const;
+
+    template<shader_uniform T>
+    void uniform(GLint location, const T & value) const;
 
     template<shader_uniform T>
     void uniform(std::string_view uniform_name, const T & value) const;
@@ -62,7 +80,58 @@ struct shader_data
 };
 
 std::optional<shader_data> load_shader_data(const std::filesystem::path & path);
+
 shader_program compile_shader(const shader_data & settings, const std::filesystem::path & shader_root_dir);
+}
+
+template<ion::shader_uniform T>
+void ion::shader_handle::uniform(GLint location, const T & value) const
+{
+    if constexpr (std::is_same_v<T, float>)
+    {
+        glUniform1f(location, value);
+    }
+    else if constexpr (std::is_same_v<T, SDL_Point>)
+    {
+        glUniform2i(location, value.x, value.y);
+    }
+    else if constexpr (std::is_same_v<T, SDL_FPoint>)
+    {
+        glUniform2f(location, value.x, value.y);
+    }
+    else if constexpr (std::is_same_v<T, SDL_Rect>)
+    {
+        glUniform4i(location, value.x, value.y, value.w, value.h);
+    }
+    else if constexpr (std::is_same_v<T, SDL_FRect>)
+    {
+        glUniform4f(location, value.x, value.y, value.w, value.h);
+    }
+    else if constexpr (std::is_same_v<T, SDL_Color>)
+    {
+        glUniform4i(location, value.r, value.g, value.b, value.a);
+    }
+    else if constexpr (std::is_same_v<T, SDL_FColor>)
+    {
+        glUniform4f(location, value.r, value.g, value.b, value.a);
+    }
+    else if constexpr (std::is_same_v<T, glm::mat4x4>)
+    {
+        glUniformMatrix4fv(location, 1u, GL_FALSE, glm::value_ptr(value));
+    }
+    else if constexpr (std::is_same_v<T, glm::vec4>)
+    {
+        glUniform4fv(location, 1u, glm::value_ptr(value));
+    }
+    else if constexpr (std::is_same_v<T, glm::vec2>)
+    {
+        glUniform2fv(location, 1u, glm::value_ptr(value));
+    }
+    else
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "uniform type is currently unsupported\n");
+    }
 }
 
 template<ion::shader_uniform T>
@@ -76,17 +145,5 @@ void ion::shader_handle::uniform(std::string_view uniform_name, const T & value)
                      shader_name.c_str(), uniform_name.data());
         return;
     }
-    if constexpr (std::is_same_v<T, glm::mat4x4>)
-    {
-        glUniformMatrix4fv(location, 1u, GL_FALSE, glm::value_ptr(value));
-    }
-    else if constexpr (std::is_same_v<T, glm::vec4>)
-    {
-        glUniform4fv(location, 1u, glm::value_ptr(value));
-    }
-    else
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                     "uniform type is currently unsupported\n");
-    }
+    uniform(location, value);
 }
