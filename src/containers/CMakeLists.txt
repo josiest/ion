@@ -3,8 +3,6 @@
 #
 
 add_library(ion-containers INTERFACE)
-add_library(ion::containers ALIAS ion-containers)
-
 set_target_properties(ion-containers
     PROPERTIES
         VERSION 0.2.0

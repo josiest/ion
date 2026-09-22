@@ -3,8 +3,6 @@
 #
 
 add_library(ion-konbu STATIC)
-add_library(ion::konbu ALIAS ion-konbu)
-
 set_target_properties(ion-konbu PROPERTIES
         VERSION 0.1.0
         SOVERSION 0
@@ -38,7 +36,11 @@ target_sources(ion-konbu
 # link the required dependencies into a static library
 find_package(yaml-cpp REQUIRED)
 find_package(EnTT REQUIRED)
-target_link_libraries(ion-konbu
-        PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp EnTT::EnTT ion-containers ion-mylar)
+target_link_libraries(ion-konbu PUBLIC
+        SDL3::SDL3
+        yaml-cpp::yaml-cpp
+        EnTT::EnTT
+        ion-containers
+        ion-mylar)
 
 install_ion_module(konbu)

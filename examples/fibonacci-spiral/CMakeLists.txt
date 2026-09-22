@@ -6,7 +6,7 @@ set_target_properties(fibonacci PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED TRUE)
 
-find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS editor mylar)
-target_link_libraries(fibonacci PRIVATE ion::editor ion::mylar)
+find_package(ion REQUIRED CONFIG REQUIRED COMPONENTS engine mylar)
+target_link_libraries(fibonacci PRIVATE ion::engine ion::mylar)
 
 file(COPY config DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -1,10 +1,11 @@
 // frameworks
 #include <ion/engine.hpp>
-#include <ion/editor.hpp>
+#include <ion/konbu.hpp>
 #include <ion/math.hpp>
 
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
+#include <yaml-cpp/yaml.h>
 
 // algorithms
 #include <cmath>
@@ -39,7 +40,6 @@ auto reflect<spiral_data>()
 class spiral
 {
 public:
-    void start();
     spiral_data settings;
 };
 
@@ -51,7 +51,6 @@ auto reflect<spiral>()
     using namespace entt::literals;
     return entt::meta_factory<spiral>()
         .type("spiral"_hs)
-        .func<&spiral::start>("spiral::start"_hs)
         .data<&spiral::settings>("spiral::settings"_hs);
 }
 }
@@ -140,15 +139,16 @@ inline void draw_spiral(SDL_Renderer* renderer, const spiral_data& spiral)
 
 int main(int argc, char * argv[])
 {
-    const auto editor = ion::editor::initialize();
-    if (not editor) { return EXIT_FAILURE; }
+    const auto engine = ion::engine::initialize();
+    if (not engine) { return EXIT_FAILURE; }
+    SDL_Renderer * renderer = engine->find_component<ion::renderer_component>()->renderer.get();
 
     // load the spiral settings and draw it to the whole window
-    const auto spiral = ion::read_yaml<spiral_data>(ion::editor_settings::load_setting("spiral"));
+    spiral_data spiral;
 
-    draw_spiral(editor->renderer.get(), spiral);
-    SDL_RenderPresent(editor->renderer.get());
-    while (not editor->has_quit())
+    draw_spiral(renderer, spiral);
+    SDL_RenderPresent(renderer);
+    while (not engine->has_quit())
     {
         ion::sdl_events::poll();
     }

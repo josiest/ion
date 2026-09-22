@@ -3,8 +3,6 @@
 #
 
 add_library(ion-engine STATIC)
-add_library(ion::engine ALIAS ion-engine)
-
 set_target_properties(ion-engine
     PROPERTIES
         VERSION 0.1.0
@@ -34,5 +32,12 @@ target_sources(ion-engine
 find_package(EnTT REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(GLEW REQUIRED)
-target_link_libraries(ion-engine PUBLIC SDL3::SDL3 EnTT::EnTT GLEW::GLEW yaml-cpp::yaml-cpp ion::konbu ion::photon)
+target_link_libraries(ion-engine PUBLIC
+        SDL3::SDL3
+        EnTT::EnTT
+        GLEW::GLEW
+        yaml-cpp::yaml-cpp
+        ion-konbu
+        ion-photon)
+
 install_ion_module(engine)

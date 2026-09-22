@@ -3,8 +3,6 @@
 #
 
 add_library(ion-editor STATIC)
-add_library(ion::editor ALIAS ion-editor)
-
 set_target_properties(ion-editor
     PROPERTIES
         VERSION 0.1.0
@@ -26,5 +24,10 @@ target_sources(ion-editor
 
 # link the required dependencies into a static library
 find_package(yaml-cpp REQUIRED CONFIG)
-target_link_libraries(ion-editor PUBLIC SDL3::SDL3 yaml-cpp::yaml-cpp ion-engine ion-konbu)
+target_link_libraries(ion-editor PUBLIC
+        SDL3::SDL3
+        yaml-cpp::yaml-cpp
+        ion-engine
+        ion-konbu)
+
 install_ion_module(editor)

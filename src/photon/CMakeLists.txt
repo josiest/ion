@@ -32,7 +32,10 @@ target_sources(ion-photon
 
 # link the required dependencies into a static library
 find_package(GLEW REQUIRED)
-target_link_libraries(ion-photon PUBLIC SDL3::SDL3 GLEW::GLEW ion::konbu)
+target_link_libraries(ion-photon PUBLIC
+        SDL3::SDL3
+        GLEW::GLEW
+        ion-konbu)
 install_ion_module(photon)
 
 # install shaders
