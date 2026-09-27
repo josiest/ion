@@ -56,6 +56,8 @@ public:
 
     void add_shaders_in_directory(const std::filesystem::path & directory_to_scan,
                                   const std::filesystem::path & shader_root_dir);
+
+    void add_shaders_in_root_directory(const std::filesystem::path & shader_dir);
 private:
     struct shader_entry
     {
