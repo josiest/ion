@@ -8,6 +8,8 @@ namespace ion
 {
 namespace internal
 {
+static constexpr GLboolean USE_FIXED_POINT_VERTEX = GL_FALSE;
+
 struct vbo_deleter
 {
     void operator()(const GLuint * vbo) const;
@@ -36,24 +38,50 @@ constexpr GLenum gl_float_type()
     return GL_DOUBLE;
 }
 
-template<RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 and N >= 3)
+struct simple_vertex2f
+{
+    static void bind_attributes();
+    using field_t = float;
+
+    float x, y;
+};
+
+struct quad_vertex2f
+{
+    static void bind_attributes();
+    using field_t = float;
+
+    float x, y;
+    float u, v;
+};
+
+template<typename T>
+concept shader_vertex = requires
+{
+    typename T::field_t;
+    { T::bind_attributes() };
+};
+
+template<shader_vertex Vertex>
+using vertex_field_t = Vertex::field_t;
+
+template<shader_vertex Vertex, std::size_t N> requires (N >= 3)
 class static_mesh
 {
     // meta info
 public:
-    using field_t = Field;
+    using field_t = vertex_field_t<Vertex>;
     static constexpr uint32_t size = N;
-    static constexpr std::uint8_t dim = Dim;
 
     // constructors
 protected:
     void initialize();
 public:
-    explicit static_mesh(std::span<const Field, N*Dim> in_vertices, GLenum array_mode = GL_TRIANGLE_STRIP);
+    explicit static_mesh(std::span<const Vertex, N> in_vertices, GLenum array_mode = GL_TRIANGLE_STRIP);
     static_mesh();
 
     // mesh interface
-    void set_vertices(std::span<Field, N*Dim> in_vertices);
+    void set_vertices(std::span<const Vertex, N> in_vertices);
     void render() const;
 
     // members
@@ -61,17 +89,14 @@ protected:
     static constexpr GLuint VERTEX_START_LOCATION = 0u;
     GLenum array_mode = GL_TRIANGLE_STRIP;
 
-    std::array<Field, Dim*N> vertices;
+    std::array<Vertex, N> vertices;
     vertex_array vao = nullptr;
     vertex_buffer vbo = nullptr;
 };
-
-template<std::uint32_t N> requires (N >= 3)
-using static_mesh2f = static_mesh<float, 2u, N>;
 }
 
-template<ion::RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 && N >= 3)
-void ion::static_mesh<Field, Dim, N>::initialize()
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+void ion::static_mesh<Vertex, N>::initialize()
 {
     // Generate the mesh's buffer and array objects
     vao.reset(new GLuint(0));
@@ -81,42 +106,40 @@ void ion::static_mesh<Field, Dim, N>::initialize()
     glGenBuffers(1, vbo.get());
 
     // copy vertex data
-    glBindVertexArray(*vao.get());
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo.get());
-    glBufferData(GL_ARRAY_BUFFER, N*Dim*sizeof(Field), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(*vao);
+    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+    glBufferData(GL_ARRAY_BUFFER, N*sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
 
     // specify the format of the vertices
-    glVertexAttribPointer(VERTEX_START_LOCATION, Dim, gl_float_type<Field>(), GL_FALSE,
-                          Dim*sizeof(Field), (void*)nullptr);
-    glEnableVertexAttribArray(VERTEX_START_LOCATION);
+    Vertex::bind_attributes();
 }
 
-template<ion::RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 && N >= 3)
-ion::static_mesh<Field, Dim, N>::static_mesh(std::span<const Field, N * Dim> in_vertices, GLenum array_mode)
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+ion::static_mesh<Vertex, N>::static_mesh(std::span<const Vertex, N> in_vertices, GLenum array_mode)
     : array_mode(array_mode)
 {
     std::ranges::copy(in_vertices, vertices.begin());
     initialize();
 }
 
-template<ion::RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 && N >= 3)
-ion::static_mesh<Field, Dim, N>::static_mesh()
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+ion::static_mesh<Vertex, N>::static_mesh()
 {
     initialize();
 }
 
-template<ion::RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 && N >= 3)
-void ion::static_mesh<Field, Dim, N>::set_vertices(std::span<Field, N * Dim> in_vertices)
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+void ion::static_mesh<Vertex, N>::set_vertices(std::span<const Vertex, N> in_vertices)
 {
     std::ranges::copy(in_vertices, vertices.begin());
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo.get());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, N*Dim*sizeof(Field), vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, N*sizeof(Vertex), vertices.data());
 }
 
-template<ion::RealNumber Field, std::uint8_t Dim, std::uint32_t N> requires (Dim >= 2 && N >= 3)
-void ion::static_mesh<Field, Dim, N>::render() const
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+void ion::static_mesh<Vertex, N>::render() const
 {
-    glBindVertexArray(*vao.get());
+    glBindVertexArray(*vao);
     glDrawArrays(array_mode, 0, N);
 }
 

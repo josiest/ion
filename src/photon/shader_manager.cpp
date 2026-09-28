@@ -25,7 +25,7 @@ void ion::shader_manager::add_shaders_in_root_directory(const std::filesystem::p
 ion::shader_manager_component::shader_manager_component(const engine_paths & in_paths)
     : paths(&in_paths)
 {
-    shaders.add_shaders_in_directory(paths->resource_dir()/"shader", paths->resource_dir());
+    shaders.add_shaders_in_root_directory(paths->resource_dir()/"shader");
 }
 
 void ion::shader_manager_component::start()

@@ -28,7 +28,12 @@ ion::canvas::canvas(const shader::solid_fill & solid_fill)
 
 void ion::canvas::triangle(float x1, float y1, float x2, float y2, float x3, float y3)
 {
-   std::array verts{ x1, y1, x2, y2, x3, y3 } ;
+   std::array verts
+   {
+      simple_vertex2f{ .x = x1, .y = y1 },
+      simple_vertex2f{ .x = x2, .y = y2 },
+      simple_vertex2f{ .x = x3, .y = y3 }
+   } ;
    triangle_mesh.set_vertices(verts);
    solid_fill.use_program();
    triangle_mesh.render();
@@ -36,7 +41,13 @@ void ion::canvas::triangle(float x1, float y1, float x2, float y2, float x3, flo
 
 void ion::canvas::rect(float x, float y, float w, float h)
 {
-   std::array verts{ x, y, x, y+h, x+w, y, x+w, y+h };
+   std::array verts
+   {
+      simple_vertex2f{ .x = x,   .y = y },
+      simple_vertex2f{ .x = x,   .y = y+h },
+      simple_vertex2f{ .x = x+w, .y = y },
+      simple_vertex2f{ .x = x+w, .y = y+h }
+   };
    rect_mesh.set_vertices(verts);
    solid_fill.use_program();
    rect_mesh.render();

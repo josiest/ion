@@ -1,0 +1,3 @@
+name: rounded-rect
+vertex: vert/quad2f.vert
+fragment: frag/rounded_rect.frag

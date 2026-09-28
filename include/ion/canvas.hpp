@@ -48,6 +48,9 @@ public:
 
     // internal interface
 protected:
+    template<std::size_t N> requires (N >= 3)
+    using mesh_t = static_mesh<simple_vertex2f, N>;
+
     static void background_internal(const SDL_FColor & color);
 
     void update_clip_space();
@@ -56,8 +59,8 @@ protected:
     shader::solid_fill solid_fill;
 
     glm::mat4x4 clip_from_world;
-    static_mesh2f<4> rect_mesh;
-    static_mesh2f<3> triangle_mesh;
+    mesh_t<4> rect_mesh;
+    mesh_t<3> triangle_mesh;
 
     int _width = 640;
     int _height = 480;

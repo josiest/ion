@@ -2,6 +2,7 @@
 out vec4 frag_color;
 uniform vec4 fill_color;
 
-void main() {
+void main()
+{
     frag_color = fill_color;
 }
