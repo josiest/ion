@@ -1,14 +1,6 @@
 #include <gl/glew.h>
 #include "ion/photon/mesh.hpp"
 
-namespace ion::internal
-{
-constexpr GLsizei * buffer_offset(GLsizei i)
-{
-    return static_cast<GLsizei *>(nullptr) + i;
-}
-}
-
 void ion::internal::vao_deleter::operator()(const GLuint * vao) const
 {
     if (vao and *vao != 0u) { glDeleteVertexArrays(1, vao); }
@@ -25,7 +17,7 @@ void ion::simple_vertex2f::bind_attributes()
                           2, GL_FLOAT,                  // Has 2 float elements
                           internal::USE_FIXED_POINT_VERTEX,
                           sizeof(simple_vertex2f),      // stride of the array
-                          internal::buffer_offset(0));  // data starts at byte 0
+                          reinterpret_cast<void *>(offsetof(simple_vertex2f, x)));
     glEnableVertexAttribArray(0u);
 }
 
@@ -34,12 +26,12 @@ void ion::quad_vertex2f::bind_attributes()
     glVertexAttribPointer(0, 2, GL_FLOAT,
                           internal::USE_FIXED_POINT_VERTEX,
                           sizeof(quad_vertex2f),
-                          internal::buffer_offset(offsetof(quad_vertex2f, x)));
+                          reinterpret_cast<void *>(offsetof(quad_vertex2f, x)));
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1, 2, GL_FLOAT,
                           internal::USE_FIXED_POINT_VERTEX,
                           sizeof(quad_vertex2f),
-                          internal::buffer_offset(offsetof(quad_vertex2f, u)));
+                          reinterpret_cast<void *>(offsetof(quad_vertex2f, u)));
     glEnableVertexAttribArray(1);
 }
