@@ -82,14 +82,28 @@ public:
 
     // mesh interface
     void set_vertices(std::span<const Vertex, N> in_vertices);
+
+    void vertices(std::span<const Vertex, N> in_vertices);
+
+    template<std::ranges::input_range VertexInput>
+    requires std::same_as<std::ranges::range_value_t<VertexInput>, Vertex>
+    void vertices(const VertexInput & in_vertices);
+
+    template<std::output_iterator<Vertex> VertexOutput>
+    VertexOutput vertices(VertexOutput into_vertices) const;
+
+    Vertex vertex(std::size_t idx) const;
+
     void render() const;
 
     // members
 protected:
+    void update_vertices();
+
     static constexpr GLuint VERTEX_START_LOCATION = 0u;
     GLenum array_mode = GL_TRIANGLE_STRIP;
 
-    std::array<Vertex, N> vertices;
+    std::array<Vertex, N> vertices_;
     vertex_array vao = nullptr;
     vertex_buffer vbo = nullptr;
 };
@@ -108,7 +122,7 @@ void ion::static_mesh<Vertex, N>::initialize()
     // copy vertex data
     glBindVertexArray(*vao);
     glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-    glBufferData(GL_ARRAY_BUFFER, N*sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, N*sizeof(Vertex), vertices_.data(), GL_DYNAMIC_DRAW);
 
     // specify the format of the vertices
     Vertex::bind_attributes();
@@ -118,7 +132,7 @@ template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
 ion::static_mesh<Vertex, N>::static_mesh(std::span<const Vertex, N> in_vertices, GLenum array_mode)
     : array_mode(array_mode)
 {
-    std::ranges::copy(in_vertices, vertices.begin());
+    std::ranges::copy(in_vertices, vertices_.begin());
     initialize();
 }
 
@@ -131,9 +145,37 @@ ion::static_mesh<Vertex, N>::static_mesh()
 template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
 void ion::static_mesh<Vertex, N>::set_vertices(std::span<const Vertex, N> in_vertices)
 {
-    std::ranges::copy(in_vertices, vertices.begin());
-    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, N*sizeof(Vertex), vertices.data());
+    std::ranges::copy(in_vertices, vertices_.begin());
+    update_vertices();
+}
+
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+void ion::static_mesh<Vertex, N>::vertices(std::span<const Vertex, N> in_vertices)
+{
+    std::ranges::copy(in_vertices, vertices_.begin());
+    update_vertices();
+}
+
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+template<std::ranges::input_range VertexInput>
+requires std::same_as<std::ranges::range_value_t<VertexInput>, Vertex>
+void ion::static_mesh<Vertex, N>::vertices(const VertexInput & in_vertices)
+{
+    std::ranges::copy(in_vertices, vertices_.begin());
+    update_vertices();
+}
+
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+template<std::output_iterator<Vertex> VertexOutput>
+VertexOutput ion::static_mesh<Vertex, N>::vertices(VertexOutput into_vertices) const
+{
+    return std::ranges::copy(vertices_, into_vertices).out;
+}
+
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+Vertex ion::static_mesh<Vertex, N>::vertex(std::size_t idx) const
+{
+    return vertices_[idx];
 }
 
 template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
@@ -141,5 +183,12 @@ void ion::static_mesh<Vertex, N>::render() const
 {
     glBindVertexArray(*vao);
     glDrawArrays(array_mode, 0, N);
+}
+
+template<ion::shader_vertex Vertex, std::size_t N> requires (N >= 3)
+void ion::static_mesh<Vertex, N>::update_vertices()
+{
+    glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, N*sizeof(Vertex), vertices_.data());
 }
 
