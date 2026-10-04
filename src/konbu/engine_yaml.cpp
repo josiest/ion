@@ -1,13 +1,40 @@
 #include "ion/konbu/engine_yaml.hpp"
+#include "ion/engine.hpp"
+#include "misc_serialization.hpp"
+#include "sdl_yaml.hpp"
 
 #include <filesystem>
 
-#include "ion/engine.hpp"
 #include <yaml-cpp/yaml.h>
 #include <SDL3/SDL_log.h>
+#include <SDL3/SDL_filesystem.h>
 
-#include "misc_serialization.hpp"
-#include "sdl_yaml.hpp"
+
+namespace fs = std::filesystem;
+
+YAML::Node ion::load_project_config()
+{
+    static constexpr std::string_view YAML_EXT = "yaml";
+    static constexpr std::string_view YML_EXT = "yml";
+
+    static const fs::path BASE_DIR = SDL_GetBasePath();
+    static const auto SETTINGS_PATH = BASE_DIR/"project";
+
+    auto settings_path = SETTINGS_PATH;
+    settings_path.replace_extension(YAML_EXT);
+    if (fs::exists(settings_path))
+    {
+        return YAML::LoadFile(settings_path.generic_string());
+    }
+    settings_path.replace_extension(YML_EXT);
+    if (fs::exists(settings_path))
+    {
+        return YAML::LoadFile(settings_path.generic_string());
+    }
+    SDL_Log("Couldn't load project settings from invalid path\n\"%s\".%s\n",
+            SETTINGS_PATH.generic_string().c_str(), YAML_EXT.data());
+    return YAML::Node{};
+}
 
 ion::project_settings ion::load_project_settings(const YAML::Node & project_config)
 {
