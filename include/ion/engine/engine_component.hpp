@@ -3,6 +3,12 @@
 
 namespace ion
 {
+template<typename ComponentT, typename... Args>
+concept initializable_with = requires(Args... args)
+{
+    { ComponentT::initialize(std::forward<Args>(args)...) } -> std::same_as<std::unique_ptr<ComponentT>>;
+};
+
 class engine;
 class IEngineComponent
 {
