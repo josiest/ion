@@ -7,6 +7,8 @@ set_target_properties(ion-engine
     PROPERTIES
         VERSION 0.1.0
         SOVERSION 0
+        CXX_STANDARD 26
+        CXX_STANDARD_REQUIRED TRUE
         EXPORT_NAME engine)
 
 target_sources(ion-engine
@@ -23,6 +25,8 @@ target_sources(ion-engine
         ${CMAKE_SOURCE_DIR}/include/ion/engine/engine_component.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/engine/sdl_events.hpp
         ${CMAKE_SOURCE_DIR}/include/ion/engine/engine.hpp)
+
+target_compile_options(ion-engine PUBLIC "-freflection")
 
 #
 # Compile and Install

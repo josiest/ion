@@ -6,7 +6,11 @@ add_library(ion-konbu STATIC)
 set_target_properties(ion-konbu PROPERTIES
         VERSION 0.1.0
         SOVERSION 0
+        CXX_STANDARD 26
+        CXX_STANDARD_REQUIRED TRUE
         EXPORT_NAME konbu)
+
+target_compile_options(ion-konbu PUBLIC "-freflection")
 
 target_sources(ion-konbu
     PRIVATE
