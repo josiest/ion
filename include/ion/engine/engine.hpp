@@ -15,7 +15,7 @@ public:
     engine() = default;
 
     template<std::derived_from<IEngineComponent> ComponentT, typename... Args>
-    requires initializable_with<ComponentT, Args...>
+    requires (initializable_with<ComponentT, Args...> or initializable_with<ComponentT, engine, Args...>)
     ComponentT * initialize_component(Args &&... args);
 
     template<std::derived_from<IEngineComponent> ComponentType, typename... Args>
@@ -39,15 +39,21 @@ inline engine * GEngine = nullptr;
 }
 
 template<std::derived_from<ion::IEngineComponent> ComponentT, typename... Args>
-requires ion::initializable_with<ComponentT, Args...>
+requires (ion::initializable_with<ComponentT, Args...> or ion::initializable_with<ComponentT, ion::engine, Args...>)
 ComponentT * ion::engine::initialize_component(Args &&... args)
 {
+    std::unique_ptr<ComponentT> component = nullptr;
+    if constexpr (ion::initializable_with<ComponentT, engine, Args...>)
     {
-        auto component = ComponentT::initialize(std::forward<Args>(args)...);
-        if (not component) { return nullptr; }
-        component->owner(this);
-        components.emplace_back(std::move(component));
+        component = ComponentT::initialize(*this, std::forward<Args>(args)...);
     }
+    else
+    {
+        component = ComponentT::initialize(std::forward<Args>(args)...);
+    }
+    if (not component) { return nullptr; }
+    component->owner(this);
+    components.emplace_back(std::move(component));
     return dynamic_cast<ComponentT *>(components.back().get());
 }
 

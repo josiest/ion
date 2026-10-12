@@ -1,6 +1,6 @@
 # --- project setup ---
 cmake_minimum_required(VERSION 4.4)
-project(ion VERSION 0.9.0)
+project(ion VERSION 0.9.1)
 
 #
 # Export and install the libary

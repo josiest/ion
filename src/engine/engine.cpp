@@ -15,14 +15,15 @@
 std::unique_ptr<ion::engine> ion::engine::initialize()
 {
     namespace fs = std::filesystem;
+    static const fs::path ROOT_DIR = SDL_GetBasePath();
+    const auto settings_path = fs::exists(ROOT_DIR/"project.yml")? ROOT_DIR/"project.yml" : ROOT_DIR/"project.yaml";
 
     engine_settings custom_engine_settings;
     project_settings custom_project_settings;
     window_settings custom_window_settings;
 
     SDL_Log("Initializing ion with root path: %s\n", SDL_GetBasePath());
-    if (const auto settings_path = fs::path(SDL_GetBasePath())/"project.yml";
-        fs::exists(settings_path))
+    if (fs::exists(settings_path))
     {
         YAML::Node project_config = YAML::LoadFile(settings_path.generic_string());
         custom_project_settings = load_project_settings(project_config);
